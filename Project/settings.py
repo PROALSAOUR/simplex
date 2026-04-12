@@ -44,6 +44,9 @@ INSTALLED_APPS = [
     'vendors',
     'accounts',
     
+    # RichTextField
+    "django_ckeditor_5",
+    
 ]
 
 MIDDLEWARE = [
@@ -56,14 +59,16 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-DEBUG = True  # اجعل هذا False في بيئة الإنتاج
+DEBUG = True  
 
 if DEBUG:
     INSTALLED_APPS += ['debug_toolbar', ]
     MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
 
     DEBUG_TOOLBAR_CONFIG = {
-        'SHOW_TOOLBAR_CALLBACK':  lambda request: request.user.is_superuser,
+        # بعد انشاء مستخدم ذو صلاحيات بدل القيمة 
+        # 'SHOW_TOOLBAR_CALLBACK':  lambda request: request.user.is_superuser,
+        'SHOW_TOOLBAR_CALLBACK':  lambda request: True,
     }
 else:
     DEBUG_TOOLBAR_CONFIG = {
@@ -87,6 +92,20 @@ TEMPLATES = [
         },
     },
 ]
+
+CKEDITOR_5_CONFIGS = {
+    "default": {
+        "toolbar": [
+            "bold", "italic", "link", "underline", "bulletedList", "numberedList", 
+            "blockQuote", "imageUpload", "mediaEmbed", "undo", "redo"
+        ],
+        "mediaEmbed": {
+            "previewsInData": True  
+        },
+        'extraAllowedContent': 'iframe[*]; script[*];',
+        "language": "ar",
+    }
+}
 
 WSGI_APPLICATION = 'Project.wsgi.application'
 
@@ -144,6 +163,7 @@ STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesSto
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+CKEDITOR_5_UPLOAD_PATH = "uploads/"
 
 LOGGING = {
     "version": 1,  # إصدار الإعدادات (يجب أن يكون 1)

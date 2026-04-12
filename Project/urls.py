@@ -27,6 +27,7 @@ urlpatterns = [
     path('vendors/', include('vendors.urls')),
     path('accounts/', include('accounts.urls')),
     path('management/', include('management.urls')),
+    path('ckeditor5/', include('django_ckeditor_5.urls')),
 ] + debug_toolbar_urls()
 
 urlpatterns += static(STATIC_URL, document_root=STATIC_ROOT)
