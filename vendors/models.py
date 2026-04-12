@@ -1,20 +1,7 @@
 from django.db import models
 from django_ckeditor_5.fields import CKEditor5Field   
+from accounts.models import Store
 
-class Store(models.Model):
-    name = models.CharField(max_length=255 , verbose_name="اسم المتجر", help_text="قم بإدخال اسم المتجر")
-    status = models.CharField(verbose_name='حالة المتجر', max_length=20, choices=[('pending', 'قيد  المراجعة'), ('active', 'مُفعل'), ('inactive', 'غير مُفعل')], default='pending')
-    logo = models.ImageField(upload_to='vendors/Stores/logos' , verbose_name="صورة لوجو المتجر")
-    upload_at = models.DateTimeField(auto_now_add=True , verbose_name='تاريخ الإنشاء')
-    location = models.CharField(max_length=255 , verbose_name="الموقع", help_text="قم بإدخال موقع المتجر الخاص بك \n يمكنك كتابة اسم المدينة فقط أو العنوان الكامل حسب رغبتك")
-    facebook = models.URLField(verbose_name='فيسبوك', blank=True, help_text='قم بإدخال رابط بروفايل صفحة الفيسبوك الخاصة بمتجرك')
-    instagram = models.URLField(verbose_name='انستاجرام', blank=True, help_text='قم بإدخال رابط بروفايل صفحة الانستاجرام الخاصة بمتجرك')
-    tiktok = models.URLField(verbose_name='تيكتوك', blank=True, help_text='قم بإدخال رابط صفحة تيكتوك الخاصة بمتجرك')
-    whatsapp = models.CharField(verbose_name='رقم الواتساب', blank=True, max_length=20, help_text='قم بإدخال رقم الواتساب الخاص بالمتجر')
-    phone_number1 = models.CharField(verbose_name='رقم الاتصال', null=True, max_length=20, help_text='قم بإدخال رقم الهاتف الذي تريد من الزبائن الاتصال بك من خلاله')
-
-    def __str__(self):
-        return self.name
 
 class Product(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='products')
@@ -35,6 +22,10 @@ class Product(models.Model):
     type = models.CharField(verbose_name='نوع المنتج', choices=[('clothes','ملابس'),('watches','ساعات'), ('Accessories','اكسسوارات')])
     gender = models.CharField( verbose_name="الجنس المستهدف", max_length=20, choices=[('male', 'رجالي'), ('female', 'نسائي'), ('unisex', 'كلا الجنسين')], default='unisex', help_text="حدد إن كان المنتج موجّه للرجال أو النساء أو مناسب لكلا الجنسين")
     max_quantity_per_order = models.PositiveIntegerField(default=10 , verbose_name="الكمية القصوى للطلب", help_text="حدد الحد الأقصى لعدد القطع التي يمكن للزبون طلبها من هذا المنتج في طلب واحد")
+
+    class Meta:
+        verbose_name = 'منتج'
+        verbose_name_plural = 'المنتجات'
 
     def __str__(self):
         return self.name
@@ -124,6 +115,10 @@ class Order(models.Model):
     customer_location = models.CharField(max_length=100, verbose_name='عنوان الزبون')
     note =  CKEditor5Field('ملاحظة', config_name='default',)
     
+    class Meta:
+        verbose_name = 'طلب'
+        verbose_name_plural = 'الطلبات'
+        
     def __str__(self):
         return self.store.name + " - " + str(self.serial_number)
     
