@@ -1,0 +1,48 @@
+{% comment %} صفحة تسجيل الدخول  {% endcomment %} 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .container {
+            text-align: center;
+            direction: rtl;
+            padding: 50px;
+            height: 100vh;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p>هذه صفحة تسجيل الدخول</p>
+        <form method="POST">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div style="color:red;">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+            {% for field in form %}
+                <div>
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+
+                    {% if field.errors %}
+                        <div style="color:red; font-size: 14px;">
+                            {{ field.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+            {% endfor %}
+
+            <button type="submit">تسجيل الدخول</button>
+        </form>
+    </div>
+    
+</body>
+</html>

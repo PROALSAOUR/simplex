@@ -1,0 +1,93 @@
+{% comment %} صفحة انشاء حساب  {% endcomment %} 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .container {
+            text-align: center;
+            direction: ltr;
+            padding: 50px;
+            height: 100vh;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p>هذه صفحة انشاء حساب </p>
+        <form method="POST" id="signup-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div style="color:red;">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+             <div>
+                <label>user name</label>
+                <input type="text" id="username" name="username" required>
+                <div id="username-feedback" style="font-size:14px;"></div>
+            </div>
+            {% for field in form %}
+                {% if field.name != 'username' %}
+                    <div>
+                        <label>{{ field.label }}</label>
+                        {{ field }}
+
+                        {% if field.errors %}
+                            <div style="color:red; font-size: 14px;">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+            {% endfor %}
+
+            <button type="submit">انشاء حساب</button>
+        </form>
+    </div>
+    <script>
+        const usernameInput = document.getElementById("username");
+        const feedback = document.getElementById("username-feedback");
+        const form = document.getElementById("signup-form");
+
+        let timeout = null;
+        let isValidUsername = false;
+
+        // 🔥 عند الكتابة
+        usernameInput.addEventListener("keyup", function () {
+            clearTimeout(timeout);
+
+            const username = this.value;
+            const url = "{% url 'accounts:check_username' %}";
+
+            // ✨ إظهار loading
+            feedback.innerText = "جاري التحقق...";
+            feedback.style.color = "gray";
+
+            timeout = setTimeout(() => {
+
+                    fetch(`${url}?username=${username}`)
+                    .then(response => response.json())
+                    .then(data => {
+
+                        feedback.innerText = data.message;
+
+                        if (data.status === 'success') {
+                            feedback.style.color = 'green';
+                            isValidUsername = true;
+                        } else {
+                            feedback.style.color = 'red';
+                            isValidUsername = false;
+                        }
+                    });
+            }, 500); // debounce
+        });
+        
+    </script>
+</body>
+</html>

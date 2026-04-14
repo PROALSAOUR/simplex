@@ -1,4 +1,4 @@
- {% comment %} صفحة اللاندنج بيج الرئيسية الخاصة بالشركة {% endcomment %} 
+{% comment %} صفحة الحسابات الرئيسية {% endcomment %} 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,7 +18,9 @@
 <body>
     <div class="container">
         <h1 >مرحبا</h1>
-        <a href="{% url 'accounts:main_accounts' %}">الحسابات</a>
+        <a href="{% url 'accounts:log_in' %}">تسجيل الدخول</a>
+        <a href="{% url 'accounts:sign_up' %}">إنشاء حساب</a>
+        <a href="/">تسجيل الخروج</a> <!-- change-later خليها بتفتح dialog اذا نقرت عليه بيطلع لك نافذة منبثقة بتأكد منها تسجيل الخروج -->
     </div>
     
 </body>
