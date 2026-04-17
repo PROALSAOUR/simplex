@@ -25,7 +25,6 @@ User (Django)
 
 # ===== لاتنسى تساوي ========
 # 👉 Middleware يمنع أي شخص يدخل الصفحة الخطأ
-# 👉 Decorator مثل @admin_only و @vendor_only
 
 class UserProfile(models.Model):
     USER_TYPES = [
@@ -51,7 +50,7 @@ class Store(models.Model):
     location = models.CharField(max_length=255 , verbose_name="الموقع", help_text="قم بإدخال موقع المتجر الخاص بك \n يمكنك كتابة اسم المدينة فقط أو العنوان الكامل حسب رغبتك")
     # جميع حقول السوشيال ميديا يتم اضافتها بعد انشاء الحساب وتفعيله الا الواتساب يجب ادخاله اثناء انشاء الحساب لانه يستخدم في التواصل مع الادارة لتفعيل الحساب
     whatsapp = models.CharField(verbose_name='رقم الواتساب', max_length=20, help_text='قم بإدخال رقم الواتساب الخاص بمتجرك حيث سنقوم بتفعيل حسابك من خلاله') # يجب ان يقوم بإدخاله لان الادارة سوف تتواصل معه على هذا الرقم لتفعيل حسابه
-    telegram = models.CharField(verbose_name='رقم التليجرام', blank=True, max_length=20, help_text="قم بإدخال رقم التليجرام الخاص بالمتجر حيث سوف يتم ارسال التنبيهات الخاصة بمتجرك من خلاله")
+    telegram = models.CharField(verbose_name='معرف التليجرام', blank=True, max_length=20, help_text="قم بإدخال رقم التليجرام الخاص بالمتجر حيث سوف يتم ارسال التنبيهات الخاصة بمتجرك من خلاله")
     facebook = models.URLField(verbose_name='فيسبوك', blank=True, help_text='قم بإدخال رابط بروفايل صفحة الفيسبوك الخاصة بمتجرك')
     instagram = models.URLField(verbose_name='انستاجرام', blank=True, help_text='قم بإدخال رابط بروفايل صفحة الانستاجرام الخاصة بمتجرك')
     tiktok = models.URLField(verbose_name='تيكتوك', blank=True, help_text='قم بإدخال رابط صفحة تيكتوك الخاصة بمتجرك')
@@ -70,6 +69,7 @@ class Vendor(models.Model):
     permission_level = models.CharField(verbose_name='مستوى الصلاحيات', max_length=20, choices=[('view',  'عرض فقط'), ('edit', 'عرض وتعديل'), ('full', 'تحكم كامل (عرض + تعديل + حذف)')], default='view', help_text='قم بتحديد مستوى الصلاحية الخاص بك \n  عرض فقط: يمكنك عرض المنتجات والطلبات ولكن لا يمكنك تعديلها أو حذفها \n عرض وتعديل: يمكنك عرض وتعديل المنتجات والطلبات ولكن لا يمكنك حذفها \n  تحكم كامل: يمكنك عرض وتعديل وحذف المنتجات والطلبات والأرباح')
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='vendors', verbose_name='المتجر')
     created_at = models.DateTimeField(auto_now_add=True , verbose_name='تاريخ الإنشاء')
+    
     
     def __str__(self):
         return f"{self.store} - {self.name}"

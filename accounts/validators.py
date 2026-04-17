@@ -2,8 +2,9 @@
 
 import phonenumbers, re
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
 
-def validate_username(username):    
+def validate_username(username, current_user_id=None):    
     """هذه الدالة تتحقق من صحة اليوزر نيم بحيث لا يحتوي على مسافات ويحتوي فقط على أحرف إنجليزية وأرقام و_ ويكون طوله 4 أحرف على الأقل"""
     # منع المسافات
     if ' ' in username:
@@ -13,6 +14,12 @@ def validate_username(username):
         raise ValidationError("اسم المستخدم يجب أن يحتوي على أحرف إنجليزية وأرقام فقط")
     if len(username) < 4:
         raise ValidationError("اسم المستخدم يجب أن يكون 4 أحرف على الأقل")
+    # منع استعمال يوزر مستعمل مسبقا
+    qs = User.objects.filter(username=username) 
+    if current_user_id is not None: # لو كان عم يسأل بدالة تعديل الحساب عن المعرف الخاص به 
+        qs = qs.exclude(pk=current_user_id)
+    if qs.exists():
+        raise ValidationError("هذا المعرف مستعمل مسبقًا، رجاءً اختر معرفاً آخر.")
 
 def validate_phone_number(phone_number):
     """هذه الدالة تتحقق من صحة رقم الهاتف بحيث يكون رقم ليبي صالح ويتم تحويله لصيغة دولية موحدة"""
@@ -33,3 +40,26 @@ def validate_phone_number(phone_number):
         raise ValidationError( 'حدث خطأ غير متوقع، الرجاء المحاولة لاحقًا')
         
     return phone_number
+
+def get_redirect_url_for_user(user):
+    """
+    دالة تستقبل كائن مستخدم وتتحقق من نوعه وتعيد رابط التوجيه المناسب وفقا لذلك
+    """
+    
+    try:
+        user_profile = user.userprofile
+    except:
+        return None
+
+    if user_profile.user_type == 'vendor':
+        if hasattr(user, 'vendor'):
+            store = user.vendor.store
+            if store.status == 'pending':
+                return 'accounts:account_under_review'
+            return 'vendors:vendor_dashboard'
+
+    elif user_profile.user_type == 'admin':
+        return 'admin_dashboard'
+
+    return None
+        

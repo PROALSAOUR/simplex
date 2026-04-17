@@ -1,0 +1,47 @@
+{% comment %} صفحة معلومات الحساب  {% endcomment %} 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .container {
+            text-align: center;
+            direction: rtl;
+            padding: 50px;
+            height: 100vh;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 >مرحبا</h1>
+
+        {% comment %} تسجيل الخروج {% endcomment %}
+        <button onclick="logout.showModal()">تسجيل الخروج</button>
+        <dialog id='logout'> 
+            <form method="post" action="{% url 'accounts:log_out' %}">
+                {% csrf_token %}
+                <p>هل انت متأكد من رغبتك بتسجيل الخروج؟</p>
+                <button type="button" onclick="logout.close()">تراجع</button>
+                <button type="submit">تسجيل الخروج</button>
+            </form>
+        </dialog>
+
+        {% comment %} صفحة بيانات البائع {% endcomment %}
+        <div style="padding:20px; background-color:#f5f5dc; margin-bottom:20px;">
+            <p style="color:red; display:inline-block;">بيانات حسابي</p>
+            <a href="{% url 'accounts:account_details' %}" style=" background-color:#4CAF50; color:white; padding:10px; text-decoration:none; border-radius:5px;">==></a>
+        </div>
+        {% comment %} صفحة بيانات المتجر {% endcomment %}
+        <div style="padding:20px; background-color:#f5f5dc; margin-bottom:20px;">
+            <p style="color:red; display:inline-block;">بيانات متجري</p>
+            <a href="{% url 'accounts:store_details' %}" style=" background-color:#4CAF50; color:white; padding:10px; text-decoration:none; border-radius:5px;">==></a>
+        </div>
+
+    </div>
+     
+</body>
+</html>

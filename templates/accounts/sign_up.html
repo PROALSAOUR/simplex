@@ -1,4 +1,5 @@
 {% comment %} صفحة انشاء حساب  {% endcomment %} 
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,8 +27,8 @@
                     {{ form.non_field_errors }}
                 </div>
             {% endif %}
-             <div>
-                <label>user name</label>
+            <div>
+                <label>المعرف</label>
                 <input type="text" id="username" name="username" required>
                 <div id="username-feedback" style="font-size:14px;"></div>
             </div>
@@ -51,43 +52,27 @@
         </form>
     </div>
     <script>
-        const usernameInput = document.getElementById("username");
+        
         const feedback = document.getElementById("username-feedback");
         const form = document.getElementById("signup-form");
-
+        
+        const usernameInput = document.getElementById("username");
+        const checkUsernameUrl = "{% url 'accounts:check_username' %}";
         let timeout = null;
         let isValidUsername = false;
-
-        // 🔥 عند الكتابة
-        usernameInput.addEventListener("keyup", function () {
-            clearTimeout(timeout);
-
-            const username = this.value;
-            const url = "{% url 'accounts:check_username' %}";
-
-            // ✨ إظهار loading
-            feedback.innerText = "جاري التحقق...";
-            feedback.style.color = "gray";
-
-            timeout = setTimeout(() => {
-
-                    fetch(`${url}?username=${username}`)
-                    .then(response => response.json())
-                    .then(data => {
-
-                        feedback.innerText = data.message;
-
-                        if (data.status === 'success') {
-                            feedback.style.color = 'green';
-                            isValidUsername = true;
-                        } else {
-                            feedback.style.color = 'red';
-                            isValidUsername = false;
-                        }
-                    });
-            }, 500); // debounce
+        // التحقق من صلاحية المعرف أثناء الكتابة
+        usernameInput.addEventListener("keyup", async function () {
+            isValidUsername = await validateUsername(this, checkUsernameUrl);
         });
-        
+        form.addEventListener("submit", function (event) {
+            if (!isValidUsername) {
+                event.preventDefault();
+                feedback.innerText = "الرجاء اختيار معَرف صالح اولاً .";
+                feedback.style.color = "red";
+            }
+        });
     </script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/accounts.js' %}"></script>
 </body>
 </html>

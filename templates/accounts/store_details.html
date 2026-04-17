@@ -1,0 +1,107 @@
+{% comment %} صفحة معلومات الحساب  {% endcomment %} 
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .container {
+            text-align: center;
+            direction: rtl;
+            padding: 50px;
+            height: 100vh;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div> 
+            <h2>بيانات متجري</h2>     
+            {% if owner %}
+                <p>اهلين زعيم!</p>
+                <button onclick="edit_store.showModal()" >تعديل بيانات المتجر</button>
+                {% comment %} زر تعديل المتجر يظهر للمالك فقط {% endcomment %}
+            {% endif %}   
+            <p> اسم المتجر: <span> {{ store.name }} </span></p>
+            <p> حالة المتجر: <span> {{ store.get_status_display }} </span></p>
+            <p> موقع المتجر: <span> {{ store.location }} </span></p>
+            <p> لوجو المتجر: <img src="{{ store.logo.url }}" alt="لوجو المتجر" style="width:120px; height:auto;"> </p>
+            <p> تاريخ إنشاء المتجر: <span> {{ store.created_at|date:"d/m/Y" }} </span></p>
+            <h4>حسابات التواصل الاجتماعي الخاصة بالمتجر </h4>
+            <p>تيليجرام: <span> {% if store.telegram %} {{store.telegram}} {% else %} لم تتم الاضافة بعد (يرجى الاضافة بأسرع وقت كي نتمكن من ارسال تنبيهات الطلبات اليك){% endif %} </span></p>
+            <p>فسيبوك: <span> {% if store.facebook %} {{store.facebook}} {% else %} لم تتم الاضافة بعد {% endif %} </span></p>
+            <p>انستغرام: <span> {% if store.instagram %} {{store.instagram}} {% else %} لم تتم الاضافة بعد {% endif %} </span></p>
+            <p>تيك توك: <span> {% if store.tiktok %} {{store.tiktok}} {% else %} لم تتم الاضافة بعد {% endif %} </span></p>
+            <p>واتساب: <span> {% if store.whatsapp %} {{store.whatsapp}} {% else %} لم تتم الاضافة بعد {% endif %} </span></p>
+            <p>رقم الهاتف: <span> {% if store.phone_number1 %} {{store.phone_number1}} {% else %} لم تتم الاضافة بعد {% endif %} </span></p>
+        </div>
+        <div> 
+            <h2>موظفين المتجر</h2>     
+            {% if owner %}
+                <p>اهلين زعيم!</p>
+                <button onclick="add_employee_dialog.showModal()" >اضافة موظف</button>
+            {% endif %}
+            {% if employees %}
+                <ul style="list-style-type: none; padding: 0;">
+                    {% for employee in employees %}
+                        <li style="margin-bottom: 20px; border: 1px solid #ccc; padding: 5px; border-radius: 5px;">
+                            <p>اسم الموظف: <span>{{ employee.name }}</span></p>
+                            <p>المعرف: <span>{{ employee.user.username }}</span></p>
+                            <p>مستوى الصلاحيات: <span>{{ employee.get_permission_level_display }}</span></p>
+                            {% if owner %}
+                                <button onclick="edit_employee.showModal()">تعديل الصلاحيات </button>                                
+                                <button onclick="delete_employee.showModal()">حذف الموظف </button>                                
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>لا يوجد موظفين في المتجر بعد.</p>
+            {% endif %}
+        </div>
+        <dialog id="add_employee_dialog">
+            <h3>اضافة موظف</h3>
+            <form id="add_employee_form" method="POST" action="{% url 'accounts:add_employee' %}" >
+                {% csrf_token %}
+                <div id="errors" style="color:red; display:none;"> سيتم عرض الاخطاء هنا </div>
+                    
+                {% comment %} المعرف والاسم وكلمة السر و تأكيد كلمة السر والصلاحيات  {% endcomment %}
+                {% comment %} حط لوب للفورم الي ساويته هون {% endcomment %}
+                <div>
+                    <label>المعرف</label>
+                    <input type="text" id="username" name="username" >
+                    <div id="username-feedback" style="font-size:14px;"></div>
+                </div>
+                {% comment %} عرض حقول الفورم {% endcomment %}
+
+                <button type="submit" onclick="" >حفظ</button>
+                <button type="button" onclick="add_employee_dialog.close()" >تراجع</button>
+            </form>
+        </dialog>
+
+
+    </div>
+
+    <script>        
+        const usernameInput = document.getElementById("username");
+        const checkUsernameUrl = "{% url 'accounts:check_username' %}";
+        let timeout = null;
+        let isValidUsername = false;
+        // التحقق من صلاحية المعرف أثناء الكتابة
+        usernameInput.addEventListener("keyup", async function () {
+            isValidUsername = await validateUsername(this, checkUsernameUrl);
+        });
+        
+    </script>
+
+
+
+    {% include "common/toast.html" %}
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/accounts.js' %}"></script>
+
+</body>
+</html>

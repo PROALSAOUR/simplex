@@ -127,3 +127,81 @@ class LoginForm(forms.Form):
             'required': 'كلمة المرور مطلوبة',
         }
     )
+    
+# نموذج انشاء موظف
+class EmployeeRegisterForm(forms.ModelForm):
+    # Vendor fields
+    username = forms.CharField(
+        error_messages={
+            'required': ' المعرف مطلوب',
+            'invalid': 'المعرف غير صالح',
+        }
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput,
+        error_messages={
+        'required': 'كلمة المرور مطلوبة',
+        'invalid': 'كلمة المرور غير صالحة',
+        }
+    )
+    confirm_password =forms.CharField(
+    widget=forms.PasswordInput,
+        error_messages={
+        'required': 'تأكيد كلمة المرور مطلوب',
+        }
+    )
+    class Meta:
+        model = Vendor
+        fields = ['name', 'permission_level']
+        error_messages = {
+            'name': {
+                'required': 'الاسم مطلوب',
+            }
+        }
+        
+    def __init__(self, *args, **kwargs): # استقبال كائن المتجر عند استدعاء الفورم
+        # استقبل المتجر من الـ view
+        self.store = kwargs.pop('store', None)
+        super().__init__(*args, **kwargs)
+
+        
+    # password match
+    def clean(self):
+        cleaned_data = super().clean()
+
+        password = cleaned_data.get("password")
+        confirm_password = cleaned_data.get("confirm_password")
+
+        if password and confirm_password:
+            if password != confirm_password:
+                raise ValidationError("كلمتا المرور غير متطابقتين")
+        return cleaned_data
+    # username check
+    def clean_username(self):
+        # يتم التحقق بالقالب بشكل مباشر ايضا لكن يوجد تحقق هنا ايضا لضمان العمل بشكل سليم
+        username = self.cleaned_data.get('username')
+        validate_username(username)  # تحقق من صحة اليوزر نيم باستخدام الدالة في validators.py
+        return username
+        
+
+    def save(self, commit=True):
+        # 1️⃣ إنشاء User
+        user = User.objects.create_user(
+            username=self.cleaned_data['username'],
+            password=self.cleaned_data['password']
+        )
+
+        # 3️⃣ إنشاء Vendor
+        vendor = Vendor.objects.create(
+            user=user,
+            store=self.store, # هنا المشكلة
+            name=self.cleaned_data['name'],
+            permission_level=self.cleaned_data['permission_level']  
+        )
+
+        # 4️⃣ تحديد نوع الحساب
+        UserProfile.objects.create(
+            user=user,
+            user_type='vendor'
+        )
+        return vendor

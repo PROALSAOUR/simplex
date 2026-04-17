@@ -1,0 +1,108 @@
+{% comment %} صفحة معلومات الحساب  {% endcomment %} 
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .container {
+            text-align: center;
+            direction: rtl;
+            padding: 50px;
+            height: 100vh;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <h2>بيانات حسابي</h2>
+        <p> الاسم: <span> {{ vendor.name }} </span></p>
+        <p> المعرف: <span> {{ vendor.user.username }} </span></p>
+        <p> مستوى الصلاحيات: <span> {{ vendor.get_permission_level_display }} </span></p>
+        
+        <button onclick="edit_account.showModal()" >تعديل</button>
+        <dialog id="edit_account">
+            <h3> تعديل بيانات حسابي</h3>
+            <form id="edit_account_form" method="POST" action="{% url 'accounts:edit_account_details' %}" >
+                {% csrf_token %}
+                <div id="edit-errors" style="color:red; display:none;"> سيتم عرض الاخطاء هنا </div>
+                    
+                <div>
+                    <label>المعرف</label>
+                    <input type="text" id="username" name="username" value="{{ vendor.user.username }}" >
+                    <div id="username-feedback" style="font-size:14px;"></div>
+                </div>
+                <div>
+                    <label>الاسم</label>
+                    <input type="text" id="name" name="name" value="{{ vendor.name }}" >
+                </div>
+
+                <button type="submit" onclick="" >حفظ</button>
+                <button type="button" onclick="edit_account.close()" >تراجع</button>
+            </form>
+        </dialog>
+
+    </div>
+
+    {% include "common/toast.html" %}
+    <script>
+        const usernameInput = document.getElementById("username");
+        const checkUsernameUrl = "{% url 'accounts:check_username' %}";
+        const currentUserId = "{{ request.user.id }}";
+        const form = document.getElementById("edit_account_form");
+        const dialog = document.getElementById("edit_account");
+        const errorsDiv = document.getElementById("edit-errors");
+        const currentUsername = usernameInput.value;
+        let timeout = null;
+        let isValidUsername = false;
+
+        // التحقق من صلاحية المعرف أثناء الكتابة
+        usernameInput.addEventListener("keyup", async function () {
+            isValidUsername = await validateUsername(this, checkUsernameUrl, currentUserId);
+        });
+        // التعامل مع نتيجة الدالة الخاصة بتعديل بيانات الحساب
+        form.addEventListener("submit", function(event) {
+            event.preventDefault(); 
+            const formData = new FormData(form);
+            const url = form.action;
+            // إذا المستخدم لم يغيّر المعرف، اعتبره صالح تلقائيًا
+            if (usernameInput.value === currentUsername) {
+                isValidUsername = true;
+            }
+            if (!isValidUsername) {
+                event.preventDefault();
+                feedback.innerText = "الرجاء اختيار معَرف صالح اولاً .";
+                feedback.style.color = "red";
+                return;
+            }
+
+            fetch(url, {
+                method: "POST",
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    // ✅ نجاح: أغلق الديالوج وأظهر رسالة نجاح
+                    dialog.close();
+                    showToast("success-toast", data.message);
+                } else {
+                    // ❌ خطأ: أبقي الديالوج مفتوح وأعرض الأخطاء
+                    errorsDiv.innerText = data.message;
+                    errorsDiv.style.display = "block";
+                }
+            })
+            .catch(error => {
+                errorsDiv.innerText = "حدث خطأ غير متوقع.";
+            });            
+        });
+
+    </script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/accounts.js' %}"></script>
+</body>
+</html>
