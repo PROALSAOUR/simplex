@@ -10,12 +10,14 @@ from .validators import validate_username, validate_phone_number
 class VendorRegisterForm(forms.ModelForm):
     # Vendor fields
     username = forms.CharField(
+        label='المعرف',
         error_messages={
             'required': 'اسم المستخدم مطلوب',
             'invalid': 'اسم المستخدم غير صالح',
         }
     )
     password = forms.CharField(
+        label='كلمة السر',
         widget=forms.PasswordInput,
         error_messages={
         'required': 'كلمة المرور مطلوبة',
@@ -23,6 +25,7 @@ class VendorRegisterForm(forms.ModelForm):
         }
     )
     confirm_password =forms.CharField(
+    label='تأكيد كلمة السر',  
     widget=forms.PasswordInput,
         error_messages={
         'required': 'تأكيد كلمة المرور مطلوب',
@@ -30,18 +33,25 @@ class VendorRegisterForm(forms.ModelForm):
     )
     # Store fields
     store_name = forms.CharField(
+        label='اسم المتجر',
         error_messages={
             'required': 'اسم المتجر مطلوب',
         }
     )
     location = forms.CharField(
+        label='الموقع',
         error_messages={
             'required': 'موقع المتجر مطلوب',
         }
     )
     whatsapp = forms.CharField(
+        label='رقم الواتساب',
+        min_length=8,
+        max_length=15,
         error_messages={
             'required': 'رقم واتساب مطلوب',
+            'min_length': 'رقم الواتساب قصير جداً، يجب أن يكون 8 أرقام على الأقل.',
+            'max_length': 'رقم الواتساب طويل جداً، الحد الأقصى 15 رقم.',
         }
     )
     class Meta:
@@ -101,7 +111,7 @@ class VendorRegisterForm(forms.ModelForm):
             user=user,
             store=store,
             name=self.cleaned_data['name'],
-            permission_level='full'  # أول بائع يحصل على صلاحية كاملة
+            permission_level='owner'  # أول بائع يحصل على ملكية للمتجر
         )
 
         # 4️⃣ تحديد نوع الحساب
@@ -138,6 +148,7 @@ class EmployeeRegisterForm(forms.ModelForm):
         }
     )
     password = forms.CharField(
+        label='كلمة السر',
         widget=forms.PasswordInput,
         error_messages={
         'required': 'كلمة المرور مطلوبة',
@@ -145,6 +156,7 @@ class EmployeeRegisterForm(forms.ModelForm):
         }
     )
     confirm_password =forms.CharField(
+    label='تأكيد كلمة السر',
     widget=forms.PasswordInput,
         error_messages={
         'required': 'تأكيد كلمة المرور مطلوب',
@@ -163,8 +175,12 @@ class EmployeeRegisterForm(forms.ModelForm):
         # استقبل المتجر من الـ view
         self.store = kwargs.pop('store', None)
         super().__init__(*args, **kwargs)
+        excluded_choice = 'owner'  # استثناء خيار المالك من خيارات الصلاحية عند انشاء موظف
+        self.fields['permission_level'].choices = [
+            choice for choice in self.fields['permission_level'].choices
+            if choice[0] != excluded_choice
+        ]
 
-        
     # password match
     def clean(self):
         cleaned_data = super().clean()

@@ -1,5 +1,3 @@
-from os import name
-
 from django.shortcuts import redirect, render
 from .forms import EmployeeRegisterForm, VendorRegisterForm, LoginForm, EmployeeRegisterForm
 from django.contrib.auth import authenticate, login, logout
@@ -8,11 +6,7 @@ from django.core.exceptions import ValidationError
 from .validators import validate_username, get_redirect_url_for_user
 from .decorators import vendor_only
 from django.contrib.auth.decorators import login_required
-
-    # تعديل بيانات المتجر
-    # دالة اضافة مستخدمين للمتجر
-    # دالة حذف مستخدمين من المتجر
-    # دالة تعديل صلاحيات مستخدمين المتجر
+from .models import Vendor
 
 @login_required(login_url='accounts:log_in') #تمنع الوصول تلقائيًا لأي مستخدم غير مسجل دخول، وتعيد توجيهه إلى صفحة التسجيل   
 @vendor_only
@@ -81,46 +75,120 @@ def store_details(request):
     """
     vendor = request.user.vendor
     store = vendor.store
-    owner = True if vendor.permission_level == "full" else False
-    employees = store.vendors.all() #change-later اعرض الموظفين جميعا بس اذا هو صلاحياته تحكم كامل حتى لو فيه مستخدم غير تحكم كامل لاتخليه يعدله او يحذفه
-    
+    owner = True if vendor.permission_level == "owner" else False
+    employees = store.vendors.all() 
+    form = EmployeeRegisterForm()
     context = {
         'store': store,
         'owner': owner,
+        'employee_form': form,
         'employees': employees,
     }
     return render(request, 'accounts/store_details.html', context)
 
-@login_required(login_url='accounts:log_in')
-@vendor_only
-def add_employee(request):
-    # تحقق من صلاحية المستخدم
-    if request.method == "POST":
-        if request.user.vendor.permission_level == 'full':
-            store = request.user.vendor.store 
-            form = EmployeeRegisterForm(request.POST, store=store)
-            if form.is_valid():
-                form.save()
-                return redirect("success_page")
-    else:
-        form = EmployeeRegisterForm(store=store)
-    return render(request, "register_employee.html", {"form": form})
-
-
-
+# تعديل بيانات المتجر change-later
 @login_required(login_url='accounts:log_in')
 @vendor_only
 def edit_store_details(request):
+    # مرحباااااااااااااس
     pass
 
+@login_required(login_url='accounts:log_in')
+@vendor_only
+def add_employee(request):
+    "دالة وظيفتها اضافة موظف جديد للمتجر, لايمكن الا لمالك المتجر "
+    if request.method == "POST":
+        if request.user.vendor.permission_level == 'owner':
+            store = request.user.vendor.store 
+            form = EmployeeRegisterForm(request.POST, store=store)
+            try:
+                if form.is_valid():
+                    form.save()
+                    return JsonResponse({"status": "success", "message": "تم اضافة الموظف بنجاح"})
+                else:
+                    return JsonResponse({"status": "error", "message": form.errors})
+            except Exception as e:
+                return JsonResponse({"status": "error", "message": str(e)})
 
+        else:
+            return JsonResponse({
+                "status": "error",
+                "message": 'عذراً, يبدو انك لا تمتلك الصلاحية لإضافة موظف'
+            })
 
+    else:
+        return JsonResponse({"status": "error", "message": "طلب غير صالح"})
 
-
-
-
-
-
+@login_required(login_url='accounts:log_in')
+@vendor_only
+def remove_employee(request):
+    "الدالة المسؤولة عن ازالة موظف من المتجر, لايمكن الا لمالك المتجر "
+    if request.method == "POST":
+        employee_id  = request.POST.get('employee_id')
+        if request.user.vendor.permission_level == 'owner':
+            try:
+                employee_id = int(employee_id)
+                employee = Vendor.objects.get(id=employee_id, store=request.user.vendor.store)
+                user = employee.user # جيب  المستخدم واحذفه مشان ينحذف البائع والبروفايل المرتبطين فيه
+                if employee.user.id == request.user.id: # منع المستخدم من حذف نفسه
+                    return JsonResponse({
+                        "status": "error",
+                        "message": "لا يمكنك حذف نفسك."
+                    })
+                    
+                user.delete()
+                return JsonResponse({
+                "status": "success",
+                "message": 'تم حذف الموظف من المتجر بنجاح'
+                })
+            except Exception as e:
+                return JsonResponse({
+                "status": "error",
+                "message": str(e)
+            })
+        else:
+            return JsonResponse({
+                "status": "error",
+                "message": 'عذراً, يبدو انك لا تمتلك الصلاحية لإزالة موظف'
+            })
+    else:
+        return JsonResponse({"status": "error", "message": "طلب غير صالح"})
+        
+@login_required(login_url='accounts:log_in')
+@vendor_only
+def edit_employee(request):
+    "الدالة المسؤولة عن تعديل صلاحيات موظف من المتجر, لايمكن الا لمالك المتجر "
+    if request.method == "POST":
+        employee_id  = request.POST.get('employee_id')
+        new_permission_level = request.POST.get('permission_level')
+        if request.user.vendor.permission_level == 'owner':
+            try:
+                employee_id = int(employee_id)
+                employee = Vendor.objects.get(id=employee_id, store=request.user.vendor.store)
+                if employee.user.id == request.user.id: # منع المستخدم من تعديل نفسه
+                    return JsonResponse({
+                        "status": "error",
+                        "message": "لا يمكنك تعديل صلاحيات نفسك."
+                    })
+                else:
+                    employee.permission_level = new_permission_level
+                    employee.save()
+                    return JsonResponse({
+                    "status": "success",
+                    "message": f'تم تعديل صلاحيات الموظف {employee.name}  بنجاح'
+                    })
+            except Exception as e:
+                return JsonResponse({
+                "status": "error",
+                "message": str(e)
+            })
+        else:
+            return JsonResponse({
+                "status": "error",
+                "message": 'عذراً, يبدو انك لا تمتلك الصلاحية لتعديل الموظف'
+            })
+    else:
+        return JsonResponse({"status": "error", "message": "طلب غير صالح"})
 
 def sign_up(request):
     """الدالة المسؤولة عن صفحة انشاء حساب جديد للبائعين"""

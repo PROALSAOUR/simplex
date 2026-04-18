@@ -51,9 +51,10 @@
                             <p>اسم الموظف: <span>{{ employee.name }}</span></p>
                             <p>المعرف: <span>{{ employee.user.username }}</span></p>
                             <p>مستوى الصلاحيات: <span>{{ employee.get_permission_level_display }}</span></p>
-                            {% if owner %}
-                                <button onclick="edit_employee.showModal()">تعديل الصلاحيات </button>                                
-                                <button onclick="delete_employee.showModal()">حذف الموظف </button>                                
+                            {% comment %} يجب ان يكون المستخدم مالكً وبنفس الوقت لايستطيع تعديل او حذف نفسه  {% endcomment %}
+                            {% if owner and request.user.id != employee.user.id  %}
+                                <button onclick="openEditDialog(this)" data-id="{{ employee.id }}" data-name="{{ employee.name }}" >تعديل الصلاحيات </button>                                
+                                <button onclick="openDeleteDialog(this)"  data-id="{{ employee.id }}" data-name="{{ employee.name }}" >حذف الموظف </button>                                
                             {% endif %}
                         </li>
                     {% endfor %}
@@ -62,42 +63,205 @@
                 <p>لا يوجد موظفين في المتجر بعد.</p>
             {% endif %}
         </div>
+        {% comment %} نموذج إضافة موظف {% endcomment %}
         <dialog id="add_employee_dialog">
             <h3>اضافة موظف</h3>
             <form id="add_employee_form" method="POST" action="{% url 'accounts:add_employee' %}" >
                 {% csrf_token %}
-                <div id="errors" style="color:red; display:none;"> سيتم عرض الاخطاء هنا </div>
-                    
-                {% comment %} المعرف والاسم وكلمة السر و تأكيد كلمة السر والصلاحيات  {% endcomment %}
-                {% comment %} حط لوب للفورم الي ساويته هون {% endcomment %}
+                {% if form.non_field_errors %}
+                    <div style="color:red;" >
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+                <div style="color:red; display:none;" id="errors"> داخل برقراف سوف يتم عرض الاخطاء هنا </div>
+                
                 <div>
                     <label>المعرف</label>
                     <input type="text" id="username" name="username" >
                     <div id="username-feedback" style="font-size:14px;"></div>
                 </div>
-                {% comment %} عرض حقول الفورم {% endcomment %}
+                {% for field in employee_form %}
+                    {% if field.name != 'username' %}
+                        <div>
+                            <label>{{ field.label }}</label>
+                            {{ field }}
+
+                            {% if field.errors %}
+                                <div style="color:red; font-size: 14px;">
+                                    {{ field.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
 
                 <button type="submit" onclick="" >حفظ</button>
                 <button type="button" onclick="add_employee_dialog.close()" >تراجع</button>
             </form>
         </dialog>
+        <script>        
+            const usernameInput = document.getElementById("username");
+            const checkUsernameUrl = "{% url 'accounts:check_username' %}";
+            const feedback = document.getElementById("username-feedback");
+            const add_form = document.getElementById("add_employee_form");
+            const dialog = document.getElementById("add_employee_dialog");
+            const errorsDiv = document.getElementById("errors");
+            let timeout = null;
+            let isValidUsername = false;
+            // التحقق من صلاحية المعرف أثناء الكتابة
+            usernameInput.addEventListener("keyup", async function () {
+                isValidUsername = await validateUsername(this, feedback, checkUsernameUrl);
+            });
+            // التعامل مع نتيجة الدالة الخاصة باضافة موظف جديد
+            add_form.addEventListener("submit", function(event) {
+                event.preventDefault(); 
+                const formData = new FormData(add_form);
+                const url = add_form.action;
 
+                if (!isValidUsername) {
+                    event.preventDefault();
+                    feedback.innerText = "الرجاء اختيار معَرف صالح اولاً .";
+                    feedback.style.color = "red";
+                    return;
+                }
+                fetch(url, {
+                    method: "POST",
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        dialog.close();
+                        showToast("success-toast", data.message);
+                        setTimeout(() => {
+                            location.reload();
+                        }, 500);
+                    } else {
+                        let errors = data.message; 
+                        errorsDiv.innerHTML = ""; 
+                        let messages = [];
+                        for (let field in errors) {
+                            errors[field].forEach(msg => {
+                                messages.push(msg);
+                            });
+                        }
+                        errorsDiv.innerText = messages.join("\n");
+                        errorsDiv.style.display = "block";
+                    }
+                })
+                .catch(error => {
+                    errorsDiv.innerText = "حدث خطأ غير متوقع.";
+                });            
+            });
+        </script>
+        {% comment %} نموذج تعديل صلاحيات الموظف {% endcomment %}
+        <dialog id='edit_employee_dialog'> 
+            <form id="edit_employee_form" method="post" action="{% url 'accounts:edit_employee' %}">
+                {% csrf_token %}
+                <input type="hidden" name="employee_id" id="edit-employee-id">
+                <p> الموظف : <span id="edit-employee-name"></span></p>
+                <div>
+                    <label>{{ employee_form.permission_level.label }}</label>
+                    {{ employee_form.permission_level }}                    
+                </div>
+                
+                <button type="button" onclick="edit_employee_dialog.close()">تراجع</button>
+                <button type="submit">حفظ</button>
+            </form>
+        </dialog>
+        <script>
+            function openEditDialog(button) {
+                // جيب قيمة الاسم والاي دي من الداتا سيت
+                const employeeId = button.dataset.id;
+                const employeeName = button.dataset.name;
+                document.getElementById("edit-employee-id").value = employeeId;    // خزّن الاي دي في الحقل المخفي
+                document.getElementById("edit-employee-name").innerText = employeeName;   // اعرض الاسم في النص
+                edit_employee_dialog.showModal();
+            }
+            // التعامل مع نتيجة الدالة الخاصة بحذف موظف
+            const editForm = document.getElementById("edit_employee_form");
+            const editDialog = document.getElementById("edit_employee_dialog");
 
+            editForm.addEventListener("submit", function(event) {
+                event.preventDefault(); 
+                const formData = new FormData(editForm);
+                const url = editForm.action;
+
+                fetch(url, {
+                    method: "POST",
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        editDialog.close();
+                        showToast("success-toast", data.message);
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        editDialog.close();
+                        showToast("failed-toast", data.message);
+                    }
+                })
+                .catch(error => {
+                    editDialog.close();
+                    showToast("failed-toast", "حدث خطأ غير متوقع.");
+                });      
+            });
+        </script>
+        {% comment %} نموذج ازالة موظف {% endcomment %}
+        <dialog id='delete_employee_dialog'> 
+            <form id="delete_employee_form" method="post" action="{% url 'accounts:remove_employee' %}">
+                {% csrf_token %}
+                <input type="hidden" name="employee_id" id="delete-employee-id">
+                <p>هل انت متأكد من رغبتك بحذف الموظف : <span id="delete-employee-name"></span> بشكل نهائي؟ </p>
+                <button type="button" onclick="delete_employee_dialog.close()">تراجع</button>
+                <button type="submit"> حذف الموظف</button>
+            </form>
+        </dialog>
+        <script>
+            function openDeleteDialog(button) {
+                // جيب قيمة الاسم والاي دي من الداتا سيت
+                const employeeId = button.dataset.id;
+                const employeeName = button.dataset.name;
+                document.getElementById("delete-employee-id").value = employeeId;    // خزّن الاي دي في الحقل المخفي
+                document.getElementById("delete-employee-name").innerText = employeeName;   // اعرض الاسم في النص
+                delete_employee_dialog.showModal();
+            }
+            // التعامل مع نتيجة الدالة الخاصة بحذف موظف
+            const deleteForm = document.getElementById("delete_employee_form");
+            const deleteDialog = document.getElementById("delete_employee_dialog");
+
+            deleteForm.addEventListener("submit", function(event) {
+                event.preventDefault(); 
+                const formData = new FormData(deleteForm);
+                const url = deleteForm.action;
+
+                fetch(url, {
+                    method: "POST",
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        deleteDialog.close();
+                        showToast("success-toast", data.message);
+                        setTimeout(() => {
+                            location.reload();
+                        }, 500);
+                    } else {
+                        deleteDialog.close();
+                        showToast("failed-toast", data.message);
+                    }
+                })
+                .catch(error => {
+                    deleteDialog.close();
+                    showToast("failed-toast", "حدث خطأ غير متوقع.");
+                });      
+            });
+        </script>
     </div>
-
-    <script>        
-        const usernameInput = document.getElementById("username");
-        const checkUsernameUrl = "{% url 'accounts:check_username' %}";
-        let timeout = null;
-        let isValidUsername = false;
-        // التحقق من صلاحية المعرف أثناء الكتابة
-        usernameInput.addEventListener("keyup", async function () {
-            isValidUsername = await validateUsername(this, checkUsernameUrl);
-        });
-        
-    </script>
-
-
 
     {% include "common/toast.html" %}
     <script src="{% static 'js/main.js' %}"></script>

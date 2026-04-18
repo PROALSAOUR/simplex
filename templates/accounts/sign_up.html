@@ -45,7 +45,6 @@
                         {% endif %}
                     </div>
                 {% endif %}
-
             {% endfor %}
 
             <button type="submit">انشاء حساب</button>
@@ -53,22 +52,22 @@
     </div>
     <script>
         
-        const feedback = document.getElementById("username-feedback");
         const form = document.getElementById("signup-form");
-        
+        const feedback = document.getElementById("username-feedback");
         const usernameInput = document.getElementById("username");
         const checkUsernameUrl = "{% url 'accounts:check_username' %}";
         let timeout = null;
         let isValidUsername = false;
         // التحقق من صلاحية المعرف أثناء الكتابة
         usernameInput.addEventListener("keyup", async function () {
-            isValidUsername = await validateUsername(this, checkUsernameUrl);
+            isValidUsername = await validateUsername(this, feedback, checkUsernameUrl);
         });
         form.addEventListener("submit", function (event) {
             if (!isValidUsername) {
                 event.preventDefault();
                 feedback.innerText = "الرجاء اختيار معَرف صالح اولاً .";
                 feedback.style.color = "red";
+                return;
             }
         });
     </script>

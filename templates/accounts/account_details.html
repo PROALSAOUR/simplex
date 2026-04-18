@@ -29,7 +29,7 @@
             <h3> تعديل بيانات حسابي</h3>
             <form id="edit_account_form" method="POST" action="{% url 'accounts:edit_account_details' %}" >
                 {% csrf_token %}
-                <div id="edit-errors" style="color:red; display:none;"> سيتم عرض الاخطاء هنا </div>
+                <div id="errors" style="color:red; display:none;"> سيتم عرض الاخطاء هنا </div>
                     
                 <div>
                     <label>المعرف</label>
@@ -51,18 +51,19 @@
     {% include "common/toast.html" %}
     <script>
         const usernameInput = document.getElementById("username");
+        const feedback = document.getElementById("username-feedback");
         const checkUsernameUrl = "{% url 'accounts:check_username' %}";
         const currentUserId = "{{ request.user.id }}";
         const form = document.getElementById("edit_account_form");
         const dialog = document.getElementById("edit_account");
-        const errorsDiv = document.getElementById("edit-errors");
+        const errorsDiv = document.getElementById("errors");
         const currentUsername = usernameInput.value;
         let timeout = null;
         let isValidUsername = false;
 
         // التحقق من صلاحية المعرف أثناء الكتابة
         usernameInput.addEventListener("keyup", async function () {
-            isValidUsername = await validateUsername(this, checkUsernameUrl, currentUserId);
+            isValidUsername = await validateUsername(this, feedback, checkUsernameUrl, currentUserId);
         });
         // التعامل مع نتيجة الدالة الخاصة بتعديل بيانات الحساب
         form.addEventListener("submit", function(event) {
