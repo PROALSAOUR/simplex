@@ -56,7 +56,7 @@ def get_redirect_url_for_user(user):
             store = user.vendor.store
             if store.status == 'pending':
                 return 'accounts:account_under_review'
-            return 'vendors:vendor_dashboard'
+            return 'store:store_dashboard'
 
     elif user_profile.user_type == 'admin':
         return 'admin_dashboard'

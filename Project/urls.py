@@ -24,8 +24,8 @@ from .views import landing_page
 urlpatterns = [
     path('', landing_page, name='landing_page'), 
     path('admin/', admin.site.urls),
-    path('vendors/', include('vendors.urls')),
-    path('accounts/', include('accounts.urls')),
+    path('store/', include('store.urls')),
+    path('account/', include('accounts.urls')),
     path('management/', include('management.urls')),
     path('ckeditor5/', include('django_ckeditor_5.urls')),
 ] + debug_toolbar_urls()
