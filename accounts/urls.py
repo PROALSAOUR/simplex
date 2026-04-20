@@ -8,7 +8,15 @@ urlpatterns = [
     path('account_details/', account_details, name='account_details'), 
     path('edit/account-details/', edit_account_details, name='edit_account_details'), 
     path('store-details/', store_details, name='store_details'), 
-    path('edit/store-details/', edit_store_details, name='edit_store_details'), 
+    
+    path('store/edit/basic/', edit_store_basic, name='edit_store_basic'), 
+    path('store/edit/social/', edit_store_social, name='edit_store_social'), 
+    path('store/edit/logo/', edit_store_logo, name='edit_store_logo'), 
+    
+    
+    
+    
+    
     path('store-details/add/employee/', add_employee, name='add_employee'), 
     path('store-details/remove/employee/', remove_employee, name='remove_employee'), 
     path('store-details/edit/employee/', edit_employee, name='edit_employee'), 

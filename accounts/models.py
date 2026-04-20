@@ -44,18 +44,17 @@ class UserProfile(models.Model):
         verbose_name_plural = 'الملفات الشخصية'
 
 class Store(models.Model):
-    slug = models.SlugField(max_length=100, unique=True , verbose_name='slug', blank=True) # هذا الحقل يستخدم في الروابط لتحديد المتجر بشكل فريد، يتم انشاءه من قبل الادارة قبل قبول وتفعيل المتجر 
+    slug = models.SlugField(max_length=100, unique=False , verbose_name='slug', blank=True , help_text=" اسم المتجر باللغة الانجليزية وبدون فراغات ") # هذا الحقل يستخدم في الروابط لتحديد المتجر بشكل فريد، يتم انشاءه من قبل الادارة قبل قبول وتفعيل المتجر 
     name = models.CharField(max_length=255 , verbose_name="اسم المتجر", help_text="قم بإدخال اسم المتجر")
     status = models.CharField(verbose_name='حالة المتجر', max_length=20, choices=[('pending', 'قيد  المراجعة'), ('active', 'مُفعل'), ('inactive', 'غير مُفعل')], default='pending')
     logo = models.ImageField(upload_to='vendors/Stores/logos' , verbose_name="صورة لوجو المتجر", default='default/default_store_logo.png') 
     location = models.CharField(max_length=255 , verbose_name="الموقع", help_text="قم بإدخال موقع المتجر الخاص بك \n يمكنك كتابة اسم المدينة فقط أو العنوان الكامل حسب رغبتك")
-    # جميع حقول السوشيال ميديا يتم اضافتها بعد انشاء الحساب وتفعيله الا الواتساب يجب ادخاله اثناء انشاء الحساب لانه يستخدم في التواصل مع الادارة لتفعيل الحساب
-    whatsapp = models.CharField(verbose_name='رقم الواتساب', max_length=20, help_text='قم بإدخال رقم الواتساب الخاص بمتجرك حيث سنقوم بتفعيل حسابك من خلاله') # يجب ان يقوم بإدخاله لان الادارة سوف تتواصل معه على هذا الرقم لتفعيل حسابه
+    # جميع حقول السوشيال ميديا يتم اضافتها بعد انشاء الحساب وتفعيله الا رقم الهاتف يجب ادخاله اثناء انشاء الحساب لانه يستخدم في التواصل مع الادارة لتفعيل الحساب
+    phone_number1 = models.CharField(verbose_name='رقم الهاتف',  max_length=20, help_text='قم بإدخال رقم الهاتف الخاص بمتجرك (ملاحظة : يجب ان يكون الرقم مربوطاً بواتساب لأننا سوف نقوم بالتواصل معك على واتساب لتفعيل حسابك) ')# يجب ان يقوم بإدخاله لان الادارة سوف تتواصل معه على هذا الرقم لتفعيل حسابه
     telegram = models.CharField(verbose_name='معرف التليجرام', blank=True, max_length=20, help_text="قم بإدخال رقم التليجرام الخاص بالمتجر حيث سوف يتم ارسال التنبيهات الخاصة بمتجرك من خلاله")
     facebook = models.URLField(verbose_name='فيسبوك', blank=True, help_text='قم بإدخال رابط بروفايل صفحة الفيسبوك الخاصة بمتجرك')
     instagram = models.URLField(verbose_name='انستاجرام', blank=True, help_text='قم بإدخال رابط بروفايل صفحة الانستاجرام الخاصة بمتجرك')
     tiktok = models.URLField(verbose_name='تيكتوك', blank=True, help_text='قم بإدخال رابط صفحة تيكتوك الخاصة بمتجرك')
-    phone_number1 = models.CharField(verbose_name='رقم الاتصال', blank=True, max_length=20, help_text='قم بإدخال رقم الهاتف الذي تريد من الزبائن الاتصال بك من خلاله')
     created_at = models.DateTimeField(auto_now_add=True , verbose_name='تاريخ الإنشاء')
     def __str__(self):
         return self.name

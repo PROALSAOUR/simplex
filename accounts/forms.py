@@ -44,14 +44,14 @@ class VendorRegisterForm(forms.ModelForm):
             'required': 'موقع المتجر مطلوب',
         }
     )
-    whatsapp = forms.CharField(
-        label='رقم الواتساب',
+    phone_number1 = forms.CharField(
+        label='رقم الهاتف',
         min_length=8,
         max_length=15,
         error_messages={
-            'required': 'رقم واتساب مطلوب',
-            'min_length': 'رقم الواتساب قصير جداً، يجب أن يكون 8 أرقام على الأقل.',
-            'max_length': 'رقم الواتساب طويل جداً، الحد الأقصى 15 رقم.',
+            'required': 'رقم الهاتف مطلوب',
+            'min_length': 'رقم الهاتف  قصير جداً، يجب أن يكون 8 أرقام على الأقل.',
+            'max_length': 'رقم الهاتف طويل جداً، الحد الأقصى 15 رقم.',
         }
     )
     class Meta:
@@ -83,14 +83,14 @@ class VendorRegisterForm(forms.ModelForm):
             raise ValidationError("اسم المستخدم موجود بالفعل")
 
         return username
-    # whatsapp validation
-    def clean_whatsapp(self):
-        whatsapp = self.cleaned_data.get('whatsapp')
-        whatsapp = validate_phone_number(whatsapp)  # تحقق من صحة رقم الهاتف باستخدام الدالة في validators.py
+    # phone_number1 validation
+    def clean_phone_number1(self):
+        phone_number1 = self.cleaned_data.get('phone_number1')
+        phone_number1 = validate_phone_number(phone_number1)  # تحقق من صحة رقم الهاتف باستخدام الدالة في validators.py
         # التحقق مما إذا كان الرقم مسجلاً لأحد المتاجر مسبقًا
-        if Store.objects.filter(whatsapp=whatsapp).exists():
+        if Store.objects.filter(phone_number1=phone_number1).exists():
             raise ValidationError("رقم الهاتف مستخدم بالفعل. يرجى التواصل مع الدعم الفني في حال كنت متأكداً انك لم تسجل به مسبقاً لحل المشكلة.")
-        return whatsapp
+        return phone_number1
 
     def save(self, commit=True):
         # 1️⃣ إنشاء User
@@ -103,7 +103,7 @@ class VendorRegisterForm(forms.ModelForm):
         store = Store.objects.create(
             name=self.cleaned_data['store_name'],
             location=self.cleaned_data['location'],
-            whatsapp=self.cleaned_data['whatsapp']
+            phone_number1=self.cleaned_data['phone_number1']
         )
 
         # 3️⃣ إنشاء Vendor
@@ -221,3 +221,22 @@ class EmployeeRegisterForm(forms.ModelForm):
             user_type='vendor'
         )
         return vendor
+
+# نموذج تعديل بيانات المتجر الاساسية
+class StoreBasicForm(forms.ModelForm):
+    class Meta:
+        model = Store
+        fields = ['name', 'location']
+        
+# نموذج تحديث حسابات المتجر الاجتماعية
+class StoreSocialForm(forms.ModelForm):
+    class Meta:
+        model = Store
+        fields = ['telegram', 'facebook', 'instagram', 'tiktok']
+        
+# نموذج تحديث لوجو المتجر 
+class StoreLogoForm(forms.ModelForm):
+    class Meta:
+        model = Store
+        fields = ['logo']
+

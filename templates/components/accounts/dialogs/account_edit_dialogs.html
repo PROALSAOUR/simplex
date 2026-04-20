@@ -1,0 +1,22 @@
+{% load static %}
+<dialog id="edit_account">
+    <h3> تعديل بيانات حسابي</h3>
+    <form id="edit_account_form" method="POST" action="{% url 'accounts:edit_account_details' %}" data-current-user-id="{{ request.user.id }}" data-check-url="{% url 'accounts:check_username' %}"  >
+        {% csrf_token %}
+        <div id="errors" style="color:red; display:none;"> سيتم عرض الاخطاء هنا </div>
+            
+        <div>
+            <label>المعرف</label>
+            <input type="text" id="username" name="username" value="{{ vendor.user.username }}" >
+            <div id="username-feedback" style="font-size:14px;"></div>
+        </div>
+        <div>
+            <label>الاسم</label>
+            <input type="text" id="name" name="name" value="{{ vendor.name }}" >
+        </div>
+
+        <button type="submit" onclick="" >حفظ</button>
+        <button type="button" onclick="edit_account.close()" >تراجع</button>
+    </form>
+</dialog>
+<script src="{% static 'js/accounts/dialogs/account_edit_dialog.js' %}"></script>

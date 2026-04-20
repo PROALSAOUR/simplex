@@ -1,0 +1,85 @@
+{% load static %}
+
+<!-- نموذج تعديل البيانات الأساسية للمتجر -->
+<dialog id="basic_dialog">
+    <h3>تعديل بيانات المتجر</h3>
+    <form id="basic_form" method="POST" action="{% url "accounts:edit_store_basic" %}">
+        {% csrf_token %}
+        <div>
+            <label>اسم المتجر</label>
+            {{ basic_form.name }}
+        </div>
+        <div>
+            <label>الموقع</label>
+            {{ basic_form.location }}
+        </div>
+        <button type="submit">حفظ</button>
+        <button type="button" onclick="basic_dialog.close()">تراجع</button>
+    </form>
+</dialog>
+<script src="{% static 'js/accounts/dialogs/store_basic_dialog.js' %}"></script>
+
+<!-- نموذج تعديل حسابات تواصل للمتجر -->
+<dialog id="social_dialog">
+    <h3>تعديل بيانات المتجر</h3>
+    <form id="social_form" method="POST" action="{% url "accounts:edit_store_social" %}">
+        {% csrf_token %}
+        <div>
+            <label>Telegram</label>
+            {{ social_form.telegram }}
+        </div>
+        <div>
+            <label>Facebook</label>
+            {{ social_form.facebook }}
+        </div>
+        <div>
+            <label>Instagram</label>
+            {{ social_form.instagram }}
+        </div>
+        <div>
+            <label>TikTok</label>
+            {{ social_form.tiktok }}
+        </div>
+        <button type="submit">حفظ</button>
+        <button type="button" onclick="social_dialog.close()">تراجع</button>
+    </form>
+</dialog>
+<script src="{% static 'js/accounts/dialogs/store_social_dialog.js' %}"></script>
+
+<!-- نموذج تعديل لوجو المتجر -->
+<dialog id="logo_dialog">
+    <h3>تعديل شعار المتجر</h3>
+
+    <form id="logo_form" enctype="multipart/form-data" action="{% url 'accounts:edit_store_logo' %}" method="POST">
+        {% csrf_token %}
+        <div style="display:flex; gap:20px; margin-bottom:15px;">
+            <!-- الصورة الحالية -->
+            <div>
+                <p>الصورة الحالية</p>
+                <img id="old_logo" src="{{ store.logo.url }}" 
+                    style="width:120px; height:120px; object-fit:cover;">
+            </div>
+            <!-- المعاينة -->
+            <div id="preview_container" style="display:none;">
+                <p>الصورة الجديدة</p>
+                <img id="preview" 
+                    style="width:120px; height:120px; object-fit:cover; border:1px dashed #aaa;">
+            </div>
+        </div>
+        <!-- Drag & Drop -->
+        <div id="drop_zone" style="
+            border:2px dashed #aaa;
+            padding:20px;
+            text-align:center;
+            cursor:pointer;
+            border-radius:10px;
+        ">
+            اسحب الصورة هنا أو اضغط للاختيار
+            <input type="file" id="file_input" name="logo" accept="image/*" hidden>
+        </div>
+        <br>
+        <button type="submit">حفظ</button>
+        <button type="button" onclick="logo_dialog.close()">تراجع</button>
+    </form>
+</dialog>
+<script src="{% static 'js/accounts/dialogs/store_logo_dialog.js' %}"></script>

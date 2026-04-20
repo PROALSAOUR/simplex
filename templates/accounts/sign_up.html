@@ -19,9 +19,8 @@
 <body>
     <div class="container">
         <p>هذه صفحة انشاء حساب </p>
-        <form method="POST" id="signup-form">
+        <form method="POST" id="signup-form"  data-check-url="{% url 'accounts:check_username' %}" >
             {% csrf_token %}
-
             {% if form.non_field_errors %}
                 <div style="color:red;">
                     {{ form.non_field_errors }}
@@ -37,7 +36,7 @@
                     <div>
                         <label>{{ field.label }}</label>
                         {{ field }}
-
+                        {% comment %} #change-later ضع placeholder لكل حقل  وجد طريقة لتقسيم الحقول الى نوعين قسم المتجر وقسم المدير {% endcomment %}
                         {% if field.errors %}
                             <div style="color:red; font-size: 14px;">
                                 {{ field.errors }}
@@ -51,27 +50,25 @@
         </form>
     </div>
     <script>
-        
-        const form = document.getElementById("signup-form");
-        const feedback = document.getElementById("username-feedback");
-        const usernameInput = document.getElementById("username");
-        const checkUsernameUrl = "{% url 'accounts:check_username' %}";
-        let timeout = null;
-        let isValidUsername = false;
-        // التحقق من صلاحية المعرف أثناء الكتابة
-        usernameInput.addEventListener("keyup", async function () {
-            isValidUsername = await validateUsername(this, feedback, checkUsernameUrl);
-        });
-        form.addEventListener("submit", function (event) {
-            if (!isValidUsername) {
-                event.preventDefault();
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            const feedback = document.getElementById("username-feedback");
+            const usernameInput = document.getElementById("username");
+            const checkUsernameUrl = form.dataset.checkUrl;
+            const isValid = await validateUsername(
+                usernameInput,
+                feedback,
+                checkUsernameUrl
+            );
+            if (!isValid) {
                 feedback.innerText = "الرجاء اختيار معَرف صالح اولاً .";
                 feedback.style.color = "red";
                 return;
             }
+            form.submit();
         });
     </script>
     <script src="{% static 'js/main.js' %}"></script>
-    <script src="{% static 'js/accounts.js' %}"></script>
+    <script src="{% static 'js/accounts/accounts.js' %}"></script>
 </body>
 </html>

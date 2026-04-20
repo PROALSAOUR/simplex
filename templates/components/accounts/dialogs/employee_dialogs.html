@@ -1,0 +1,68 @@
+{% load static %}
+
+<!--  نموذج إضافة موظف  -->
+<dialog id="add_employee_dialog">
+    <h3>اضافة موظف</h3>
+    <form id="add_employee_form" method="POST" action="{% url 'accounts:add_employee' %}" data-check-url="{% url 'accounts:check_username' %}">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <div style="color:red;" >
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+        <div style="color:red; display:none;" id="errors">سوف يتم عرض الاخطاء هنا </div>
+        
+        <div>
+            <label>المعرف</label>
+            <input type="text" id="username" name="username" >
+            <div id="username-feedback" style="font-size:14px;"></div>
+        </div>
+        {% for field in employee_form %}
+            {% if field.name != 'username' %}
+                <div>
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+
+                    {% if field.errors %}
+                        <div style="color:red; font-size: 14px;">
+                            {{ field.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% endfor %}
+
+        <button type="submit" >حفظ</button>
+        <button type="button" onclick="add_employee_dialog.close()" >تراجع</button>
+    </form>
+</dialog>
+<script src="{% static 'js/accounts/dialogs/add_employee_dialog.js' %}"></script>
+
+<!--  نموذج تعديل صلاحيات موظف  -->
+<dialog id='edit_employee_dialog'> 
+    <form id="edit_employee_form" method="post" action="{% url 'accounts:edit_employee' %}">
+        {% csrf_token %}
+        <input type="hidden" name="employee_id" id="edit-employee-id">
+        <p> الموظف : <span id="edit-employee-name"></span></p>
+        <div>
+            <label>{{ employee_form.permission_level.label }}</label>
+            {{ employee_form.permission_level }}                    
+        </div>
+        
+        <button type="button" onclick="edit_employee_dialog.close()">تراجع</button>
+        <button type="submit">حفظ</button>
+    </form>
+</dialog>
+<script src="{% static 'js/accounts/dialogs/edit_employee_dialog.js' %}"></script>
+
+<!--  نموذج ازالة موظف  -->
+<dialog id='delete_employee_dialog'> 
+    <form id="delete_employee_form" method="post" action="{% url 'accounts:remove_employee' %}">
+        {% csrf_token %}
+        <input type="hidden" name="employee_id" id="delete-employee-id">
+        <p>هل انت متأكد من رغبتك بحذف الموظف : <span id="delete-employee-name"></span> بشكل نهائي؟ </p>
+        <button type="button" onclick="delete_employee_dialog.close()">تراجع</button>
+        <button type="submit"> حذف الموظف</button>
+    </form>
+</dialog>
+<script src="{% static 'js/accounts/dialogs/delete_employee_dialog.js' %}"></script>

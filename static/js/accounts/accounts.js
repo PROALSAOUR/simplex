@@ -2,7 +2,7 @@
 // تستخدم هذه الدالة للتحقق من صلاحية المعرف (اليوزرنيم) أثناء كتابة المستخدم له في نموذج التسجيل أو تعديل الحساب. تقوم بإرسال طلب إلى الخادم للتحقق مما إذا كان المعرف متاحًا أم لا، وتعرض رسالة للمستخدم بناءً على النتيجة.
 // تستطيع التكيف مع حالتي الانشاء والتعديل وفقا لحالة تمرير currentUserId
 let usernameTimeout = null;
-function validateUsername(inputElement, feedback, url, currentUserId = null) {
+async function validateUsername(inputElement, feedback, url, currentUserId = null) {
     clearTimeout(usernameTimeout);
     const username = inputElement.value;
 
