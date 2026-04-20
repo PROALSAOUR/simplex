@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     // التعامل مع نتيجة الدالة الخاصة بتعديل بيانات الحساب
     form.addEventListener("submit", function(event) {
+
         event.preventDefault(); 
         const formData = new FormData(form);
         const url = form.action;
@@ -38,11 +39,10 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(data => {
             if (data.status === "success") {
                 // ✅ نجاح: أغلق الديالوج وأظهر رسالة نجاح
+                document.getElementById("show_name").innerText = data.name;
+                document.getElementById("show_username").innerText = data.username;
                 dialog.close();
                 showToast("success-toast", data.message);
-                setTimeout(() => {
-                    location.reload();
-                }, 1000);
             } else {
                 // ❌ خطأ: أبقي الديالوج مفتوح وأعرض الأخطاء
                 errorsDiv.innerText = data.message;

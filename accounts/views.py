@@ -61,7 +61,9 @@ def edit_account_details(request):
         vendor.save()
         return JsonResponse({
             "status": "success",
-            "message": "تم التعديل بنجاح"
+            "message": "تم التعديل بنجاح",
+            "name": vendor.name,
+            "username": user.username
         })
         
     return JsonResponse({"status": "error", "message": "طلب غير صالح"})
