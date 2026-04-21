@@ -11,7 +11,6 @@
             text-align: center;
             direction: ltr;
             padding: 50px;
-            height: 100vh;
             font-size: 24px;
         }
     </style>
@@ -19,53 +18,109 @@
 <body>
     <div class="container">
         <p>هذه صفحة انشاء حساب </p>
-        <form method="POST" id="signup-form"  data-check-url="{% url 'accounts:check_username' %}" >
+        <form method="POST" id="signup-form" data-check-url="{% url 'accounts:check_username' %}" >
             {% csrf_token %}
+
             {% if form.non_field_errors %}
                 <div style="color:red;">
                     {{ form.non_field_errors }}
                 </div>
             {% endif %}
-            <div>
-                <label>المعرف</label>
-                <input type="text" id="username" name="username" required>
-                <div id="username-feedback" style="font-size:14px;"></div>
-            </div>
-            {% for field in form %}
-                {% if field.name != 'username' %}
-                    <div>
-                        <label>{{ field.label }}</label>
-                        {{ field }}
-                        {% comment %} #change-later ضع placeholder لكل حقل  وجد طريقة لتقسيم الحقول الى نوعين قسم المتجر وقسم المدير {% endcomment %}
-                        {% if field.errors %}
-                            <div style="color:red; font-size: 14px;">
-                                {{ field.errors }}
-                            </div>
-                        {% endif %}
-                    </div>
-                {% endif %}
-            {% endfor %}
 
+            <div style="padding:20px; background-color:#f5f5dc; margin-bottom:20px;">
+                <p>بياناتك الشخصية</p>
+                <!-- اليوزرنيم -->
+                <div style="margin-bottom: 15px; background-color:green;">
+                    <label>المعرف</label> 
+                    <input type="text" id="username" name="username" placeholder="{{form.username.field.widget.attrs.placeholder}}" required>
+                    <div id="username-feedback" style="font-size:14px; background-color:#f5f5dc; "></div>
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{ form.username.field.help_text }}</p>
+                    {% if form.username.errors %}
+                        <div style="padding:5px; background-color:red; color:white;">{{ form.username.errors }}</div>
+                    {% endif %}
+                </div>
+                <!-- الاسم -->
+                <div  style="margin-bottom: 15px; background-color:green;">
+                    <label> {{form.name.label}}</label>
+                    {{form.name}}
+                    <br>
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{ form.name.field.help_text }}</p>
+                    {% if form.name.errors %}
+                        <div style="padding:5px; background-color:red; color:white;">{{ form.name.errors }}</div>
+                    {% endif %}
+                </div>
+                <!-- كلمة السر -->
+                <div  style="margin-bottom: 15px; background-color:green;">
+                    <label> {{form.password.label}}</label>
+                    {{form.password}}
+                    <br>
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; ">{{ form.password.field.help_text }}</p>
+                    {% if form.password.errors %}
+                        <div style="padding:5px; background-color:red; color:white;">{{ form.password.errors }}</div>
+                    {% endif %}
+                </div>
+                <!-- تأكيد كلمة السر -->
+                <div  style="margin-bottom: 15px; background-color:green;">
+                    <label> {{form.confirm_password.label}}</label>
+                    {{form.confirm_password}}
+                    {% if form.confirm_password.errors %}
+                        <div style="padding:5px; background-color:red; color:white;">{{ form.confirm_password.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div style="padding:20px; background-color:#f5f5dc; margin-bottom:20px;">
+                <p>بيانات متجرك</p>
+                <!-- اسم المتجر -->
+                <div  style="margin-bottom: 15px; background-color:green;">
+                    <label> {{form.store_name.label}}</label>
+                    {{form.store_name}}
+                    <br>
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; ">{{ form.store_name.field.help_text }}</p>
+                    {% if form.store_name.errors %}
+                        <div style="padding:5px; background-color:red; color:white;">{{ form.store_name.errors }}</div>
+                    {% endif %}
+                </div>
+                <!-- رقم الهاتف -->
+                <div  style="margin-bottom: 15px; background-color:green;">
+                    <label> {{form.phone_number1.label}}</label>
+                    {{form.phone_number1}}
+                    <br>
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; ">{{ form.phone_number1.field.help_text }}</p>
+                    {% if form.phone_number1.errors %}
+                        <div style="padding:5px; background-color:red; color:white;">{{ form.phone_number1.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <p>عند النقر على انشاء حساب هذا يعني انك توافق على الشروط والاحكام</p>
             <button type="submit">انشاء حساب</button>
+
         </form>
     </div>
     <script>
+        const form = document.getElementById("signup-form");
+        const usernameInput = document.getElementById("username");
+        const feedback = document.getElementById("username-feedback");
+        const checkUsernameUrl =  form.dataset.checkUrl;
+        let isValidUsername = false;
+
+        // التحقق من صلاحية المعرف أثناء الكتابة
+        usernameInput.addEventListener("keyup", async function () {
+            isValidUsername = await validateUsername(this, feedback, checkUsernameUrl);
+        });
+
         form.addEventListener("submit", async function (event) {
-            event.preventDefault();
-            const feedback = document.getElementById("username-feedback");
-            const usernameInput = document.getElementById("username");
-            const checkUsernameUrl = form.dataset.checkUrl;
             const isValid = await validateUsername(
                 usernameInput,
                 feedback,
                 checkUsernameUrl
             );
             if (!isValid) {
+                event.preventDefault();
                 feedback.innerText = "الرجاء اختيار معَرف صالح اولاً .";
                 feedback.style.color = "red";
-                return;
             }
-            form.submit();
         });
     </script>
     <script src="{% static 'js/main.js' %}"></script>

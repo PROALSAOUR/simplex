@@ -1,7 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
 from .models import Vendor, Store, UserProfile
-import phonenumbers
 from django.core.exceptions import ValidationError
 from .validators import validate_username, validate_phone_number
 
@@ -11,13 +10,18 @@ class VendorRegisterForm(forms.ModelForm):
     # Vendor fields
     username = forms.CharField(
         label='المعرف',
+        help_text = 'المعرف هو اسم المستخدم الذي ستسجل به الدخول. يجب أن يتكون من أحرف إنجليزية وأرقام فقط، ولا يحتوي على فراغات.',
         error_messages={
             'required': 'اسم المستخدم مطلوب',
             'invalid': 'اسم المستخدم غير صالح',
-        }
+        },
+        widget=forms.TextInput(attrs={
+            'placeholder': '(مثل: example1)'
+        })
     )
     password = forms.CharField(
         label='كلمة السر',
+        help_text = "كلمة السر يجب أن تكون قوية وتتكون من 4 أحرف على الأقل، وتشمل حروفًا وأرقامًا \n (في حال نسيان كلمة المرور سوف يتوجب عليك التواصل يدويا مع خدمة العملاء لتغييرها لذا يرجى حفظها جيدا.)",
         widget=forms.PasswordInput,
         error_messages={
         'required': 'كلمة المرور مطلوبة',
@@ -34,18 +38,14 @@ class VendorRegisterForm(forms.ModelForm):
     # Store fields
     store_name = forms.CharField(
         label='اسم المتجر',
+        help_text = 'اسم المتجر الذي سيظهر للعملاء. يمكنك تعديله لاحقًا من إعدادات المتجر.',
         error_messages={
             'required': 'اسم المتجر مطلوب',
         }
     )
-    location = forms.CharField(
-        label='الموقع',
-        error_messages={
-            'required': 'موقع المتجر مطلوب',
-        }
-    )
     phone_number1 = forms.CharField(
         label='رقم الهاتف',
+        help_text = 'رقم الهاتف الذي سوف نتواصل معك من خلاله لتفعيل حسابك,ملاحظة: يجب ان يكون مربوطاً بواتساب.',
         min_length=8,
         max_length=15,
         error_messages={
@@ -102,7 +102,6 @@ class VendorRegisterForm(forms.ModelForm):
         # 2️⃣ إنشاء Store
         store = Store.objects.create(
             name=self.cleaned_data['store_name'],
-            location=self.cleaned_data['location'],
             phone_number1=self.cleaned_data['phone_number1']
         )
 

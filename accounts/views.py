@@ -82,20 +82,24 @@ def store_details(request):
     employee_form = EmployeeRegisterForm()
     store_basic_form = StoreBasicForm(instance=store)
     store_social_form = StoreSocialForm(instance=store)
+    counts = employees.count()
     context = {
         'store': store,
         'owner': owner,
+        'employees': employees,
         'employee_form': employee_form,
         'basic_form': store_basic_form,
         'social_form': store_social_form,
-        'employees': employees,
+        'counts': counts,
     }
     return render(request, 'accounts/store_details.html', context)
 
-# ضيف وصف لدوال تعديل المتجر change-later
 @login_required(login_url='accounts:log_in')
 @vendor_only
 def edit_store_basic(request):
+    """
+    الدالة المسؤولة عن تعديل بيانات المتجر الاساسية وهي الاسم والموقع 
+    """
     if request.method == "POST":
         if request.user.vendor.permission_level in ['owner', 'full']:
             store = request.user.vendor.store
@@ -121,6 +125,9 @@ def edit_store_basic(request):
 @login_required(login_url='accounts:log_in')
 @vendor_only
 def edit_store_social(request):
+    """
+    الدالة المسؤولة عن تعديل حسابات المتجر الاجتماعية  
+    """
     if request.method == "POST":
         if request.user.vendor.permission_level in ['owner', 'full']:
             store = request.user.vendor.store
@@ -148,6 +155,9 @@ def edit_store_social(request):
 @login_required(login_url='accounts:log_in')
 @vendor_only
 def edit_store_logo(request):
+    """
+    الدالة المسؤولة عن تعديل لوجو المتجر  
+    """
     if request.method == "POST":
         if request.user.vendor.permission_level in ['owner', 'full']:
             store = request.user.vendor.store
@@ -168,9 +178,6 @@ def edit_store_logo(request):
             })
     else:
         return JsonResponse({"status": "error", "message": "طلب غير صالح"})
-
-
-
 
 @login_required(login_url='accounts:log_in')
 @vendor_only
@@ -285,11 +292,15 @@ def sign_up(request):
         
     
     if request.method == 'POST':
+        print("وصلت طلب بوست")
         form = VendorRegisterForm(request.POST)
         if form.is_valid():
             form.save() 
             # بعد ما يتم انشاء الحساب، يتم تحويله لصفحة تحت المراجعة لانتظار تفعيل الحساب من قبل الادارة
             return redirect('accounts:account_under_review')
+        else:    
+            print("الفورم غير صالح")
+            print(form.errors)
     else:
         form = VendorRegisterForm()
         
@@ -302,7 +313,6 @@ def check_username(request):
     """دالة التحقق من اليوزرنيم بشكل مباشر عند انشاء حساب"""
     
     username = request.GET.get('username')
-    # current_user_id = request.user.pk if request.user.is_authenticated else None
     current_user_id = request.GET.get('current_user_id')        
     try:
         current_user_id = int(current_user_id)
@@ -370,7 +380,11 @@ def log_out(request):
             "message": "المستخدم لم يقم بتسجيل الدخول اصلا"
         })
     
-# change-later هي الصفحة بيقدر يشوفها الي حالة حسابه قيد المراجعة فقط ولايمكن لاي احد اخر عرضها
 def account_under_review(request):
     """الدالة المسؤولة عن صفحة تحت المراجعة لانتظار تفعيل الحساب من قبل الادارة"""
-    return render(request, 'accounts/account_under_review.html')
+    
+    if request.user.is_authenticated:
+        if request.user.vendor.store.status != 'pending': # لو الشخص مسجل دخول بالفعل و حساب الشخص مو قيد المراجعة حوله لقائمة حسابه
+            return redirect('accounts:account_list')
+    else: 
+        return render(request, 'accounts/account_under_review.html')

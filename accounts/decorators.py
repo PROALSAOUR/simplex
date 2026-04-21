@@ -2,7 +2,7 @@ from django.shortcuts import redirect
 
 
 def vendor_only(view_func):
-    # طبقة حماية وظيفتها التحقق من ان نوع حساب المستخدم بائع
+    """طبقة حماية وظيفتها التحقق من ان نوع حساب المستخدم بائع والا تعيد توجيهه لصفحة الهبوط الرئيسية"""
     def wrapper(request, *args, **kwargs):
         user = request.user
 

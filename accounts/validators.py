@@ -1,5 +1,4 @@
 # ملف مخصص لدوال التحقق من البيانات في النماذج مثل التحقق من صحة رقم الهاتف او اليوزر نيم او اي تحقق اخر ممكن نحتاجه في المستقبل
-
 import phonenumbers, re
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
@@ -59,7 +58,7 @@ def get_redirect_url_for_user(user):
             return 'store:store_dashboard'
 
     elif user_profile.user_type == 'admin':
-        return 'admin_dashboard'
+        return 'admin_dashboard' #change-later اضف رابط صفحة الادارة الصحيح
 
     return None
         

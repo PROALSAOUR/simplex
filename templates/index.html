@@ -17,9 +17,15 @@
 </head>
 <body>
     <div class="container">
-        <h1 >مرحبا</h1>
-        <a href="{% url 'accounts:log_in' %}">تسجيل الدخول</a>
-        <a href="{% url 'accounts:sign_up' %}">إنشاء حساب</a>
+        <h1 >صفحة اللاندينغ بيج الرئيسية الخاصة بالموقع</h1>
+        <div>
+            <a href="{% url 'accounts:account_list' %}">  ادارة الحساب </a>
+            <a href="{% url 'accounts:log_in' %}">تسجيل الدخول</a>
+            <a href="{% url 'accounts:sign_up' %}">إنشاء حساب</a>
+        </div>
+        <div>
+            <a href="{% url 'store:store_dashboard' %}"> لوحة التحكم الخاصة بالمتجر </a>
+        </div>
     </div>
     
 </body>

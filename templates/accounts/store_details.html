@@ -21,7 +21,7 @@
         {% comment %} المتجر {% endcomment %}
         <div> 
             <h2>تفاصيل المتجر</h2>     
-        
+            <a href="{% url 'accounts:account_list' %}">العودة الى قائمة الحسابات</a>
         </div>
         {% comment %} بيانات المتجر واللوجو {% endcomment %}
         <div>
@@ -33,7 +33,7 @@
                 </div>    
                 <p id="store_name">{{ store.name }}</p>
                 <hr>
-                <p id="store_location">{{ store.location }}</p>
+                <p id="store_location">{% if store.location %}{{ store.location }}{% else %}لم تتم الاضافة بعد{% endif %}</p>
                 <hr>
                 <button onclick="basic_dialog.showModal()" ><i>تعديل</i></button>
             </div>
@@ -62,11 +62,12 @@
         {% comment %} الموظفين {% endcomment %}
         <div> 
             <h2>موظفين المتجر</h2>     
-            <p>{% lorem 90 w random %}</p> {% comment %} نذة عن الموظفين وفائدتهم وصلاحياتهم {% endcomment %}
-            {% if owner %}
+            <p>{% lorem 90 w random %}</p> <!-- نبذة عن الموظفين وفائدتهم وصلاحياتهم -->
+            {% if owner and counts < 5 %} <!-- اذا كان المستخدم مالك المتجر وعدد الموظفين اقل من او يساوي 5 اعرض زر اضافة موظف  -->
                 <button onclick="add_employee_dialog.showModal()" >اضافة موظف</button>
             {% endif %}
             {% if employees %}
+                <p>عدد الموظفين: {{ counts }}\5</p>
                 <ul style="list-style-type: none; padding: 0;">
                     {% for employee in employees %}
                         <li style="margin-bottom: 20px; border: 1px solid #ccc; padding: 5px; border-radius: 5px;">

@@ -18,7 +18,7 @@
 </head>
 <body>
     <div class="container">
-
+        <a href="{% url 'accounts:account_list' %}">العودة الى قائمة الحسابات</a>
         <h2>بيانات حسابي</h2>
         <p> الاسم: <span id="show_name" > {{ vendor.name }} </span></p>
         <p> المعرف: <span id="show_username" > {{ vendor.user.username }} </span></p>
