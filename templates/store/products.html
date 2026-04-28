@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .container {
+            text-align: center;
+            direction: rtl;
+            padding: 50px;
+            height: 100vh;
+            font-size: 24px;
+        }
+    </style> 
+</head>
+<body>
+    <div class="container">
+        <p> صفحة المنتجات الرئيسية </p>
+        <a href="{% url 'store:add_product' %}"> اضافة منتج جديد </a>
+        {% comment %} #change-later عند النقر يتم عرض قائمة منبثقة  {% endcomment %}
+        <button style="margin:20px; padding:10px; background-color:#007bff; color:white; border:none; cursor:pointer;"> فلترة </button>
+        {% if products %}
+            <table style="width:100%; border-collapse:collapse; margin:20px;">
+                <thead>
+                    <tr style="background-color:#f9f9f9; border:1px solid #ccc;">
+                        <th style="padding:10px; border:1px solid #ccc;">الصورة</th>
+                        <th style="padding:10px; border:1px solid #ccc;">الاسم</th>
+                        <th style="padding:10px; border:1px solid #ccc;">الحالة</th>
+                        <th style="padding:10px; border:1px solid #ccc;"> معروض؟ </th>
+                        <th style="padding:10px; border:1px solid #ccc;">السعر</th>
+                        <th style="padding:10px; border:1px solid #ccc;">الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                        <tr style="border:1px solid #ccc;" >
+                            <td style="padding:10px; border:1px solid #ccc; text-align:center;">
+                                <img src="{{ product.thumbnail_img.url }}" alt="{{ product.name }}" style="max-width:100px; height:auto;">
+                            </td>
+                            <td style="padding:10px; border:1px solid #ccc;">{{ product.name }}</td>
+                            <td style="padding:10px; border:1px solid #ccc;">{{ product.get_status_display }}</td>
+                            <td style="padding:10px; border:1px solid #ccc;">{{ product.show }}</td>
+                            <td style="padding:10px; border:1px solid #ccc;">${{ product.get_price }}</td>
+                            <td style="padding:10px; border:1px solid #ccc; ">
+                                {% comment %} #change-later استبدل بايقونات {% endcomment %}
+                                <a href="{% url "store:edit_product" product.id %}">تعديل</a>
+                                {% if USER_LEVEL in ADVANCED_PERMISSIONS %}
+                                    <button type="button" onclick="openDeleteProductDialog(this)"  data-id="{{ product.id }}" data-name="{{ product.name }}" data-redirect="{% url "store:show_products" %}">حذف</button>                                
+                                {% endif %}
+                                <a href="#">معاينة</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        {% else %}
+            <h2> لايوجد لديك منتجات بعد  </h2>
+        {% endif %}
+    </div>
+    {% include "common/toast.html" %}
+    <script src="{% static 'js/main.js' %}"></script>
+    {% include "components/store/dialogs/delete_product_dialog.html" %}
+
+</body>
+</html>

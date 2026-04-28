@@ -209,7 +209,7 @@ class EmployeeRegisterForm(forms.ModelForm):
         # 3️⃣ إنشاء Vendor
         vendor = Vendor.objects.create(
             user=user,
-            store=self.store, # هنا المشكلة
+            store=self.store, 
             name=self.cleaned_data['name'],
             permission_level=self.cleaned_data['permission_level']  
         )

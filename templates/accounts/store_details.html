@@ -22,6 +22,7 @@
         <div> 
             <h2>تفاصيل المتجر</h2>     
             <a href="{% url 'accounts:account_list' %}">العودة الى قائمة الحسابات</a>
+            <p style="background-color:#f1f1f1; margin-bottom:10px; padding:10px;">ملاحظة يمكن فقط لمالك المتجر والموظف ذو الصلاحية الكاملة تعديل بيانات المتجر</p>
         </div>
         {% comment %} بيانات المتجر واللوجو {% endcomment %}
         <div>
@@ -29,19 +30,25 @@
             <div style="background-color:#f5f5dc; margin-bottom:10px; padding:10px; position:relative;">
                 <div style="background-color: white;  position:absolute; top: 10px; left: 10px;"> 
                     <img id="store_logo" src="{{ store.logo.url }}" style="width: 100px; height: 100px; display:block;">
-                    <button onclick="logo_dialog.showModal()" ><i>تعديل</i></button>
+                    {% if USER_LEVEL in ADVANCED_PERMISSIONS %}
+                        <button onclick="logo_dialog.showModal()" ><i>تعديل</i></button>
+                    {% endif %}
                 </div>    
                 <p id="store_name">{{ store.name }}</p>
                 <hr>
                 <p id="store_location">{% if store.location %}{{ store.location }}{% else %}لم تتم الاضافة بعد{% endif %}</p>
                 <hr>
-                <button onclick="basic_dialog.showModal()" ><i>تعديل</i></button>
+                {% if USER_LEVEL in ADVANCED_PERMISSIONS %}
+                    <button onclick="basic_dialog.showModal()" ><i>تعديل</i></button>
+                {% endif %}
             </div>
         </div>
         {% comment %} حسابات المتجر الاجتماعية {% endcomment %}
         <div>
             <h3>حسابات المتجر الاجتماعية</h3>
-            <button onclick="social_dialog.showModal()" ><i>تعديل</i></button>
+            {% if USER_LEVEL in ADVANCED_PERMISSIONS %}
+                <button onclick="social_dialog.showModal()" ><i>تعديل</i></button>
+            {% endif %}
             <div style="background-color:#f5f5dc; margin-bottom:10px; padding:10px;">   
                 {% comment %} #change-later ضيف ايقونة جلب كل موقع تواصل ورابط يودي عند النقر عليه للموقع  وكمان عدل طريقة عرض الرابط بحيث يعرض طول معين مايتجاوزه {% endcomment %}
                 <p id="store_phone_number1">{{ store.phone_number1 }}</p>
@@ -76,8 +83,8 @@
                             <p>مستوى الصلاحيات: <span>{{ employee.get_permission_level_display }}</span></p>
                             {% comment %} يجب ان يكون المستخدم مالكً وبنفس الوقت لايستطيع تعديل او حذف نفسه  {% endcomment %}
                             {% if owner and request.user.id != employee.user.id  %}
-                                <button onclick="openEditDialog(this)" data-id="{{ employee.id }}" data-name="{{ employee.name }}" >تعديل الصلاحيات </button>                                
-                                <button onclick="openDeleteDialog(this)"  data-id="{{ employee.id }}" data-name="{{ employee.name }}" >حذف الموظف </button>                                
+                                <button onclick="openEditEmployeeDialog(this)" data-id="{{ employee.id }}" data-name="{{ employee.name }}" >تعديل الصلاحيات </button>                                
+                                <button onclick="openDeleteEmployeeDialog(this)"  data-id="{{ employee.id }}" data-name="{{ employee.name }}" >حذف الموظف </button>                                
                             {% endif %}
                         </li>
                     {% endfor %}

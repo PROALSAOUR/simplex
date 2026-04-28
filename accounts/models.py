@@ -66,10 +66,9 @@ class Store(models.Model):
 class Vendor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, verbose_name='الاسم الثنائي', help_text='قم بإدخال اسمك الثنائي (الاسم الأول والاسم الأخير)')
-    permission_level = models.CharField(verbose_name='مستوى الصلاحيات', max_length=20, choices=[('view',  'عرض فقط'), ('edit', 'عرض وتعديل'), ('full', 'تحكم كامل (عرض + تعديل + حذف)'), ('owner', 'مالك المتجر')], default='view', help_text='قم بتحديد مستوى الصلاحية الخاص بك \n  عرض فقط: يمكنك عرض المنتجات والطلبات ولكن لا يمكنك تعديلها أو حذفها \n عرض وتعديل: يمكنك عرض وتعديل المنتجات والطلبات ولكن لا يمكنك حذفها \n  تحكم كامل: يمكنك عرض وتعديل وحذف المنتجات والطلبات والأرباح \n مالك المتجر : بإمكانه التحكم بكل شيء')
+    permission_level = models.CharField(verbose_name='مستوى الصلاحيات', max_length=20, choices=[('edit', 'عرض وتعديل'), ('full', 'تحكم كامل (عرض + تعديل + حذف)'), ('owner', 'مالك المتجر')], default='edit', help_text='قم بتحديد مستوى الصلاحية الخاص بك \n عرض وتعديل: يمكنك عرض وتعديل المنتجات والطلبات ولكن لا يمكنك حذفها \n  تحكم كامل: يمكنك عرض وتعديل وحذف المنتجات والطلبات والأرباح \n مالك المتجر : بإمكانه التحكم بكل شيء')
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='vendors', verbose_name='المتجر')
     created_at = models.DateTimeField(auto_now_add=True , verbose_name='تاريخ الإنشاء')
-    
     
     def __str__(self):
         return f"{self.store} - {self.name}"

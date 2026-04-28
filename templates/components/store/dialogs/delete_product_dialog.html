@@ -1,0 +1,12 @@
+{% load static %}
+<dialog id='delete_product_dialog'> 
+    <form id="delete_product_form" method="post" action="{% url 'store:delete_product' %}">
+        {% csrf_token %}
+        <input type="hidden" name="product_id" id="delete-product-id">
+        <p>هل انت متأكد من رغبتك بحذف المنتج : <span id="delete-product-name"></span> بشكل نهائي؟ </p>
+        <button type="button" onclick="delete_product_dialog.close()">تراجع</button>
+        <button type="submit"> حذف</button>
+    </form>
+</dialog>
+
+<script src="{% static 'js/store/dialogs/delete_product_dialog.js' %}"></script>

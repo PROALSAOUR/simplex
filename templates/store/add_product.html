@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .container {
+            text-align: center;
+            direction: rtl;
+            padding: 50px;
+            height: 100vh;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p>هذه صفحة اضافة منتج </p>
+        {% comment %} #change-later قسم الصفحة لأقسام قسم اسعار وقسم مواصفات وقسم صور وهكذا {% endcomment %}
+        {% comment %} #change-later تحكم بالراجع من الدالة وضيف توست بيظهر تم الانشاء قبل التحويل لصفحة المنتجات {% endcomment %}
+        {% comment %} #change-later ضيف شرح تحت كل خانة {% endcomment %}
+        <form method="POST" id="add_product_form" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% for field in  add_form %}
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                        <label>{{ field.label }}</label> 
+                        {{ field }}
+                        <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{ field.help_text }}</p>
+                        {% if field.errors %}
+                            <div style="padding:5px; background-color:red; color:white;">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+            {% endfor %}
+            <button type="submit">انشاء</button>
+        </form>
+    </div>
+    {% include "common/toast.html" %}
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

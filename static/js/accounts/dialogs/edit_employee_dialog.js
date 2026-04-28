@@ -1,4 +1,4 @@
-function openEditDialog(button) {
+function openEditEmployeeDialog(button) {
     // جيب قيمة الاسم والاي دي من الداتا سيت
     const employeeId = button.dataset.id;
     const employeeName = button.dataset.name;

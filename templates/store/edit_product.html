@@ -1,0 +1,31 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .container {
+            text-align: center;
+            direction: rtl;
+            padding: 50px;
+            height: 100vh;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p>هذه صفحة تعديل منتج </p>
+        <p> اسم المنتج <span>{{ product.name }}</span></p>
+        {% if USER_LEVEL in ADVANCED_PERMISSIONS %}
+            <button type="button" onclick="openDeleteProductDialog(this)"  data-id="{{ product.id }}" data-name="{{ product.name }}" data-redirect="{% url "store:show_products" %}" >حذف</button>                                
+        {% endif %}                                
+    </div>
+
+    {% include "components/store/dialogs/delete_product_dialog.html" %}
+    {% include "common/toast.html" %}
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

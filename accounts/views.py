@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
 from django.core.exceptions import ValidationError
 from .validators import validate_username, get_redirect_url_for_user
-from .decorators import vendor_only
+from .decorators import vendor_only , advanced_permission_required
 from django.contrib.auth.decorators import login_required
 from .models import Vendor
 
@@ -96,86 +96,76 @@ def store_details(request):
 
 @login_required(login_url='accounts:log_in')
 @vendor_only
+@advanced_permission_required()
 def edit_store_basic(request):
     """
     الدالة المسؤولة عن تعديل بيانات المتجر الاساسية وهي الاسم والموقع 
     """
     if request.method == "POST":
-        if request.user.vendor.permission_level in ['owner', 'full']:
-            store = request.user.vendor.store
-            form = StoreBasicForm(request.POST, instance=store)
-            if form.is_valid():
-                form.save()
-                return JsonResponse({
-                    "status": "success",
-                    "message": "تم إجراء التعديل بنجاح",
-                    "name": store.name,
-                    "location": store.location
-                    })
-            else:
-                return JsonResponse({"status": "error", "message": form.errors})
-        else:
+        
+        store = request.user.vendor.store
+        form = StoreBasicForm(request.POST, instance=store)
+        if form.is_valid():
+            form.save()
             return JsonResponse({
-                "status": "error",
-                "message": 'عذراً, يبدو انك لا تمتلك الصلاحية لتعديل بيانات المتجر'
-            })
+                "status": "success",
+                "message": "تم إجراء التعديل بنجاح",
+                "name": store.name,
+                "location": store.location
+                })
+        else:
+            return JsonResponse({"status": "error", "message": form.errors})
+        
     else:
         return JsonResponse({"status": "error", "message": "طلب غير صالح"})
 
 @login_required(login_url='accounts:log_in')
 @vendor_only
+@advanced_permission_required()
 def edit_store_social(request):
     """
     الدالة المسؤولة عن تعديل حسابات المتجر الاجتماعية  
     """
     if request.method == "POST":
-        if request.user.vendor.permission_level in ['owner', 'full']:
-            store = request.user.vendor.store
-            form = StoreSocialForm(request.POST, instance=store)
-            if form.is_valid():
-                form.save()
-                return JsonResponse({
-                    "status": "success",
-                    "message": "تم إجراء التعديل بنجاح",
-                    "telegram": store.telegram,
-                    "facebook": store.facebook,
-                    "instagram": store.instagram,
-                    "tiktok": store.tiktok
-                })
-            else:
-                return JsonResponse({"status": "error", "message": form.errors})
-        else:
+        
+        store = request.user.vendor.store
+        form = StoreSocialForm(request.POST, instance=store)
+        if form.is_valid():
+            form.save()
             return JsonResponse({
-                "status": "error",
-                "message": 'عذراً, يبدو انك لا تمتلك الصلاحية لتعديل بيانات المتجر'
+                "status": "success",
+                "message": "تم إجراء التعديل بنجاح",
+                "telegram": store.telegram,
+                "facebook": store.facebook,
+                "instagram": store.instagram,
+                "tiktok": store.tiktok
             })
+        else:
+            return JsonResponse({"status": "error", "message": form.errors})
+        
     else:
         return JsonResponse({"status": "error", "message": "طلب غير صالح"})
 
 @login_required(login_url='accounts:log_in')
 @vendor_only
+@advanced_permission_required()
 def edit_store_logo(request):
     """
     الدالة المسؤولة عن تعديل لوجو المتجر  
     """
     if request.method == "POST":
-        if request.user.vendor.permission_level in ['owner', 'full']:
-            store = request.user.vendor.store
-            form = StoreLogoForm(request.POST, request.FILES, instance=store)
-            if form.is_valid():
-                form.save()
-                return JsonResponse({
-                    "status": "success",
-                    "message": "تم تحديث لوجو المتجر بنجاح",
-                    "logo_url": store.logo.url
-                })
-            else:
-                return JsonResponse({"status": "error", "message": form.errors})
-        else:
+        store = request.user.vendor.store
+        form = StoreLogoForm(request.POST, request.FILES, instance=store)
+        if form.is_valid():
+            form.save()
             return JsonResponse({
-                "status": "error",
-                "message": 'عذراً, يبدو انك لا تمتلك الصلاحية لتعديل بيانات المتجر'
+                "status": "success",
+                "message": "تم تحديث لوجو المتجر بنجاح",
+                "logo_url": store.logo.url
             })
+        else:
+            return JsonResponse({"status": "error", "message": form.errors})
+        
     else:
         return JsonResponse({"status": "error", "message": "طلب غير صالح"})
 
@@ -292,15 +282,11 @@ def sign_up(request):
         
     
     if request.method == 'POST':
-        print("وصلت طلب بوست")
         form = VendorRegisterForm(request.POST)
         if form.is_valid():
             form.save() 
             # بعد ما يتم انشاء الحساب، يتم تحويله لصفحة تحت المراجعة لانتظار تفعيل الحساب من قبل الادارة
             return redirect('accounts:account_under_review')
-        else:    
-            print("الفورم غير صالح")
-            print(form.errors)
     else:
         form = VendorRegisterForm()
         

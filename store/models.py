@@ -6,8 +6,8 @@ from accounts.models import Store
 class Product(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='products')
     name = models.CharField(max_length=255 , verbose_name="اسم المنتج", help_text="قم بإدخال اسم المنتج")
-    thumbnail_img = models.ImageField(upload_to='vendors/Products/thumbnails' , verbose_name="صورة المنتج الرئيسية")
-    description = CKEditor5Field('الوصف', config_name='default',)
+    thumbnail_img = models.ImageField(upload_to='vendors/Products/thumbnails' , verbose_name="صورة المنتج الرئيسية", help_text="قم بإدخال صورة المنتج الرئيسية التي ستظهر في صفحة المتجر وصفحة تفاصيل المنتج")
+    description = CKEditor5Field('الوصف', config_name='default', help_text="قم بإدخال وصف وتفاصيل المنتج ")
     upload_at = models.DateTimeField(auto_now_add=True , verbose_name='تاريخ الإنشاء')
     show = models.BooleanField(default=False , verbose_name='عرض للزبائن', help_text="قم بالأختيار ان كنت ترغب بعرض المنتج للزبائن مباشرة \n ان لم تقم بتحديده سيتم إخفاء المنتج ولن يتمكن زبائنك من رؤيته")
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2 , verbose_name="سعر الشراء", help_text="أدخل سعر الجملة الذي اشتريت به المنتج")
@@ -19,7 +19,7 @@ class Product(models.Model):
     status = models.CharField(verbose_name='حالة المنتج', max_length=20, choices=[('checking', 'جاري المراجعة'), ('approved', 'مقبول'), ('rejected', 'مرفوض')], default='checking')
     rejected_cause = models.TextField(verbose_name='سبب الرفض', blank=True, null=True, help_text='في حال تم رفض المنتج،سيتم عرض سبب الرفض هنا')
     has_sizes = models.BooleanField(default=True, verbose_name='المنتج له مقاسات', help_text='قم بالتحديد ان كان المنتج الخاص بك له عدة مقاسات')
-    type = models.CharField(verbose_name='نوع المنتج', choices=[('clothes','ملابس'),('watches','ساعات'), ('Accessories','اكسسوارات')])
+    type = models.CharField(verbose_name='نوع المنتج', choices=[('clothes','ملابس'),('watches','ساعات'), ('Accessories','اكسسوارات')] , default='clothes', help_text="قم بإختيار نوع المنتج الخاص بك")
     gender = models.CharField( verbose_name="الجنس المستهدف", max_length=20, choices=[('male', 'رجالي'), ('female', 'نسائي'), ('unisex', 'كلا الجنسين')], default='unisex', help_text="حدد إن كان المنتج موجّه للرجال أو النساء أو مناسب لكلا الجنسين")
     max_quantity_per_order = models.PositiveIntegerField(default=10 , verbose_name="الكمية القصوى للطلب", help_text="حدد الحد الأقصى لعدد القطع التي يمكن للزبون طلبها من هذا المنتج في طلب واحد")
 
