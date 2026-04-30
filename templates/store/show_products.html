@@ -62,6 +62,13 @@
     </div>
     {% include "common/toast.html" %}
     <script src="{% static 'js/main.js' %}"></script>
+    {% if messages %}
+        {% for message in messages %}
+            <script>
+                showToast('success-toast', "{{ message }}");
+            </script>
+        {% endfor %}
+    {% endif %}
     {% include "components/store/dialogs/delete_product_dialog.html" %}
 
 </body>

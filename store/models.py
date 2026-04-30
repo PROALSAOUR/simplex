@@ -39,6 +39,7 @@ class Product(models.Model):
         
 class ProductImages(models.Model):
     product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE , verbose_name='المنتج')
+    priority = models.PositiveIntegerField(default=1 , verbose_name='الأولوية', help_text='حدد الأولوية للصورة في عرض المنتج') # . يمكنك استخدام هذا الحقل لترتيب الصور حسب الأهمية. على سبيل المثال، يمكنك تعيين الأولوية 1 للصورة الرئيسية، والأولوية 2 للصورة الثانية، وهكذا.
     image = models.ImageField(upload_to='store/Products/images' , verbose_name='الصورة')
     
     def __str__(self):

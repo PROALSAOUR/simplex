@@ -3,7 +3,10 @@ from django.contrib.auth.decorators import login_required
 from accounts.decorators import vendor_only , advanced_permission_required
 from store.forms import ProductRegisterForm
 from django.http import JsonResponse
-from .models import Product
+from django.contrib import messages
+from .models import Product, ProductImages
+from django.db import transaction
+import json
 
 
 @login_required(login_url='accounts:log_in')
@@ -20,20 +23,38 @@ def show_products(request):
     context = {
         'products': products
     }
-    return render(request, 'store/products.html', context)
+    return render(request, 'store/show_products.html', context)
 
 @login_required(login_url='accounts:log_in')
 @vendor_only
+@transaction.atomic # تجعل كل العمليات داخل الدالة تُنفَّذ كحزمة واحدة، إذا حدث خطأ في أي خطوة يتم التراجع عن كل العمليات السابقة
 def add_product(request):
     """دالة وظيفتها اضافة منتج جديد """
     store = request.user.vendor.store
     if request.method == "POST":
         form = ProductRegisterForm(request.POST, request.FILES, store=store)
         if form.is_valid():
-            form.save() 
+            product = form.save(commit=False)
+            product.store = store
+            product.save()
+            order_data = request.POST.get("images_order")
+            order_data = json.loads(order_data) if order_data else []
+
+            images = request.FILES.getlist("images")
+            
+            # نحفظ الصور حسب الترتيب
+            for index, image in enumerate(images):
+
+                ProductImages.objects.create(
+                    product=product,
+                    image=image,
+                    priority=index + 1
+                )
+            
+            
+            messages.success(request, "تمت إضافة المنتج بنجاح")
             return redirect('store:show_products')
         else:
-            print(form.errors)
             # إعادة عرض النموذج مع الأخطاء
             context = {"add_form": form}
             return render(request, 'store/add_product.html', context)
@@ -81,9 +102,10 @@ def delete_product(request):
 @vendor_only
 def edit_product(request, pid):
     product = get_object_or_404(Product, id=pid)
-    
+    product_images = product.images.all()
     
     context = {
         'product': product,
+        'product_images': product_images,
     }
     return render(request, 'store/edit_product.html', context)

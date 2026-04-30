@@ -21,7 +21,19 @@
         <p> اسم المنتج <span>{{ product.name }}</span></p>
         {% if USER_LEVEL in ADVANCED_PERMISSIONS %}
             <button type="button" onclick="openDeleteProductDialog(this)"  data-id="{{ product.id }}" data-name="{{ product.name }}" data-redirect="{% url "store:show_products" %}" >حذف</button>                                
-        {% endif %}                                
+        {% endif %}    
+        
+        {% if product_images %} 
+            {% for image in product_images %}
+                <div>
+                    <p>ترتيب الصورة: {{ image.priority }}</p>
+                    <img src="{{ image.image.url }}" alt="{{ image.product.name }}" width="200" height="200">
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>لا توجد صور للمنتج.</p>
+        {% endif %}                   
+
     </div>
 
     {% include "components/store/dialogs/delete_product_dialog.html" %}
