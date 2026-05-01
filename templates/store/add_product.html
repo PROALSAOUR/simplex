@@ -14,159 +14,309 @@
             font-size: 24px;
         }
     </style>
-    <style>
 
-        *{
-            box-sizing:border-box;
-            font-family:Arial;
-        }
-
-        body{
-            background:#f5f5f5;
-            padding:30px;
-        }
-
-        .upload-container{
-            max-width:900px;
-            margin:auto;
-        }
-
-        /* مربع الرفع الرئيسي */
-
-        .upload-box{
-            border:3px dashed #999;
-            background:white;
-            padding:50px 20px;
-            text-align:center;
-            border-radius:12px;
-            cursor:pointer;
-            transition:.2s;
-        }
-
-        .upload-box.dragover{
-            border-color:#2196f3;
-            background:#eef7ff;
-        }
-
-        .upload-box.hidden{
-            display:none;
-        }
-
-        .upload-box input{
-            display:none;
-        }
-
-        /* القائمة */
-
-        .images-list{
-            margin-top:20px;
-            display:flex;
-            flex-direction:column;
-            gap:12px;
-        }
-
-        /* عنصر صورة */
-
-        .image-item{
-            background:white;
-            border-radius:12px;
-            padding:10px;
-            display:flex;
-            align-items:center;
-            gap:15px;
-            border:1px solid #ddd;
-        }
-
-        .drag-handle{
-            cursor:grab;
-            font-size:24px;
-            user-select:none;
-        }
-
-        .image-number{
-            width:35px;
-            text-align:center;
-            font-size:18px;
-            font-weight:bold;
-        }
-
-        .image-preview{
-            width:80px;
-            height:80px;
-            object-fit:cover;
-            border-radius:8px;
-            border:1px solid #ddd;
-            display:block;
-            flex-shrink:0;
-        }
-
-        .image-info{
-            flex:1;
-        }
-
-        .image-info p{
-            margin:4px 0;
-            font-size:14px;
-        }
-
-        .remove-btn{
-            background:red;
-            color:white;
-            border:none;
-            padding:10px 14px;
-            border-radius:8px;
-            cursor:pointer;
-        }
-
-        /* مربع الإضافة */
-
-        .mini-upload{
-            border:2px dashed #bbb;
-            background:white;
-            padding:20px;
-            border-radius:12px;
-            text-align:center;
-            cursor:pointer;
-        }
-
-        .mini-upload input{
-            display:none;
-        }
-
-        .dragging{
-            opacity:.5;
-        }
-
-    </style>
 </head>
 <body>
     <div class="container">
         <h1>هذه صفحة اضافة منتج </h1>
-        {% comment %} #change-later قسم الصفحة لأقسام قسم اسعار وقسم مواصفات وقسم صور وهكذا {% endcomment %}
         {% comment %} #change-later ضيف شرح تحت كل خانة {% endcomment %}
         <form method="POST" id="add_product_form" enctype="multipart/form-data">
             {% csrf_token %}    
-            <input type="hidden" name="images_order" id="images_order"> {% comment %}  حقل مخفي للترتيب {% endcomment %}
-            <div class="upload-container">
-                <h3>صور المنتج</h3>
-                <div class="upload-box" id="uploadBox">
-                    <input type="file" id="fileInput" multiple accept="image/*">
-                    <h2>اسحب الصور هنا</h2>
-                    <p>أو اضغط للإضافة</p>
+            {% if add_form.non_field_errors %}
+                <div style="padding:10px; background-color:#f8d7da; color:#721c24; margin-bottom: 15px; border-radius:8px;">
+                    {{ add_form.non_field_errors }}
                 </div>
-                <div class="images-list" id="imagesList"></div>
+            {% endif %}
+        
+            {% comment %} قسم المعلومات الأساسية [name, description, type, gender , upload_at] {% endcomment %}
+            <div style="background-color:#e1e1e1; padding:10px 40px; margin-bottom: 15px;">
+                <h3>قسم المعلومات الأساسية</h3>
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  add_form.name.label }}</label> 
+                    {{  add_form.name }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  add_form.name.help_text }}</p>
+                    {% if  add_form.name.errors %}
+                    <div style="padding:5px; background-color:red; color:white;">{{  add_form.name.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  add_form.description.label }}</label> 
+                    {{  add_form.description }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  add_form.description.help_text }}</p>
+                    {% if  add_form.description.errors %}
+                    <div style="padding:5px; background-color:red; color:white;">{{  add_form.description.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  add_form.type.label }}</label> 
+                    {{  add_form.type }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  add_form.type.help_text }}</p>
+                    {% if  add_form.type.errors %}
+                    <div style="padding:5px; background-color:red; color:white;">{{  add_form.type.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  add_form.gender.label }}</label> 
+                    {{  add_form.gender }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  add_form.gender.help_text }}</p>
+                    {% if  add_form.gender.errors %}
+                    <div style="padding:5px; background-color:red; color:white;">{{  add_form.gender.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+                
+            {% comment %} قسم الصور [thumbnail_img] {% endcomment %}
+            <div style="background-color:#e1e1e1; padding:10px 40px; margin-bottom: 15px;">
+                <h3>قسم الصور </h3>
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <p> صورة المنتج الرئيسية </p>
+                    <label for="id_thumbnail_img" id="custom_upload_box">
+                        <span>اضغط لاختيار صورة</span>
+                    </label>
+                    {{  add_form.thumbnail_img }}
+                    <!-- المعاينة -->
+                    <div id="thumbnail_preview_box" style="display:none; margin-top:15px;">
+                        <p>معاينة الصورة</p>
+                        <img id="thumbnail_preview"
+                            style="width:200px; border-radius:10px; display:block; margin-bottom:10px;">
+                        <button type="button" id="change_image_btn">استبدال الصورة</button>
+                    </div>
+                    
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  add_form.thumbnail_img.help_text }}</p>
+                    {% if  add_form.thumbnail_img.errors %}
+                    <div style="padding:5px; background-color:red; color:white;">{{  add_form.thumbnail_img.errors }}</div>
+                    {% endif %}
+                </div>
+                <style>
+                    #id_thumbnail_img{
+                        display:none;
+                    }
+                    #custom_upload_box{
+                        display:flex;
+                        justify-content:center;
+                        align-items:center;
+                        height:100px;
+                        width:90%;
+                        border:3px dashed #888;
+                        border-radius:15px;
+                        background-color:white;
+                        cursor:pointer;
+                        font-size:20px;
+                        margin:auto;
+                    }
+                    #custom_upload_box:hover{
+                        background-color:#f5f5f5;
+                    }
+                </style>
+
+                <input type="hidden" name="images_order" id="images_order"> {% comment %}  حقل مخفي للترتيب {% endcomment %}
+                <div class="upload-container">
+                    <h5>صور المنتج</h5>
+                    <div class="upload-box" id="uploadBox">
+                        <input type="file" id="fileInput" multiple accept="image/*">
+                        <h2>اسحب الصور هنا</h2>
+                        <p>أو اضغط للإضافة</p>
+                    </div>
+                    <div class="images-list" id="imagesList"></div>
+                </div>
+                <style>
+
+                    *{
+                        box-sizing:border-box;
+                        font-family:Arial;
+                    }
+
+                    body{
+                        background:#f5f5f5;
+                        padding:30px;
+                    }
+
+                    .upload-container{
+                        max-width:900px;
+                        margin:auto;
+                    }
+
+                    /* مربع الرفع الرئيسي */
+
+                    .upload-box{
+                        border:3px dashed #999;
+                        background:white;
+                        padding:50px 20px;
+                        text-align:center;
+                        border-radius:12px;
+                        cursor:pointer;
+                        transition:.2s;
+                    }
+
+                    .upload-box.dragover{
+                        border-color:#2196f3;
+                        background:#eef7ff;
+                    }
+
+                    .upload-box.hidden{
+                        display:none;
+                    }
+
+                    .upload-box input{
+                        display:none;
+                    }
+
+                    /* القائمة */
+
+                    .images-list{
+                        margin-top:20px;
+                        display:flex;
+                        flex-direction:column;
+                        gap:12px;
+                    }
+
+                    /* عنصر صورة */
+
+                    .image-item{
+                        background:white;
+                        border-radius:12px;
+                        padding:10px;
+                        display:flex;
+                        align-items:center;
+                        gap:15px;
+                        border:1px solid #ddd;
+                    }
+
+                    .drag-handle{
+                        cursor:grab;
+                        font-size:24px;
+                        user-select:none;
+                    }
+
+                    .image-number{
+                        width:35px;
+                        text-align:center;
+                        font-size:18px;
+                        font-weight:bold;
+                    }
+
+                    .image-preview{
+                        width:80px;
+                        height:80px;
+                        object-fit:cover;
+                        border-radius:8px;
+                        border:1px solid #ddd;
+                        display:block;
+                        flex-shrink:0;
+                    }
+
+                    .image-info{
+                        flex:1;
+                    }
+
+                    .image-info p{
+                        margin:4px 0;
+                        font-size:14px;
+                    }
+
+                    .remove-btn{
+                        background:red;
+                        color:white;
+                        border:none;
+                        padding:10px 14px;
+                        border-radius:8px;
+                        cursor:pointer;
+                    }
+
+                    /* مربع الإضافة */
+
+                    .mini-upload{
+                        border:2px dashed #bbb;
+                        background:white;
+                        padding:20px;
+                        border-radius:12px;
+                        text-align:center;
+                        cursor:pointer;
+                    }
+
+                    .mini-upload input{
+                        display:none;
+                    }
+
+                    .dragging{
+                        opacity:.5;
+                    }
+
+                </style>
+
+            </div>
+                
+            {% comment %} قسم التسعير والعروض [purchase_price, price, offer, offer_price , free_delivery] {% endcomment %}
+            <div style="background-color:#e1e1e1; padding:10px 40px; margin-bottom: 15px;">
+                <h3>قسم التسعير </h3>
+                <!-- سعر الشراء -->
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  add_form.purchase_price.label }}</label> 
+                    {{  add_form.purchase_price }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  add_form.purchase_price.help_text }}</p>
+                    {% if  add_form.purchase_price.errors %}
+                    <div style="padding:5px; background-color:red; color:white;">{{  add_form.purchase_price.errors }}</div>
+                    {% endif %}
+                </div>  
+                <!-- السعر -->     
+                <div id="price_field" style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  add_form.price.label }}</label> 
+                    {{  add_form.price }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  add_form.price.help_text }}</p>
+                    {% if  add_form.price.errors %}
+                        <div style="padding:5px; background-color:red; color:white;">{{  add_form.price.errors }}</div>
+                    {% endif %}         
+                </div>
+                <!-- خيار التخفيض --> 
+                <div id="offer_checkbox_field" style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  add_form.offer.label }}</label> 
+                    {{  add_form.offer }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  add_form.offer.help_text }}</p>
+                    {% if  add_form.offer.errors %}
+                        <div style="padding:5px; background-color:red; color:white;">{{  add_form.offer.errors }}</div>
+                    {% endif %}
+                </div>
+                <!-- سعر التخفيض -->
+                <div id="offer_price_field" style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  add_form.offer_price.label }}</label> 
+                    {{  add_form.offer_price }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  add_form.offer_price.help_text }}</p>
+                    <span id="offer_percentage" >نسبة التخفيض 20%</span>
+                    {% if  add_form.offer_price.errors %}
+                        <div style="padding:5px; background-color:red; color:white;">{{  add_form.offer_price.errors }}</div>
+                    {% endif %}
+                </div>
+                <!-- توصيل مجاني -->
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  add_form.free_delivery.label }}</label> 
+                    {{  add_form.free_delivery }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  add_form.free_delivery.help_text }}</p>
+                    {% if  add_form.free_delivery.errors %}
+                        <div style="padding:5px; background-color:red; color:white;">{{  add_form.free_delivery.errors }}</div>
+                    {% endif %}
+                </div>
             </div>
 
-            {% for field in  add_form %}
-            <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                <label>{{ field.label }}</label> 
-                {{ field }}
-                <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{ field.help_text }}</p>
-                {% if field.errors %}
-                <div style="padding:5px; background-color:red; color:white;">{{ field.errors }}</div>
-                {% endif %}
+            {% comment %} قسم المقاسات والمتغيرات [has_sizes] {% endcomment %}
+            <div style="background-color:#e1e1e1; padding:10px 40px; margin-bottom: 15px;">
+                <h3>قسم المقاسات والألوان </h3>
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  add_form.has_sizes.label }}</label> 
+                    {{  add_form.has_sizes }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  add_form.has_sizes.help_text }}</p>
+                    {% if  add_form.has_sizes.errors %}
+                    <div style="padding:5px; background-color:red; color:white;">{{  add_form.has_sizes.errors }}</div>
+                    {% endif %}
+                </div>
+                {% comment %} #change-later ضيف آلية اضافة المقاسات والألوان هون {% endcomment %}
             </div>
-            {% endfor %}
+
+            {% comment %} الي تحت بصفحة التعديل فقط {% endcomment %}
+            {% comment %} قسم المخزون والطلبات [max_quantity_per_order, total_sales] {% endcomment %}
+            {% comment %} قسم حالة المنتج والمراجعة [show, status, rejected_cause , upload_at] {% endcomment %}
 
             <button type="submit">انشاء</button>
             <button type="button" id="reset_form_btn"> إعادة تعيين</button>
@@ -175,267 +325,9 @@
 
     {% include "common/toast.html" %}
     <script src="{% static 'js/main.js' %}"></script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const form = document.getElementById("add_product_form");
-            const resetBtn = document.getElementById("reset_form_btn");
-            // استرجاع البيانات المحفوظة
-            for (const field of form.elements) {
-                if (!field.name) continue;
-                const savedValue = sessionStorage.getItem(field.name);
-                if (savedValue && field.type !== "file") {
-                    field.value = savedValue;
-                }
-            }
-            // حفظ البيانات عند الكتابة
-            form.addEventListener("input", (event) => {
-                const field = event.target;
-                if (!field.name) return;
-                if (field.type !== "file") {
-                    sessionStorage.setItem(field.name, field.value);
-                }
-            });
-            // حذف البيانات بعد الإرسال الناجح
-            form.addEventListener("submit", () => {
-                for (const field of form.elements) {
-                    if (!field.name) continue;
-                    sessionStorage.removeItem(field.name);
-                }
-            });
-            // حذف البيانات بعد النقر على زر اعادة التعيين
-            resetBtn.addEventListener("click", () => {
-                form.reset();
-                // حذف البيانات المحفوظة
-                for (const field of form.elements) {
-                    if (!field.name) continue;
-                    sessionStorage.removeItem(field.name);
-                }
-            });
-        });
-    </script>
-
-    {% comment %} كود تسليم الصور لدالة العرض  {% endcomment %}
-    <script>
-        function syncFilesToForm() {
-            // نحذف أي inputs قديمة
-            const form = document.getElementById("add_product_form"); 
-            document.querySelectorAll(".dynamic-file").forEach(e => e.remove());
-            uploadedFiles.forEach(file => {
-                const dt = new DataTransfer();
-                dt.items.add(file);
-                const input = document.createElement("input");
-                input.type = "file";
-                input.name = "images";
-                input.classList.add("dynamic-file");
-                input.files = dt.files;
-                form.appendChild(input);
-            });
-        }
-        document.addEventListener("DOMContentLoaded", () => {
-            const form = document.getElementById("add_product_form");
-            const orderInput = document.getElementById("images_order");
-            form.addEventListener("submit", function () {
-                // نحفظ الترتيب فقط (مثلاً أسماء أو indices)
-                const order = uploadedFiles.map((file, index) => ({
-                    name: file.name,
-                    index: index + 1
-                }));
-                orderInput.value = JSON.stringify(order);
-                syncFilesToForm();
-            });
-        });
-    </script>
+    <script src="{% static 'js/store/add_product.js' %}"></script>
 
 
-    <!-- سكريبت خاص بإدارة رفع الصور (سحب وإفلات، عرض معاينة، ترتيب، حذف) -->
-    <script>
-
-        const uploadBox = document.getElementById("uploadBox");
-        const fileInput = document.getElementById("fileInput");
-        const imagesList = document.getElementById("imagesList");
-
-        let uploadedFiles = [];
-
-        /* فتح الاختيار */
-        uploadBox.addEventListener("click", () => fileInput.click());
-
-        fileInput.addEventListener("change", (e) => {
-            addFiles(e.target.files);
-        });
-
-        /* drag */
-        uploadBox.addEventListener("dragover", (e) => {
-            e.preventDefault();
-            uploadBox.classList.add("dragover");
-        });
-
-        uploadBox.addEventListener("dragleave", () => {
-            uploadBox.classList.remove("dragover");
-        });
-
-        uploadBox.addEventListener("drop", (e) => {
-            e.preventDefault();
-            uploadBox.classList.remove("dragover");
-            addFiles(e.dataTransfer.files);
-        });
-
-        /* إضافة الملفات مع منع التكرار */
-        function addFiles(files){
-
-            [...files].forEach(file => {
-
-                if(!file.type.startsWith("image/")) return;
-
-                /* منع التكرار */
-                const exists = uploadedFiles.some(f =>
-                    f.name === file.name &&
-                    f.size === file.size &&
-                    f.lastModified === file.lastModified
-                );
-
-                if(!exists){
-                    uploadedFiles.push(file);
-                }
-
-            });
-
-            renderImages();
-        }
-
-        /* عرض الصور */
-        function renderImages(){
-
-            imagesList.innerHTML = "";
-
-            if(uploadedFiles.length > 0){
-                uploadBox.classList.add("hidden");
-            } else {
-                uploadBox.classList.remove("hidden");
-            }
-
-            uploadedFiles.forEach((file,index)=>{
-
-                const url = URL.createObjectURL(file);
-
-                const item = document.createElement("div");
-                item.className = "image-item";
-                item.draggable = true;
-
-                item.innerHTML = `
-                    <div class="drag-handle">☰</div>
-
-                    <div class="image-number">${index + 1}</div>
-
-                    <img src="${url}" class="image-preview">
-
-                    <div class="image-info">
-                        <p><strong>${file.name}</strong></p>
-                        <p>الحجم: ${(file.size / 1024).toFixed(1)} KB</p>
-                        <p>النوع: ${file.type}</p>
-                    </div>
-
-                    <button class="remove-btn">إزالة</button>
-                `;
-
-                item.querySelector(".remove-btn").addEventListener("click", () => {
-                    uploadedFiles.splice(index, 1);
-                    renderImages();
-                });
-
-                item.addEventListener("dragstart", () => {
-                    item.classList.add("dragging");
-                });
-
-                item.addEventListener("dragend", () => {
-                    item.classList.remove("dragging");
-                    updateOrder();
-                });
-
-                imagesList.appendChild(item);
-            });
-
-            /* مربع الإضافة */
-            if(uploadedFiles.length > 0){
-
-                const miniUpload = document.createElement("div");
-                miniUpload.className = "mini-upload";
-
-                miniUpload.innerHTML = `
-                    <input type="file" multiple accept="image/*">
-                    <p>+ إضافة المزيد</p>
-                `;
-
-                const input = miniUpload.querySelector("input");
-
-                miniUpload.addEventListener("click", () => input.click());
-
-                input.addEventListener("change", (e) => addFiles(e.target.files));
-
-                miniUpload.addEventListener("dragover", (e) => e.preventDefault());
-
-                miniUpload.addEventListener("drop", (e) => {
-                    e.preventDefault();
-                    addFiles(e.dataTransfer.files);
-                });
-
-                imagesList.appendChild(miniUpload);
-            }
-        }
-
-        /* ترتيب السحب (بدون التأثير على مربع الإضافة) */
-        imagesList.addEventListener("dragover", (e) => {
-            e.preventDefault();
-
-            const draggingItem = document.querySelector(".dragging");
-            if(!draggingItem) return;
-
-            const items = [...imagesList.querySelectorAll(".image-item:not(.dragging)")];
-
-            let nextSibling = null;
-
-            for(const item of items){
-
-                const rect = item.getBoundingClientRect();
-                const mid = rect.top + rect.height / 2;
-
-                if(e.clientY < mid){
-                    nextSibling = item;
-                    break;
-                }
-            }
-
-            if(nextSibling){
-                imagesList.insertBefore(draggingItem, nextSibling);
-            } else {
-                const last = items[items.length - 1];
-                if(last) last.after(draggingItem);
-            }
-        });
-
-        /* تحديث الترتيب */
-        function updateOrder(){
-
-            const items = [...imagesList.querySelectorAll(".image-item")];
-
-            const newOrder = [];
-
-            items.forEach(item => {
-
-                const name = item.querySelector("strong").innerText;
-
-                const file = uploadedFiles.find(f => f.name === name);
-
-                if(file){
-                    newOrder.push(file);
-                }
-            });
-
-            uploadedFiles = newOrder;
-
-            renderImages();
-        }
-    </script>
 
 </body>
 </html>

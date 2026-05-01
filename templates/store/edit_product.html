@@ -18,7 +18,11 @@
 <body>
     <div class="container">
         <p>هذه صفحة تعديل منتج </p>
+        <img src="{{ product.thumbnail_img.url }}"  width="200" height="200">
         <p> اسم المنتج <span>{{ product.name }}</span></p>
+        <p> سعر المنتج <span>{{ product.price }}</span></p>
+        <p> تخفيض على المنتج <span>{{ product.offer }}</span></p>
+        <p> سعر التخفيض المنتج <span>{{ product.offer_price }}</span></p>
         {% if USER_LEVEL in ADVANCED_PERMISSIONS %}
             <button type="button" onclick="openDeleteProductDialog(this)"  data-id="{{ product.id }}" data-name="{{ product.name }}" data-redirect="{% url "store:show_products" %}" >حذف</button>                                
         {% endif %}    
@@ -33,6 +37,14 @@
         {% else %}
             <p>لا توجد صور للمنتج.</p>
         {% endif %}                   
+
+            {% comment %} قسم المعلومات الأساسية [name, description, type, gender , upload_at] {% endcomment %}
+            {% comment %} قسم الصور [thumbnail_img] {% endcomment %}
+            {% comment %} قسم التسعير والعروض [purchase_price, price, offer, offer_price , free_delivery] {% endcomment %}
+            {% comment %} قسم المقاسات والمتغيرات [has_sizes] {% endcomment %}
+            {% comment %} الي تحت بصفحة التعديل فقط {% endcomment %}
+            {% comment %} قسم المخزون والطلبات [max_quantity_per_order, total_sales] {% endcomment %}
+            {% comment %} قسم حالة المنتج والمراجعة [show, status, rejected_cause , upload_at] {% endcomment %}
 
     </div>
 

@@ -1,13 +1,13 @@
+import json
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from accounts.decorators import vendor_only , advanced_permission_required
 from store.forms import ProductRegisterForm
 from django.http import JsonResponse
 from django.contrib import messages
+from store.validators import validate_image_file
 from .models import Product, ProductImages
 from django.db import transaction
-import json
-
 
 @login_required(login_url='accounts:log_in')
 @vendor_only
@@ -37,20 +37,28 @@ def add_product(request):
             product = form.save(commit=False)
             product.store = store
             product.save()
+            
             order_data = request.POST.get("images_order")
             order_data = json.loads(order_data) if order_data else []
-
-            images = request.FILES.getlist("images")
             
-            # نحفظ الصور حسب الترتيب
-            for index, image in enumerate(images):
-
+            images = request.FILES.getlist("images")
+            images_map = {img.name: img for img in images} # نحول الصور لقاموس (اسم → ملف)
+            for item in order_data:
+                image_name = item.get("name")
+                priority = item.get("index")
+                image_file = images_map.get(image_name)
+                
+                if not image_file:  # تخطي إذا لم يتم العثور على الملف
+                    continue 
+                
+                if not validate_image_file(image_file):
+                    continue  # تخطي الصورة إذا لم تكن صالحة    
+                
                 ProductImages.objects.create(
                     product=product,
-                    image=image,
-                    priority=index + 1
+                    image=image_file,
+                    priority=priority
                 )
-            
             
             messages.success(request, "تمت إضافة المنتج بنجاح")
             return redirect('store:show_products')
