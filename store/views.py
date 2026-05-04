@@ -1,14 +1,16 @@
-import json
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from accounts.decorators import vendor_only , advanced_permission_required
-from store.forms import ProductRegisterForm
 from django.http import JsonResponse
 from django.contrib import messages
-from store.validators import validate_image_file
-from .models import *
-from django.db import transaction
+from django.db import transaction , models as db_models
+from django.core.paginator import Paginator
+import json
+
 from Project.utils import compress_image
+from accounts.decorators import vendor_only , advanced_permission_required
+from store.validators import validate_image_file
+from store.models import *
+from store.forms import ProductRegisterForm
 
 @login_required(login_url='accounts:log_in')
 @vendor_only
@@ -18,11 +20,96 @@ def store_dashboard(request):
 @login_required(login_url='accounts:log_in')
 @vendor_only
 def show_products(request):
-    """دالة وظيفتها عرض جميع المنتجات الخاصة بالمستخدم"""
     vendor = request.user.vendor
     products = vendor.store.products.all()
+
+    # ── فلترة ──────────────────────────────────────────
+    status = request.GET.get('status')
+    if status in ['checking', 'approved', 'rejected']:
+        products = products.filter(status=status)
+
+    product_type = request.GET.get('type')
+    if product_type in ['clothes', 'watches', 'Accessories']:
+        products = products.filter(type=product_type)
+
+    gender = request.GET.get('gender')
+    if gender in ['male', 'female', 'unisex']:
+        products = products.filter(gender=gender)
+
+    show = request.GET.get('show')
+    if show == 'true':
+        products = products.filter(show=True)
+    elif show == 'false':
+        products = products.filter(show=False)
+
+    offer = request.GET.get('offer')
+    if offer == 'true':
+        products = products.filter(offer=True)
+    elif offer == 'false':
+        products = products.filter(offer=False)
+
+    price_min = request.GET.get('price_min')
+    price_max = request.GET.get('price_max')
+
+    if price_min:
+        try:
+            products = products.filter(
+                db_models.Q(offer=True, offer_price__gte=float(price_min)) |
+                db_models.Q(offer=False, price__gte=float(price_min))
+            )
+        except ValueError:
+            pass
+
+    if price_max:
+        try:
+            products = products.filter(
+                db_models.Q(offer=True, offer_price__lte=float(price_max)) |
+                db_models.Q(offer=False, price__lte=float(price_max))
+            )
+        except ValueError:
+            pass
+
+    search = request.GET.get('search', '').strip()
+    if search:
+        products = products.filter(name__icontains=search)
+    # ── ترتيب ──────────────────────────────────────────
+    VALID_SORTS = {
+        '-upload_at': '-upload_at',   # الأحدث أولاً
+        'upload_at':  'upload_at',    # الأقدم أولاً
+        'name':       'name',         # أبجدياً تصاعدي
+        '-name':      '-name',        # أبجدياً تنازلي
+        'price':      'price',        # الأرخص أولاً
+        '-price':     '-price',       # الأغلى أولاً
+    }
+    selected_sort = request.GET.get('sort', '-upload_at')
+    order_by = VALID_SORTS.get(selected_sort, '-upload_at')
+    products = products.order_by(order_by)
+    # ── Pagination ──────────────────────────────────────
+    paginator = Paginator(products, 20)
+    page_number = request.GET.get('page')
+    try:
+        page_obj = paginator.page(page_number if page_number else 1)
+    except Exception:
+        page_obj = paginator.page(1)
+
+    # ── نبني query string بدون page لاستخدامه في روابط الباجنيتور ──
+    query_params = request.GET.copy()
+    query_params.pop('page', None)
+    query_string = query_params.urlencode()  # مثال: status=approved&gender=male
+
     context = {
-        'products': products
+        'page_obj': page_obj,
+        'query_string': query_string,
+        # قيم الفلاتر للحفاظ عليها في الـ form
+        'selected_status': status or '',
+        'selected_type': product_type or '',
+        'selected_gender': gender or '',
+        'selected_show': show or '',
+        'selected_offer': offer or '',
+        'price_min': request.GET.get('price_min', ''),
+        'price_max': request.GET.get('price_max', ''),
+        'search': search,
+        'selected_sort':   selected_sort,
     }
     return render(request, 'store/show_products.html', context)
 

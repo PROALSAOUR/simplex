@@ -1,6 +1,6 @@
 from django import forms
-from .validators import validate_image_file
-from .models import *
+from store.validators import validate_image_file
+from store.models import *
 from django.core.exceptions import ValidationError
 from Project.utils import compress_image
 

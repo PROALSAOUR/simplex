@@ -19,46 +19,734 @@
     <div class="container">
         <p> صفحة المنتجات الرئيسية </p>
         <a href="{% url 'store:add_product' %}"> اضافة منتج جديد </a>
-        {% comment %} #change-later عند النقر يتم عرض قائمة منبثقة  {% endcomment %}
-        <button style="margin:20px; padding:10px; background-color:#007bff; color:white; border:none; cursor:pointer;"> فلترة </button>
-        {% if products %}
-            <table style="width:100%; border-collapse:collapse; margin:20px;">
-                <thead>
+        
+    
+        {% comment %} كود تنسيق خاص بتنسيق الجدول مبدئيا  {% endcomment %}
+        <style>
+            /* ═══════════════════════════════════════════
+                TOKENS & RESET
+            ═══════════════════════════════════════════ */
+            :root {
+                --bg:        #efe9e9;
+                --surface:   #94a2b3;
+                --surface2:  #5b6b9f;
+                --border:    rgba(255,255,255,0.07);
+                --accent:    #4f7cff;
+                --accent-g:  linear-gradient(135deg,#4f7cff,#a855f7);
+                --accent2:   #a855f7;
+                --text:      #e8eaf0;
+                --muted:     #7b82a0;
+                --danger:    #f04b4b;
+                --success:   #22c97a;
+                --warning:   #f5a623;
+                --radius:    14px;
+                --radius-sm: 8px;
+                --shadow:    0 8px 32px rgba(0,0,0,.45);
+                --trans:     .2s cubic-bezier(.4,0,.2,1);
+            }
+
+            /* ═══════════════════════════════════════════
+                LAYOUT WRAPPER
+            ═══════════════════════════════════════════ */
+            .sp-wrapper {
+                background: var(--bg);
+                min-height: 100vh;
+                padding: 32px 24px 60px;
+                font-family: 'Segoe UI', Tahoma, sans-serif;
+                direction: rtl;
+            }
+
+            /* ═══════════════════════════════════════════
+                TOP BAR  (search + filter btn + sort btn)
+            ═══════════════════════════════════════════ */
+            .sp-topbar {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+            }
+
+            /* Search input */
+            .sp-search-wrap {
+                position: relative;
+                flex: 1;
+                min-width: 200px;
+            }
+            .sp-search-wrap svg {
+                position: absolute;
+                right: 14px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--muted);
+                pointer-events: none;
+            }
+            .sp-search-input {
+                width: 100%;
+                background: var(--surface);
+                border: 1.5px solid var(--border);
+                border-radius: var(--radius);
+                color: var(--text);
+                padding: 11px 42px 11px 16px;
+                font-size: .95rem;
+                outline: none;
+                transition: border-color var(--trans), box-shadow var(--trans);
+                box-sizing: border-box;
+            }
+            .sp-search-input::placeholder { color: var(--muted); }
+            .sp-search-input:focus {
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(79,124,255,.15);
+            }
+
+            /* Icon buttons (filter + sort) */
+            .sp-icon-btn {
+                display: flex;
+                align-items: center;
+                gap: 7px;
+                background: var(--surface);
+                border: 1.5px solid var(--border);
+                border-radius: var(--radius);
+                color: var(--text);
+                padding: 10px 16px;
+                font-size: .88rem;
+                cursor: pointer;
+                transition: border-color var(--trans), background var(--trans);
+                white-space: nowrap;
+                position: relative;
+            }
+            .sp-icon-btn:hover {
+                border-color: var(--accent);
+                background: var(--surface2);
+            }
+            .sp-icon-btn.active {
+                border-color: var(--accent);
+                background: rgba(79,124,255,.12);
+                color: #a0b8ff;
+            }
+
+            /* active-filter badge on filter button */
+            .sp-filter-badge {
+                display: none;
+                background: var(--accent);
+                color: #fff;
+                font-size: .7rem;
+                font-weight: 700;
+                border-radius: 50%;
+                width: 18px; height: 18px;
+                align-items: center;
+                justify-content: center;
+            }
+            .sp-filter-badge.show { display: flex; }
+
+            /* Search submit (hidden, triggered by Enter) */
+            .sp-search-submit { display: none; }
+
+            /* ═══════════════════════════════════════════
+                FILTER DIALOG (slide-down panel)
+            ═══════════════════════════════════════════ */
+            .sp-filter-panel {
+                background: var(--surface);
+                border: 1.5px solid var(--border);
+                border-radius: var(--radius);
+                padding: 0;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height .35s cubic-bezier(.4,0,.2,1),
+                            padding .35s cubic-bezier(.4,0,.2,1),
+                            opacity .25s;
+                opacity: 0;
+                margin-bottom: 0;
+            }
+            .sp-filter-panel.open {
+                max-height: 600px;
+                padding: 22px 24px 18px;
+                opacity: 1;
+                margin-bottom: 16px;
+            }
+
+            .sp-filter-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+                gap: 14px;
+                margin-bottom: 18px;
+            }
+
+            .sp-field label {
+                display: block;
+                font-size: .78rem;
+                font-weight: 600;
+                color: var(--muted);
+                text-transform: uppercase;
+                letter-spacing: .06em;
+                margin-bottom: 6px;
+            }
+
+            .sp-select, .sp-number {
+                width: 100%;
+                background: var(--surface2);
+                border: 1.5px solid var(--border);
+                border-radius: var(--radius-sm);
+                color: var(--text);
+                padding: 9px 12px;
+                font-size: .88rem;
+                outline: none;
+                transition: border-color var(--trans);
+                box-sizing: border-box;
+                appearance: none;
+                -webkit-appearance: none;
+            }
+            .sp-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237b82a0' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 10px center; padding-left: 30px; }
+            .sp-select:focus, .sp-number:focus {
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(79,124,255,.12);
+            }
+
+            .sp-price-row { display: flex; gap: 8px; align-items: center; }
+            .sp-price-row .sp-number { flex: 1; }
+            .sp-price-sep { color: var(--muted); font-size: .8rem; }
+
+            .sp-filter-actions {
+                display: flex;
+                gap: 10px;
+                justify-content: flex-end;
+                padding-top: 14px;
+                border-top: 1px solid var(--border);
+            }
+
+            .sp-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                border: none;
+                border-radius: var(--radius-sm);
+                padding: 9px 20px;
+                font-size: .88rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: opacity var(--trans), transform var(--trans);
+                text-decoration: none;
+            }
+            .sp-btn:hover { opacity: .87; transform: translateY(-1px); }
+            .sp-btn-primary { background: var(--accent-g); color: #fff; }
+            .sp-btn-ghost   { background: transparent; color: var(--muted); border: 1.5px solid var(--border); }
+            .sp-btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+
+            /* ═══════════════════════════════════════════
+                SORT DROPDOWN
+            ═══════════════════════════════════════════ */
+            .sp-sort-wrap { position: relative; }
+            .sp-sort-menu {
+                position: absolute;
+                top: calc(100% + 8px);
+                left: 0;
+                background: var(--surface);
+                border: 1.5px solid var(--border);
+                border-radius: var(--radius);
+                min-width: 210px;
+                box-shadow: var(--shadow);
+                z-index: 200;
+                overflow: hidden;
+                display: none;
+            }
+            .sp-sort-menu.open { display: block; }
+            .sp-sort-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 11px 16px;
+                color: var(--text);
+                font-size: .88rem;
+                cursor: pointer;
+                transition: background var(--trans);
+                border: none;
+                background: none;
+                width: 100%;
+                text-align: right;
+            }
+            .sp-sort-item:hover { background: var(--surface2); }
+            .sp-sort-item.selected { color: var(--accent); }
+            .sp-sort-item svg { color: var(--muted); flex-shrink: 0; }
+
+            /* ═══════════════════════════════════════════
+                META ROW (count + active filters)
+            ═══════════════════════════════════════════ */
+            .sp-meta {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 18px;
+                flex-wrap: wrap;
+            }
+            .sp-count {
+                color: var(--muted);
+                font-size: .85rem;
+            }
+            .sp-count strong { color: var(--text); }
+
+            .sp-chip {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                background: rgba(79,124,255,.12);
+                border: 1px solid rgba(79,124,255,.25);
+                border-radius: 20px;
+                padding: 3px 10px 3px 6px;
+                font-size: .78rem;
+                color: #a0b8ff;
+            }
+            .sp-chip-close {
+                cursor: pointer;
+                color: #a0b8ff;
+                display: flex;
+                align-items: center;
+                font-size: 1rem;
+                line-height: 1;
+                background: none;
+                border: none;
+                padding: 0;
+            }
+
+            /* ═══════════════════════════════════════════
+                TABLE  (user keeps their table, we only
+                style the wrapper & header/rows lightly)
+            ═══════════════════════════════════════════ */
+            .sp-table-wrap {
+                background: var(--surface);
+                border: 1.5px solid var(--border);
+                border-radius: var(--radius);
+                overflow-x: auto;
+                box-shadow: var(--shadow);
+            }
+
+            /* ═══════════════════════════════════════════
+                EMPTY STATE
+            ═══════════════════════════════════════════ */
+            .sp-empty {
+                text-align: center;
+                padding: 60px 20px;
+                color: var(--muted);
+            }
+            .sp-empty svg { opacity: .3; margin-bottom: 16px; }
+            .sp-empty p { font-size: 1rem; }
+
+            /* ═══════════════════════════════════════════
+                PAGINATION
+            ═══════════════════════════════════════════ */
+            .sp-pagination {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                margin-top: 32px;
+                flex-wrap: wrap;
+            }
+
+            .sp-page-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 38px;
+                height: 38px;
+                padding: 0 10px;
+                background: var(--surface);
+                border: 1.5px solid var(--border);
+                border-radius: var(--radius-sm);
+                color: var(--text);
+                font-size: .85rem;
+                font-weight: 500;
+                text-decoration: none;
+                transition: border-color var(--trans), background var(--trans), color var(--trans);
+                cursor: pointer;
+            }
+            .sp-page-btn:hover {
+                border-color: var(--accent);
+                color: #a0b8ff;
+                background: var(--surface2);
+            }
+            .sp-page-btn.active {
+                background: var(--accent-g);
+                border-color: transparent;
+                color: #fff;
+                font-weight: 700;
+                box-shadow: 0 4px 14px rgba(79,124,255,.35);
+            }
+            .sp-page-btn.disabled {
+                opacity: .35;
+                pointer-events: none;
+            }
+            .sp-page-sep {
+                color: var(--muted);
+                font-size: .85rem;
+                padding: 0 4px;
+                user-select: none;
+            }
+        </style>
+
+        <div class="sp-wrapper">
+            <form method="GET" id="sp-form">
+
+                <!-- ══ TOP BAR ══════════════════════════════════════════ -->
+                <div class="sp-topbar">
+
+                    <!-- Search -->
+                    <div class="sp-search-wrap">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                    <input type="text" name="search" class="sp-search-input"
+                            placeholder="ابحث عن منتج..." value="{{ search }}"
+                            oninput="updateBadge()">
+                    <button type="submit" class="sp-search-submit">بحث</button>
+                    </div>
+
+                    <!-- Filter toggle -->
+                    <button type="button" class="sp-icon-btn" id="sp-filter-btn" onclick="toggleFilter()">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18M7 12h10M11 18h2"/>
+                    </svg>
+                    فلترة
+                    <span class="sp-filter-badge {% if selected_status or selected_type or selected_gender or selected_show or selected_offer or price_min or price_max %}show{% endif %}" id="sp-badge">
+                        ✓
+                    </span>
+                    </button>
+
+                    <!-- Sort dropdown -->
+                    <div class="sp-sort-wrap">
+                    <button type="button" class="sp-icon-btn {% if selected_sort %}active{% endif %}"
+                            id="sp-sort-btn" onclick="toggleSort()">
+                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path d="M3 8h13M3 12h9M3 16h5"/><path d="M17 8l4 4-4 4" stroke-linecap="round"/>
+                        </svg>
+                        ترتيب
+                        {% if selected_sort %}<span style="color:var(--accent);font-size:.75rem;">●</span>{% endif %}
+                    </button>
+
+                    <div class="sp-sort-menu" id="sp-sort-menu">
+                        {% with sorts=sort_options %}
+                        <button type="button" class="sp-sort-item {% if selected_sort == '-upload_at' %}selected{% endif %}"
+                                onclick="applySort('-upload_at')">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+                        الأحدث أولاً
+                        </button>
+                        <button type="button" class="sp-sort-item {% if selected_sort == 'upload_at' %}selected{% endif %}"
+                                onclick="applySort('upload_at')">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+                        الأقدم أولاً
+                        </button>
+                        <button type="button" class="sp-sort-item {% if selected_sort == 'name' %}selected{% endif %}"
+                                onclick="applySort('name')">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h6"/></svg>
+                        أبجدياً (أ → ي)
+                        </button>
+                        <button type="button" class="sp-sort-item {% if selected_sort == '-name' %}selected{% endif %}"
+                                onclick="applySort('-name')">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h6"/></svg>
+                        أبجدياً (ي → أ)
+                        </button>
+                        <button type="button" class="sp-sort-item {% if selected_sort == 'price' %}selected{% endif %}"
+                                onclick="applySort('price')">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                        السعر: الأرخص أولاً
+                        </button>
+                        <button type="button" class="sp-sort-item {% if selected_sort == '-price' %}selected{% endif %}"
+                                onclick="applySort('-price')">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                        السعر: الأغلى أولاً
+                        </button>
+                        {% endwith %}
+                    </div>
+                    <!-- hidden sort input -->
+                    <input type="hidden" name="sort" id="sp-sort-input" value="{{ selected_sort }}">
+                    </div>
+
+                </div><!-- /topbar -->
+
+                <!-- ══ FILTER PANEL ═════════════════════════════════════ -->
+                <div class="sp-filter-panel {% if selected_status or selected_type or selected_gender or selected_show or selected_offer or price_min or price_max %}open{% endif %}"
+                    id="sp-filter-panel">
+                    <div class="sp-filter-grid">
+
+                    <div class="sp-field">
+                        <label>نوع المنتج</label>
+                        <select name="type" class="sp-select">
+                        <option value="">الكل</option>
+                        <option value="clothes"     {% if selected_type == 'clothes' %}selected{% endif %}>ملابس</option>
+                        <option value="watches"     {% if selected_type == 'watches' %}selected{% endif %}>ساعات</option>
+                        <option value="Accessories" {% if selected_type == 'Accessories' %}selected{% endif %}>اكسسوارات</option>
+                        </select>
+                    </div>
+
+                    <div class="sp-field">
+                        <label>الجنس</label>
+                        <select name="gender" class="sp-select">
+                        <option value="">الكل</option>
+                        <option value="male"   {% if selected_gender == 'male' %}selected{% endif %}>رجالي</option>
+                        <option value="female" {% if selected_gender == 'female' %}selected{% endif %}>نسائي</option>
+                        <option value="unisex" {% if selected_gender == 'unisex' %}selected{% endif %}>كلا الجنسين</option>
+                        </select>
+                    </div>
+
+                    <div class="sp-field">
+                        <label>الحالة</label>
+                        <select name="status" class="sp-select">
+                        <option value="">الكل</option>
+                        <option value="checking" {% if selected_status == 'checking' %}selected{% endif %}>جاري المراجعة</option>
+                        <option value="approved" {% if selected_status == 'approved' %}selected{% endif %}>مقبول</option>
+                        <option value="rejected" {% if selected_status == 'rejected' %}selected{% endif %}>مرفوض</option>
+                        </select>
+                    </div>
+
+                    <div class="sp-field">
+                        <label>الظهور</label>
+                        <select name="show" class="sp-select">
+                        <option value="">الكل</option>
+                        <option value="true"  {% if selected_show == 'true' %}selected{% endif %}>ظاهر</option>
+                        <option value="false" {% if selected_show == 'false' %}selected{% endif %}>مخفي</option>
+                        </select>
+                    </div>
+
+                    <div class="sp-field">
+                        <label>التخفيض</label>
+                        <select name="offer" class="sp-select">
+                        <option value="">الكل</option>
+                        <option value="true"  {% if selected_offer == 'true' %}selected{% endif %}>عليه تخفيض</option>
+                        <option value="false" {% if selected_offer == 'false' %}selected{% endif %}>بدون تخفيض</option>
+                        </select>
+                    </div>
+
+                    <div class="sp-field">
+                        <label>نطاق السعر</label>
+                        <div class="sp-price-row">
+                        <input type="number" name="price_min" class="sp-number"
+                                placeholder="من" min="0" value="{{ price_min }}">
+                        <span class="sp-price-sep">—</span>
+                        <input type="number" name="price_max" class="sp-number"
+                                placeholder="إلى" min="0" value="{{ price_max }}">
+                        </div>
+                    </div>
+
+                    </div>
+
+                    <div class="sp-filter-actions">
+                    <a href="{% url 'store:show_products' %}" class="sp-btn sp-btn-ghost">مسح الكل</a>
+                    <button type="submit" class="sp-btn sp-btn-primary">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L19 7"/></svg>
+                        تطبيق
+                    </button>
+                    </div>
+                </div>
+
+            </form><!-- /form -->
+
+            <!-- ══ META ROW ═════════════════════════════════════════ -->
+            <div class="sp-meta">
+                <span class="sp-count">
+                    إجمالي المنتجات: <strong style="color:black;">{{ page_obj.paginator.count }}</strong> منتج
+                    &nbsp;·&nbsp; الصفحة <strong style="color:black;">{{ page_obj.number }}</strong> من <strong style="color:black;">{{ page_obj.paginator.num_pages }}</strong>
+                </span>
+
+                <!-- Active filter chips -->
+                {% if selected_status %}
+                    <span class="sp-chip">
+                    <button class="sp-chip-close" onclick="clearParam('status')">×</button>
+                    الحالة: {{ selected_status }}
+                    </span>
+                {% endif %}
+                {% if selected_type %}
+                    <span class="sp-chip">
+                    <button class="sp-chip-close" onclick="clearParam('type')">×</button>
+                    النوع: {{ selected_type }}
+                    </span>
+                {% endif %}
+                {% if selected_gender %}
+                    <span class="sp-chip">
+                    <button class="sp-chip-close" onclick="clearParam('gender')">×</button>
+                    الجنس: {{ selected_gender }}
+                    </span>
+                {% endif %}
+                {% if selected_show %}
+                    <span class="sp-chip">
+                    <button class="sp-chip-close" onclick="clearParam('show')">×</button>
+                    الظهور: {% if selected_show == 'true' %}ظاهر{% else %}مخفي{% endif %}
+                    </span>
+                {% endif %}
+                {% if selected_offer %}
+                    <span class="sp-chip">
+                    <button class="sp-chip-close" onclick="clearParam('offer')">×</button>
+                    {% if selected_offer == 'true' %}عليه تخفيض{% else %}بدون تخفيض{% endif %}
+                    </span>
+                {% endif %}
+                {% if price_min or price_max %}
+                    <span class="sp-chip">
+                    <button class="sp-chip-close" onclick="clearParam('price_min');clearParam('price_max')">×</button>
+                    السعر: {{ price_min|default:"0" }} — {{ price_max|default:"∞" }}
+                    </span>
+                {% endif %}
+                {% if search %}
+                    <span class="sp-chip">
+                    <button class="sp-chip-close" onclick="clearParam('search')">×</button>
+                    بحث: "{{ search }}"
+                    </span>
+                {% endif %}
+            </div>
+
+            <!-- ══ TABLE ═════════════════════════════════════════════ -->
+            {% if page_obj.object_list %}
+                <div class="sp-table-wrap">
+                <table style="width:100%; border-collapse:collapse; margin:20px;">
+                    <thead>
                     <tr style="background-color:#f9f9f9; border:1px solid #ccc;">
+                        <th>#</th>
                         <th style="padding:10px; border:1px solid #ccc;">الصورة</th>
                         <th style="padding:10px; border:1px solid #ccc;">الاسم</th>
                         <th style="padding:10px; border:1px solid #ccc;">الحالة</th>
-                        <th style="padding:10px; border:1px solid #ccc;"> معروض؟ </th>
+                        <th style="padding:10px; border:1px solid #ccc;">معروض؟</th>
                         <th style="padding:10px; border:1px solid #ccc;">السعر</th>
                         <th style="padding:10px; border:1px solid #ccc;">الإجراءات</th>
                     </tr>
-                </thead>
-                <tbody>
-                    {% for product in products %}
-                        <tr style="border:1px solid #ccc;" >
-                            <td style="padding:10px; border:1px solid #ccc; text-align:center;">
-                                <img src="{{ product.thumbnail_img.url }}" alt="{{ product.name }}" style="max-width:100px; height:auto;">
-                            </td>
-                            <td style="padding:10px; border:1px solid #ccc;">{{ product.name }}</td>
-                            <td style="padding:10px; border:1px solid #ccc;">{{ product.get_status_display }}</td>
-                            <td style="padding:10px; border:1px solid #ccc;">{{ product.show }}</td>
-                            <td style="padding:10px; border:1px solid #ccc;">${{ product.get_price }}</td>
-                            <td style="padding:10px; border:1px solid #ccc; ">
-                                {% comment %} #change-later استبدل بايقونات {% endcomment %}
-                                <a href="{% url "store:edit_product" product.id %}">تعديل</a>
-                                {% if USER_LEVEL in ADVANCED_PERMISSIONS %}
-                                    <button type="button" onclick="openDeleteProductDialog(this)"  data-id="{{ product.id }}" data-name="{{ product.name }}" data-redirect="{% url "store:show_products" %}">حذف</button>                                
-                                {% endif %}
-                                <a href="#">معاينة</a>
-                            </td>
-                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for product in page_obj %}
+                    <tr style="border:1px solid #ccc;">
+                        <td style="padding:10px; border:1px solid #ccc; text-align:center;">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
+                        <td style="padding:10px; border:1px solid #ccc; text-align:center;">
+                        <img src="{{ product.thumbnail_img.url }}" alt="{{ product.name }}" style="max-width:100px; height:auto;">
+                        </td>
+                        <td style="padding:10px; border:1px solid #ccc;">{{ product.name }}</td>
+                        <td style="padding:10px; border:1px solid #ccc;">{{ product.get_status_display }}</td>
+                        <td style="padding:10px; border:1px solid #ccc;">{{ product.show }}</td>
+                        <td style="padding:10px; border:1px solid #ccc;">${{ product.get_price }}</td>
+                        <td style="padding:10px; border:1px solid #ccc;">
+                        <a href="{% url "store:edit_product" product.id %}">تعديل</a>
+                        {% if USER_LEVEL in ADVANCED_PERMISSIONS %}
+                            <button type="button" onclick="openDeleteProductDialog(this)"
+                                    data-id="{{ product.id }}" data-name="{{ product.name }}"
+                                    data-redirect="{% url "store:show_products" %}">حذف</button>
+                        {% endif %}
+                        <a href="#">معاينة</a>
+                        </td>
+                    </tr>
                     {% endfor %}
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+                </div>
 
-        {% else %}
-            <h2> لايوجد لديك منتجات بعد  </h2>
-        {% endif %}
+            {% else %}
+                <div class="sp-empty">
+                <svg width="56" height="56" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2">
+                    <path d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <p>لا توجد منتجات تطابق الفلترة المحددة</p>
+                </div>
+            {% endif %}
+
+            <!-- ══ PAGINATION ════════════════════════════════════════ -->
+            {% if page_obj.paginator.num_pages > 1 %}
+                <nav class="sp-pagination">
+
+                    <!-- السابق -->
+                    {% if page_obj.has_previous %}
+                        <a class="sp-page-btn" href="?{{ query_string }}&page={{ page_obj.previous_page_number }}">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        </a>
+                    {% else %}
+                        <span class="sp-page-btn disabled">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        </span>
+                    {% endif %}
+
+                    <!-- Page numbers with smart windowing -->
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if num == 1 or num == page_obj.paginator.num_pages %}
+                        {% if page_obj.number == num %}
+                            <span class="sp-page-btn active">{{ num }}</span>
+                        {% else %}
+                            <a class="sp-page-btn" href="?{{ query_string }}&page={{ num }}">{{ num }}</a>
+                        {% endif %}
+                        {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                        {% if page_obj.number == num %}
+                            <span class="sp-page-btn active">{{ num }}</span>
+                        {% else %}
+                            <a class="sp-page-btn" href="?{{ query_string }}&page={{ num }}">{{ num }}</a>
+                        {% endif %}
+                        {% elif num == page_obj.number|add:"-3" or num == page_obj.number|add:"3" %}
+                        <span class="sp-page-sep">…</span>
+                        {% endif %}
+                    {% endfor %}
+
+                    <!-- التالي -->
+                    {% if page_obj.has_next %}
+                        <a class="sp-page-btn" href="?{{ query_string }}&page={{ page_obj.next_page_number }}">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        </a>
+                    {% else %}
+                        <span class="sp-page-btn disabled">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        </span>
+                    {% endif %}
+
+                </nav>
+            {% endif %}
+
+        </div><!-- /sp-wrapper -->
+        {% comment %} كود جافا خاص بتنسيق الجدول مبدئيا لاعلاقة له بالخلفية {% endcomment %}
+        <script>
+            /* ── Filter panel toggle ── */
+            function toggleFilter() {
+                const panel = document.getElementById('sp-filter-panel');
+                const btn   = document.getElementById('sp-filter-btn');
+                panel.classList.toggle('open');
+                btn.classList.toggle('active');
+            }
+
+            /* ── Sort dropdown toggle ── */
+            function toggleSort() {
+                const menu = document.getElementById('sp-sort-menu');
+                const btn  = document.getElementById('sp-sort-btn');
+                menu.classList.toggle('open');
+                btn.classList.toggle('active');
+            }
+
+            /* ── Apply sort value then submit ── */
+            function applySort(val) {
+                document.getElementById('sp-sort-input').value = val;
+                document.getElementById('sp-sort-menu').classList.remove('open');
+                document.getElementById('sp-form').submit();
+            }
+
+            /* ── Update badge visibility ── */
+            function updateBadge() {
+                // badge already handled server-side; this is for dynamic awareness
+            }
+
+            /* ── Remove a single filter chip and re-submit ── */
+            function clearParam(name) {
+                const url    = new URL(window.location.href);
+                const names  = name.split(';');
+                names.forEach(n => url.searchParams.delete(n.trim()));
+                url.searchParams.delete('page');
+                window.location.href = url.toString();
+            }
+
+            /* ── Close sort menu on outside click ── */
+            document.addEventListener('click', function(e) {
+                const wrap = document.querySelector('.sp-sort-wrap');
+                if (wrap && !wrap.contains(e.target)) {
+                document.getElementById('sp-sort-menu').classList.remove('open');
+                document.getElementById('sp-sort-btn').classList.remove('active');
+                }
+            });
+        </script>
+            
     </div>
     {% include "common/toast.html" %}
     <script src="{% static 'js/main.js' %}"></script>

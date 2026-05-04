@@ -1,8 +1,11 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import Vendor, Store, UserProfile
 from django.core.exceptions import ValidationError
-from .validators import validate_username, validate_phone_number
+
+from Project.utils import compress_image
+from store.validators import validate_image_file
+from accounts.models import Vendor, Store, UserProfile
+from accounts.validators import validate_username, validate_phone_number
 
 
 # نموذج انشاء حساب
@@ -239,3 +242,13 @@ class StoreLogoForm(forms.ModelForm):
         model = Store
         fields = ['logo']
 
+    def clean_logo(self):
+        logo = self.cleaned_data.get("logo")
+        if not logo:
+            return logo 
+        
+        compressed_logo = compress_image(logo)
+        if not validate_image_file(compressed_logo):
+            raise ValidationError("الصورة غير صالحة أو حجمها كبير")
+        return compressed_logo
+        
