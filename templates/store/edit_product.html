@@ -66,5 +66,16 @@
     {% include "components/store/dialogs/delete_product_dialog.html" %}
     {% include "common/toast.html" %}
     <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/store/product_colors.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // #change-later عدل معرف فورم التعديل
+            const editForm = document.getElementById('my_edit_form');
+            if (editForm) {
+                SimplexColorManager.setForm(editForm);
+                SimplexPricingManager.setForm(editForm);
+            }
+        });
+    </script>
 </body>
 </html>

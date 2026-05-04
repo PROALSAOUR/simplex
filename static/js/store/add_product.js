@@ -2,13 +2,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("add_product_form");
     const resetBtn = document.getElementById("reset_form_btn");
     const orderInput = document.getElementById("images_order");
-    const offerCheckbox = document.getElementById("id_offer");
-    const offerCheckboxField = document.getElementById("offer_checkbox_field");
-    const priceInput = document.getElementById("id_price");
-    const offerPriceInput = document.getElementById("id_offer_price");
-    const priceField = document.getElementById("price_field");
-    const offerPriceField = document.getElementById("offer_price_field");
-    const offerPercentage = document.getElementById("offer_percentage");
     const uploadBox = document.getElementById("uploadBox");
     const fileInput = document.getElementById("fileInput");
     const imagesList = document.getElementById("imagesList");
@@ -24,69 +17,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function getFileKey(file) {
         return `${file.name}|${file.size}|${file.type}|${file.lastModified}`;
-    }
-
-    function initOfferControls() {
-        if (!offerCheckbox || !offerCheckboxField || !priceInput || !offerPriceInput || !priceField || !offerPriceField || !offerPercentage) {
-            return;
-        }
-
-        const priceLabel = priceField.querySelector("label");
-        const originalNextSibling = priceField.nextElementSibling;
-
-        function setOfferState(isEnabled) {
-            if (isEnabled) {
-                priceLabel.textContent = "السعر قبل التخفيض";
-                offerPriceField.style.display = "block";
-                offerPriceInput.required = true;
-                offerCheckboxField.after(priceField);
-                priceField.after(offerPriceField);
-                calculateDiscount();
-                return;
-            }
-
-            priceLabel.textContent = "سعر البيع";
-            offerPriceField.style.display = "none";
-            offerPercentage.style.display = "none";
-            offerPriceInput.value = "";
-            offerPriceInput.required = false;
-
-            if (originalNextSibling) {
-                originalNextSibling.before(priceField);
-            }
-        }
-
-        function calculateDiscount() {
-            const originalPrice = parseFloat(priceInput.value);
-            const discountedPrice = parseFloat(offerPriceInput.value);
-
-            if (isNaN(originalPrice) || isNaN(discountedPrice)) {
-                offerPercentage.style.display = "none";
-                offerPriceInput.setCustomValidity("");
-                return;
-            }
-
-            if (discountedPrice >= originalPrice) {
-                offerPriceInput.setCustomValidity("يجب أن يكون السعر بعد التخفيض أقل من السعر قبل التخفيض");
-                offerPriceInput.reportValidity();
-                offerPercentage.style.display = "none";
-                return;
-            }
-
-            offerPriceInput.setCustomValidity("");
-            const percentage = ((originalPrice - discountedPrice) / originalPrice) * 100;
-            offerPercentage.style.display = "inline-block";
-            offerPercentage.textContent = "نسبة التخفيض " + percentage.toFixed(1) + "%";
-        }
-
-        offerCheckbox.addEventListener("change", function () {
-            setOfferState(this.checked);
-        });
-
-        priceInput.addEventListener("input", calculateDiscount);
-        offerPriceInput.addEventListener("input", calculateDiscount);
-
-        setOfferState(offerCheckbox.checked);
     }
 
     function syncFilesToForm() {
@@ -116,6 +46,24 @@ document.addEventListener("DOMContentLoaded", function () {
         }));
 
         orderInput.value = JSON.stringify(order);
+    }
+
+    function resetThumbnailPreview() {
+        if (!thumbnailInput || !customUploadBox || !thumbnailPreviewBox || !thumbnailPreviewImg) {
+            return;
+        }
+
+        thumbnailInput.value = "";
+        thumbnailPreviewImg.src = "";
+        thumbnailPreviewBox.style.display = "none";
+        customUploadBox.style.display = "block";
+    }
+
+    function resetUploadState() {
+        uploadedFiles = [];
+        uploadedFileKeys.clear();
+        renderImages();
+        syncFilesToForm();
     }
 
     function resetFormStorage() {
@@ -168,6 +116,21 @@ document.addEventListener("DOMContentLoaded", function () {
             resetBtn.addEventListener("click", () => {
                 form.reset();
                 resetFormStorage();
+                resetUploadState();
+                resetThumbnailPreview();
+
+                if (window.SimplexColorManager?.resetColors) {
+                    window.SimplexColorManager.resetColors();
+                } else {
+                    const colorsField = document.getElementById("colors_data");
+                    const colorsList = document.getElementById("colors-list");
+                    if (colorsField) {
+                        colorsField.value = "";
+                    }
+                    if (colorsList) {
+                        colorsList.innerHTML = "";
+                    }
+                }
             });
         }
     }
@@ -350,7 +313,7 @@ document.addEventListener("DOMContentLoaded", function () {
         renderImages();
     }
 
-    // حولها لدالة جلوبال #change-later
+    
     function compressImage(file, uploadKey) {
         return new Promise((resolve) => {
             const img = new Image();
@@ -428,7 +391,6 @@ document.addEventListener("DOMContentLoaded", function () {
         restoreFormData();
         bindFormPersistence();
         initThumbnailPreview();
-        initOfferControls();
         initFileUploader();
         bindDragSort();
 
@@ -439,7 +401,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     showToast('failed-toast', 'يرجى اضافة صور للمنتج اولا!');
                     return;
                 }
-                // #change-later تحقق من رفع الوان ايضا
+
                 syncFilesToForm();
             });
         }

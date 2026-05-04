@@ -376,7 +376,7 @@
                                         <span style="font-size:13px; color:#777;">اضغط لاختيار صورة اللون</span>
                                     </label>
                                     <input type="file" id="nc-image" accept="image/*"
-                                        style="display:none;" onchange="onImageSelected(this)">
+                                        style="display:none;" onchange="SimplexColorManager.onImageSelected(this)">
                                 </div>
 
                                 <!-- معاينة الصورة بعد الاختيار -->
@@ -390,7 +390,7 @@
                                                 <button type="button"
                                                         style="background:white; border:1px solid #ddd; border-radius:8px; padding:7px 14px;
                                                             font-size:13px; cursor:pointer; font-family:inherit; position:relative; overflow:hidden;">
-                                                    <input type="file" accept="image/*" onchange="onImageSelected(this)"
+                                                    <input type="file" accept="image/*" onchange="SimplexColorManager.onImageSelected(this)"
                                                         style="position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;">
                                                     تغيير الصورة
                                                 </button>
@@ -421,7 +421,7 @@
                                             style="width:15px; height:15px; accent-color:#1d9e75;">
                                         <label for="nc-size-av" style="font-size:13px; color:#555; cursor:pointer;">متوفر</label>
                                     </div>
-                                    <button type="button" onclick="addSizeToNew()"
+                                    <button type="button" onclick="SimplexColorManager.addSizeToNew()"
                                             style="background:#f0f0f0; border:1px solid #ddd; border-radius:8px; padding:8px 16px;
                                                 font-size:13px; cursor:pointer; font-family:inherit; white-space:nowrap;">
                                         حفظ المقاس
@@ -431,12 +431,12 @@
 
                             <!-- قسم ازرار حفظ وإلغاء اللون -->
                             <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:14px;">
-                                <button type="button" onclick="cancelForm()"
+                                <button type="button" onclick="SimplexColorManager.cancelForm()"
                                         style="background:white; border:1px solid #ccc; border-radius:8px; padding:8px 18px;
                                             font-size:14px; cursor:pointer; font-family:inherit; color:#555;">
                                     إلغاء
                                 </button>
-                                <button type="button" onclick="saveColor()"
+                                <button type="button" onclick="SimplexColorManager.saveColor()"
                                         style="background:#1d9e75; color:white; border:none; border-radius:8px; padding:8px 22px;
                                             font-size:14px; cursor:pointer; font-family:inherit;">
                                     حفظ اللون
@@ -446,7 +446,7 @@
                     </div>
                     
                     <!-- زر إضافة لون -->
-                    <button type="button" id="add-color-btn" onclick="openNewColorForm()"
+                    <button type="button" id="add-color-btn" onclick="SimplexColorManager.openNewColorForm()"
                             style="width:100%; padding:14px; border:2px dashed #aaa; border-radius:12px; background:none;
                                 cursor:pointer; font-size:14px; color:#666; font-family:inherit;">
                         + إضافة لون جديد
@@ -469,259 +469,6 @@
                         .btn-cv-del:hover { background:#faece7; }
                         .nc-size-item { display:flex; align-items:center; gap:8px; background:#f8f8f8; border-radius:8px; padding:7px 10px; margin-bottom:6px; }
                     </style>
-                    <script>
-                        document.addEventListener('DOMContentLoaded', () => {
-                            let colorsData      = []; // سوف يتم تخزين قيم الالوان المضافة والمقاسات التابعة لها هنا تجهيزا لإرسالها لدالة العرض
-                            let newColorSizes   = []; // اثناء انشاء لون سوف يتم تخزين قيم المقاسات التابعة له هنا
-                            let currentImageFile = null; 
-                            let currentImageURL  = null; 
-                            let currentImageName = ''; 
-                            let editingIndex    = null; 
-
-                            // ── فتح نموذج إضافة لون جديد ─────────────────────────────────
-                            window.openNewColorForm = function () {
-                                editingIndex = null;
-                                resetForm('إضافة لون جديد');
-                                showForm(true);
-                            };
-                            // ── فتح نموذج تعديل لون موجود ────────────────────────────────
-                            window.openEditForm = function (index) {
-                                const c = colorsData[index];
-                                editingIndex     = index;
-                                newColorSizes    = c.sizes.map(s => ({ ...s }));
-                                currentImageFile = c.imageFile || null;
-                                currentImageURL  = c.imageURL  || null;
-                                currentImageName = c.imageName || '';
-
-                                document.getElementById('nc-color').value         = c.color;
-                                document.getElementById('nc-available').checked   = c.available;
-                                document.getElementById('nc-size-input').value    = '';
-                                document.getElementById('nc-size-av').checked     = true;
-                                document.getElementById('form-title-text').textContent = 'تعديل اللون';
-
-                                clearErrors();
-                                setImageUI(currentImageURL, currentImageName);
-                                renderNewSizes();
-                                showForm(true);
-                                // تمرير النموذج للعرض على الشاشة
-                                setTimeout(() =>
-                                    document.getElementById('new-color-form')
-                                        .scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
-                            };
-                            // ──  اظهار نموذج اضافة/تعديل لون واخفاء زر الاضافة ────────────────────
-                            function showForm(show) {
-                                document.getElementById('new-color-form').style.display = show ? 'block' : 'none';
-                                document.getElementById('add-color-btn').style.display  = show ? 'none'  : 'block';
-                            }
-                            // ── اعادة قيم نموذج لون للافتراضي ─────────────────────────────────
-                            function resetForm(title) {
-                                newColorSizes    = [];
-                                currentImageFile = null;
-                                currentImageURL  = null;
-                                currentImageName = '';
-                                document.getElementById('nc-color').value       = '';
-                                document.getElementById('nc-available').checked = true;
-                                document.getElementById('nc-image').value       = '';
-                                document.getElementById('nc-size-input').value  = '';
-                                document.getElementById('nc-size-av').checked   = true;
-                                document.getElementById('form-title-text').textContent = title;
-                                clearErrors();
-                                setImageUI(null, '');
-                                renderNewSizes(); 
-                            }
-                            // ── ازالة اخطاء نموذج لون  ─────────────────────────────────
-                            function clearErrors() {
-                                document.getElementById('nc-color').style.borderColor  = '#ddd';
-                                document.getElementById('err-color').style.display     = 'none';
-                                document.getElementById('err-image').style.display     = 'none';
-                            }
-                            // ── اغلاق نموذج لون في حالة الرغبة بالالغاء دون الحفظ ─────────────────────────────────
-                            window.cancelForm = function () {
-                                showForm(false);
-                            };
-                            // ── إدارة واجهة الصورة ───────────────────────────────────────
-                            function setImageUI(url, name) {
-                                if (url) {
-                                    document.getElementById('nc-preview').src          = url;
-                                    document.getElementById('nc-fname').textContent    = name;
-                                    document.getElementById('upload-area-wrap').style.display    = 'none';
-                                    document.getElementById('img-selected-wrap').style.display   = 'block';
-                                } else {
-                                    document.getElementById('upload-area-wrap').style.display    = 'block';
-                                    document.getElementById('img-selected-wrap').style.display   = 'none';
-                                }
-                            }
-                            window.onImageSelected = function (input) {
-                                const file = input.files[0];
-                                if (!file) return;
-                                currentImageFile = file;
-                                currentImageURL  = URL.createObjectURL(file);
-                                currentImageName = file.name;
-                                setImageUI(currentImageURL, currentImageName);
-                                document.getElementById('err-image').style.display = 'none';
-                            };
-                            // ── إدارة  المقاسات ───────────────────────────────────────
-                            // دالة حفظ المقاس واضافته للقائمة 
-                            window.addSizeToNew = function () {
-                                const inp = document.getElementById('nc-size-input');
-                                const val = inp.value.trim();
-                                if (!val) { inp.focus(); return; }
-                                newColorSizes.push({
-                                    size:      val,
-                                    available: document.getElementById('nc-size-av').checked
-                                });
-                                inp.value = '';
-                                inp.focus();
-                                renderNewSizes();
-                            };
-                            // دالة ازالة مقاس
-                            window.removeNewSize = function (i) {
-                                newColorSizes.splice(i, 1);
-                                renderNewSizes();
-                            };
-                            // دالة تعرض جميع المقاسات المضافة لـ للون
-                            function renderNewSizes() {
-                                const el = document.getElementById('nc-sizes-list');
-                                if (!newColorSizes.length) {
-                                    el.innerHTML = '<p style="font-size:12px; color:#aaa; margin:0 0 8px;">لم تضف مقاسات — سيُضاف مقاس موحد تلقائياً</p>';
-                                    return;
-                                }
-                                el.innerHTML = newColorSizes.map((s, i) => `
-                                    <div class="nc-size-item">
-                                        <span style="font-size:13px; font-weight:600; flex:1;">${s.size}</span>
-                                        <span class="cv-badge ${s.available ? 'cv-yes' : 'cv-no'}">
-                                            ${s.available ? 'متوفر' : 'غير متوفر'}
-                                        </span>
-                                        <button type="button" onclick="removeNewSize(${i})"
-                                                style="background:none; border:none; color:#bbb; cursor:pointer; font-size:16px; padding:0 2px; line-height:1;">✕</button>
-                                    </div>`).join('');
-                            }
-                            // ──   دالة حفظ اللون الجديد وانشائه ────────────────────────────────────
-                            window.saveColor = function () {
-                                let valid = true;
-                                const colorName = document.getElementById('nc-color').value.trim();
-                                if (!colorName) {
-                                    document.getElementById('nc-color').style.borderColor = '#e24b4a';
-                                    document.getElementById('err-color').style.display    = 'block';
-                                    valid = false;
-                                } else {
-                                    document.getElementById('nc-color').style.borderColor = '#ddd';
-                                    document.getElementById('err-color').style.display    = 'none';
-                                }
-
-                                if (!currentImageURL) {
-                                    document.getElementById('err-image').style.display = 'block';
-                                    valid = false;
-                                } else {
-                                    document.getElementById('err-image').style.display = 'none';
-                                }
-
-                                if (!valid) return;
-
-                                const entry = {
-                                    color:     colorName,
-                                    available: document.getElementById('nc-available').checked,
-                                    sizes:     [...newColorSizes],
-                                    imageFile: currentImageFile,
-                                    imageURL:  currentImageURL,
-                                    imageName: currentImageName,
-                                };
-
-                                if (editingIndex !== null) {
-                                    colorsData[editingIndex] = entry;
-                                } else {
-                                    colorsData.push(entry);
-                                }
-
-                                cancelForm();
-                                renderColorsList();
-                                syncField();
-                            };
-                            // ── مزامنة الحقل المخفي  وازالة الصور من المصفوفة كي يصبح بالامكان ارسالها لدالة العرض───────────────────────────────────────
-                            function syncField() {
-                                const data = colorsData.map(({ imageFile, imageURL, imageName, ...rest }) => rest);
-                                document.getElementById('colors_data').value = JSON.stringify(data);
-
-                                // إزالة الحقول القديمة للصور
-                                document.querySelectorAll('.ci-file').forEach(el => el.remove());
-
-                                // إضافة حقول جديدة للصور
-                                colorsData.forEach((c, i) => {
-                                    if (!c.imageFile) return;
-                                    const dt = new DataTransfer();
-                                    dt.items.add(c.imageFile);
-                                    const inp = document.createElement('input');
-                                    inp.type = 'file';
-                                    inp.name = `color_image_${i}`;
-                                    inp.className = 'ci-file';
-                                    inp.style.display = 'none';
-                                    inp.files = dt.files;
-                                    form.appendChild(inp);
-                                });
-                            }
-                            // ── عرض قائمة الألوان المحفوظة ────────────────────────────────────
-                            // #change-later شيل التنسيقات من هون  ونسق بجوك بملف التنسيقات
-                            function renderColorsList() {
-                                const el = document.getElementById('colors-list');
-                                el.innerHTML = colorsData.map((c, i) => `
-                                    <div class="cv-card ">
-                                        <div class="cv-header">
-                                            <img src="${c.imageURL}" alt="${c.color}"
-                                                style="width:34px; height:34px; border-radius:50%; object-fit:cover; border:1px solid #ddd; flex-shrink:0;">
-                                            <span>${c.color}</span>
-                                            <span class="cv-badge ${c.available ? 'cv-yes' : 'cv-no'}">
-                                                ${c.available ? 'متوفر' : 'غير متوفر'}
-                                            </span>
-                                            
-                                        </div>
-                                        <div style="font-size:13px; font-weight:600; color:#555; margin-bottom:6px;">المقاسات:</div>
-                                        <div class="cv-sizes">
-                                            ${c.sizes.length
-                                                ? c.sizes.map(s => `<span class="cv-chip ${s.available ? '' : 'off'}">${s.size}</span>`).join('')
-                                                : '<span style="color:#aaa; font-size:13px;">مقاس موحد</span>'}
-                                        </div>
-                                        <div class="cv-actions">
-                                            <button type="button" class="btn-cv-edit" onclick="openEditForm(${i})">تعديل</button>
-                                            <button type="button" class="btn-cv-del"  onclick="deleteColor(${i})">حذف</button>
-                                        </div>
-                                    </div>`).join('');
-                            }
-                            // ── حذف لون ──────────────────────────────────────────────────
-                            window.deleteColor = function (i) {
-                                colorsData.splice(i, 1);
-                                renderColorsList();
-                                syncField(); 
-                            };
-                            // ──  منع السلوك الافتراضي لزر انتر في حقل اسم اللون ───────────────────────────────────────  
-                            document.getElementById('nc-color').addEventListener('keydown', function (e) {
-                                if (e.key === 'Enter') { e.preventDefault();}
-                            });
-                            // ──  منع السلوك الافتراضي لزر انتر في حقل المقاس ───────────────────────────────────────
-                            document.getElementById('nc-size-input').addEventListener('keydown', function (e) {
-                                if (e.key === 'Enter') { e.preventDefault(); addSizeToNew(); }
-                            });
-                            // ── مسح خطأ الاسم فور الكتابة ────────────────────────────────
-                            document.getElementById('nc-color').addEventListener('input', function () {
-                                if (this.value.trim()) {
-                                    this.style.borderColor = '#ddd';
-                                    document.getElementById('err-color').style.display = 'none';
-                                }
-                            });
-                            // #change-later ضعها بمكان مناسب
-                            const form = document.getElementById("add_product_form");
-                            form.addEventListener("submit", (event) => {
-                                syncField();
-                                if (!colorsData || colorsData.length === 0) {
-                                    event.preventDefault();
-                                    showToast('failed-toast', 'يرجى اضافة الوان للمنتج اولا!');
-                                    return;
-                                }
-                            });
-                        });
-                        
-                    </script>
-
-
                     
                 </div>
             </div>
@@ -735,10 +482,7 @@
     {% include "common/toast.html" %}
     <script src="{% static 'js/main.js' %}"></script>
     <script src="{% static 'js/store/add_product.js' %}"></script>
-    
-    
-
-    
-    
+    <script src="{% static 'js/store/product_pricing.js' %}"></script>
+    <script src="{% static 'js/store/product_colors.js' %}"></script>
 </body>
 </html>
