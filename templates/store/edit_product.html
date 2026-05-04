@@ -37,14 +37,29 @@
         {% else %}
             <p>لا توجد صور للمنتج.</p>
         {% endif %}                   
+        
+        {% if product.colors.all  %}
+            {% for color in product.colors.all %}
+                <p>  اللون {{color.color}} </p>
+                <img src="{{ color.image.url }}"  width="100" height="100">
+                {% if color.sizes.all %}
+                    {% for size in color.sizes.all %}
+                    <p> المقاس: {{size.size}} </p>
+                    {% endfor %}
+                {% else %}
+                    لايوجد مقاسات لهذا اللون
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            لايوجد الوان لهذا المنتج
+        {% endif %}
 
-            {% comment %} قسم المعلومات الأساسية [name, description, type, gender , upload_at] {% endcomment %}
-            {% comment %} قسم الصور [thumbnail_img] {% endcomment %}
-            {% comment %} قسم التسعير والعروض [purchase_price, price, offer, offer_price , free_delivery] {% endcomment %}
-            {% comment %} قسم المقاسات والمتغيرات [has_sizes] {% endcomment %}
-            {% comment %} الي تحت بصفحة التعديل فقط {% endcomment %}
-            {% comment %} قسم المخزون والطلبات [max_quantity_per_order, total_sales] {% endcomment %}
-            {% comment %} قسم حالة المنتج والمراجعة [show, status, rejected_cause , upload_at] {% endcomment %}
+        {% comment %} قسم المعلومات الأساسية [name, description, type, gender , upload_at] {% endcomment %}
+        {% comment %} قسم الصور [thumbnail_img] {% endcomment %}
+        {% comment %} قسم التسعير والعروض [purchase_price, price, offer, offer_price , free_delivery] {% endcomment %}
+        {% comment %} قسم المقاسات والمتغيرات [has_sizes] {% endcomment %}
+        {% comment %} قسم المخزون والطلبات [max_quantity_per_order, total_sales] {% endcomment %}
+        {% comment %} قسم حالة المنتج والمراجعة [show, status, rejected_cause , upload_at] {% endcomment %}
 
     </div>
 

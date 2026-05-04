@@ -63,6 +63,8 @@ class Store(models.Model):
         verbose_name = 'متجر'
         verbose_name_plural = 'المتاجر'
 
+#change-later اضافة خيار التحقق من الطلبات للمتجر اذا مفعل يتم التواصل مع الزبون للتحقق من الطلب والا يصل الطلب مباشرة للبائع
+
 class Vendor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, verbose_name='الاسم الثنائي', help_text='قم بإدخال اسمك الثنائي (الاسم الأول والاسم الأخير)')

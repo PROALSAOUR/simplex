@@ -6,8 +6,9 @@ from store.forms import ProductRegisterForm
 from django.http import JsonResponse
 from django.contrib import messages
 from store.validators import validate_image_file
-from .models import Product, ProductImages
+from .models import *
 from django.db import transaction
+from Project.utils import compress_image
 
 @login_required(login_url='accounts:log_in')
 @vendor_only
@@ -47,7 +48,6 @@ def add_product(request):
                 image_name = item.get("name")
                 priority = item.get("index")
                 image_file = images_map.get(image_name)
-                
                 if not image_file:  # تخطي إذا لم يتم العثور على الملف
                     continue 
                 
@@ -59,7 +59,41 @@ def add_product(request):
                     image=image_file,
                     priority=priority
                 )
-            
+
+            # ── حفظ الألوان والمقاسات ──────────────────────────────
+            colors_data = request.POST.get("colors_data")
+            if colors_data:
+                try:
+                    colors_list = json.loads(colors_data)
+                except (json.JSONDecodeError, ValueError):
+                    colors_list = []
+
+                for i, color_item in enumerate(colors_list):
+                    image_file = request.FILES.get(f"color_image_{i}")
+                    # ضغط الصورة إذا كانت موجودة
+                    compressed_image = compress_image(image_file) if image_file else None
+                    
+                    color_obj = ProductColor.objects.create(
+                        product=product,
+                        color=color_item.get("color", ""),
+                        available=color_item.get("available", True),
+                        image=compressed_image
+                    )
+
+                    sizes_list = color_item.get("sizes", [])
+
+                    #  المنتج دون مقاسات 
+                    #  → لا تضف مقاسات للون حيث ان المقاس موحد 
+                    if not sizes_list:
+                        continue
+                    else: # المنتج محددا مع مقاسات والمستخدم ضايف للألوان مقاسات
+                        for size_item in sizes_list:
+                            ProductSize.objects.create(
+                                product_color=color_obj,
+                                size=size_item.get("size", ""),
+                                available=size_item.get("available", True)
+                            )
+
             messages.success(request, "تمت إضافة المنتج بنجاح")
             return redirect('store:show_products')
         else:

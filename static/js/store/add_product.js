@@ -104,6 +104,8 @@ document.addEventListener("DOMContentLoaded", function () {
             input.type = "file";
             input.name = "images";
             input.classList.add("dynamic-file");
+            input.style.display = "none";
+            input.tabIndex = -1;
             input.files = dt.files;
             form.appendChild(input);
         });
@@ -348,6 +350,7 @@ document.addEventListener("DOMContentLoaded", function () {
         renderImages();
     }
 
+    // حولها لدالة جلوبال #change-later
     function compressImage(file, uploadKey) {
         return new Promise((resolve) => {
             const img = new Image();
@@ -430,7 +433,15 @@ document.addEventListener("DOMContentLoaded", function () {
         bindDragSort();
 
         if (form) {
-            form.addEventListener("submit", syncFilesToForm);
+            form.addEventListener("submit", (event) => {
+                if (!uploadedFiles || uploadedFiles.length === 0) {
+                    event.preventDefault();
+                    showToast('failed-toast', 'يرجى اضافة صور للمنتج اولا!');
+                    return;
+                }
+                // #change-later تحقق من رفع الوان ايضا
+                syncFilesToForm();
+            });
         }
     }
     init();

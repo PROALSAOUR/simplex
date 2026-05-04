@@ -18,7 +18,6 @@ class Product(models.Model):
     total_sales = models.PositiveIntegerField(default=0 , verbose_name="عدد المبيعات", help_text="اجمالي عدد مرات بيع المنتج")
     status = models.CharField(verbose_name='حالة المنتج', max_length=20, choices=[('checking', 'جاري المراجعة'), ('approved', 'مقبول'), ('rejected', 'مرفوض')], default='checking')
     rejected_cause = models.TextField(verbose_name='سبب الرفض', blank=True, null=True, help_text='في حال تم رفض المنتج،سيتم عرض سبب الرفض هنا')
-    has_sizes = models.BooleanField(default=True, verbose_name='المنتج له مقاسات', help_text='قم بالتحديد ان كان المنتج الخاص بك له عدة مقاسات')
     type = models.CharField(verbose_name='نوع المنتج', choices=[('clothes','ملابس'),('watches','ساعات'), ('Accessories','اكسسوارات')] , default='clothes', help_text="قم بإختيار نوع المنتج الخاص بك")
     gender = models.CharField( verbose_name="الجنس المستهدف", max_length=20, choices=[('male', 'رجالي'), ('female', 'نسائي'), ('unisex', 'كلا الجنسين')], default='unisex', help_text="حدد إن كان المنتج موجّه للرجال أو النساء أو مناسب لكلا الجنسين")
     max_quantity_per_order = models.PositiveIntegerField(default=10 , verbose_name="الكمية القصوى للطلب", help_text="حدد الحد الأقصى لعدد القطع التي يمكن للزبون طلبها من هذا المنتج في طلب واحد")

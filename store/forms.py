@@ -1,13 +1,14 @@
 from django import forms
 from .validators import validate_image_file
-from .models import Product
+from .models import *
 from django.core.exceptions import ValidationError
+from Project.utils import compress_image
 
 
 class ProductRegisterForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['name', 'thumbnail_img', 'description', 'show', 'purchase_price', 'price', 'offer', 'offer_price', 'free_delivery', 'has_sizes', 'type', 'gender']
+        fields = ['name', 'thumbnail_img', 'description', 'show', 'purchase_price', 'price', 'offer', 'offer_price', 'free_delivery', 'type', 'gender']
         
     def __init__(self, *args, **kwargs): # استقبال كائن المتجر عند استدعاء الفورم
         # استقبل المتجر من الـ view
@@ -33,11 +34,13 @@ class ProductRegisterForm(forms.ModelForm):
         
     def clean_thumbnail_img(self):
         image = self.cleaned_data.get("thumbnail_img")
-        if image:
-            is_valid = validate_image_file(image)
-            if not is_valid:
-                raise ValidationError("الصورة غير صالحة أو حجمها كبير")
-        return image
+        if not image:
+            return image 
+
+        compressed_image = compress_image(image)
+        if not validate_image_file(compressed_image):
+            raise ValidationError("الصورة غير صالحة أو حجمها كبير")
+        return compressed_image
         
     def save(self, commit=True):
         product = Product.objects.create(
@@ -51,7 +54,6 @@ class ProductRegisterForm(forms.ModelForm):
             offer=self.cleaned_data['offer'],
             offer_price=self.cleaned_data['offer_price'],
             free_delivery=self.cleaned_data['free_delivery'],
-            has_sizes=self.cleaned_data['has_sizes'],
             type=self.cleaned_data['type'],
             gender=self.cleaned_data['gender'],
         )
