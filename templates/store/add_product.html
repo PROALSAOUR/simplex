@@ -122,6 +122,7 @@
                 </style>
 
                 <input type="hidden" name="images_order" id="images_order"> {% comment %}  حقل مخفي للترتيب {% endcomment %}
+                <input type="hidden" name="deleted_images" id="deleted_images"> {% comment %}  حقل مخفي للصور المحذوفة {% endcomment %}
                 <div class="upload-container">
                     <h5>صور المنتج</h5>
                     <div class="upload-box" id="uploadBox">
@@ -490,7 +491,7 @@
     
     {% include "common/toast.html" %}
     <script src="{% static 'js/main.js' %}"></script>
-    <script src="{% static 'js/store/add_product.js' %}"></script>
+    <script src="{% static 'js/store/product_images.js' %}"></script>
     <script src="{% static 'js/store/product_pricing.js' %}"></script>
     <script src="{% static 'js/store/product_colors.js' %}"></script>
 </body>

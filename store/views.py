@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.db import transaction , models as db_models
 from django.core.paginator import Paginator
 import json
+import hashlib
 
 from Project.utils import compress_image
 from accounts.decorators import vendor_only , advanced_permission_required
@@ -297,6 +298,61 @@ def edit_product(request, pid):
                 else:
                     product.colors.all().delete()
 
+            # Handle images
+            deleted_images = request.POST.get("deleted_images")
+            if deleted_images:
+                try:
+                    deleted_ids = json.loads(deleted_images)
+                    ProductImages.objects.filter(id__in=deleted_ids, product=product).delete()
+                except (json.JSONDecodeError, ValueError):
+                    deleted_ids = []
+            else:
+                deleted_ids = []
+
+            order_data = request.POST.get("images_order")
+            if order_data:
+                try:
+                    order_list = json.loads(order_data)
+                    images = request.FILES.getlist("images")
+                    images_map = {img.name: img for img in images}
+
+                    existing_hashes = set()
+                    for existing in product.images.all():
+                        try:
+                            existing.image.open()
+                            file_bytes = existing.image.read()
+                            existing_hashes.add(hashlib.md5(file_bytes).hexdigest())
+                            existing.image.close()
+                        except Exception:
+                            pass
+
+                    for item in order_list:
+                        image_id = item.get("id")
+                        image_name = item.get("name")
+                        priority = item.get("index")
+                        is_existing = item.get("isExisting", False)
+
+                        if is_existing and image_id:
+                            # Update priority for existing image
+                            ProductImages.objects.filter(id=image_id, product=product).update(priority=priority)
+                        elif not is_existing:
+                            # Add new image if not duplicate by content
+                            image_file = images_map.get(image_name)
+                            if image_file and validate_image_file(image_file):
+                                image_file.seek(0)
+                                uploaded_hash = hashlib.md5(image_file.read()).hexdigest()
+                                image_file.seek(0)
+                                if uploaded_hash in existing_hashes:
+                                    continue
+                                compressed_image = compress_image(image_file)
+                                ProductImages.objects.create(
+                                    product=product,
+                                    image=compressed_image,
+                                    priority=priority
+                                )
+                except (json.JSONDecodeError, ValueError):
+                    pass
+
             messages.success(request, "تم تعديل المنتج بنجاح")
             return redirect('store:edit_product', pid=product.id)
 
@@ -321,17 +377,33 @@ def edit_product(request, pid):
         })
 
     colors_data_json = json.dumps(colors_data, ensure_ascii=False)
+    
+    images_data = []
+    for image in product_images:
+        images_data.append({
+            'id': image.id,
+            'url': image.image.url,
+            'name': image.image.name.split('/')[-1],
+            'size': image.image.size,
+            'priority': image.priority,
+        })
+
+    images_data_json = json.dumps(images_data, ensure_ascii=False)
     context = {
         'product': product,
         'edit_form': form,
         'product_images': product_images,
         'colors_data_json': colors_data_json,
+        'images_data_json': images_data_json,
     }
     return render(request, 'store/edit_product.html', context)
 
 def view_product(request, pid):
     product = get_object_or_404(Product, id=pid)
+    product_images = product.images.all()
+
     context = {
         'product': product,
+        'product_images': product_images,
     }
     return render(request, 'store/view_product.html', context)

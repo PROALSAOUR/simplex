@@ -6,6 +6,9 @@ from Project.utils import compress_image
 
 
 class ProductRegisterForm(forms.ModelForm):
+    images_order = forms.CharField(required=False, widget=forms.HiddenInput())
+    deleted_images = forms.CharField(required=False, widget=forms.HiddenInput())
+    
     class Meta:
         model = Product
         fields = ['name', 'thumbnail_img', 'description', 'is_visible', 'purchase_price', 'price', 'offer', 'offer_price', 'free_delivery', 'type', 'gender', 'max_quantity_per_order']

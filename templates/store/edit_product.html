@@ -59,10 +59,13 @@
                 </div>
             {% endif %}
             <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                <p>تاريخ الإنشاء:{{  product.upload_at }}</p> #change-later  نسق التاريخ هنا 
-            </div>
+                <p>
+                    تاريخ الإنشاء:
+                    {{ product.upload_at|date:"Y/n/j" }}
+                    الساعة {{ product.upload_at|time:"g:iA" }}
+                </p>          
+          </div>
         </div>
-
         <form method="POST" id="edit_product_form" enctype="multipart/form-data">
             {% csrf_token %}    
             {% if edit_form.non_field_errors %}
@@ -138,12 +141,23 @@
                     <label for="id_thumbnail_img" id="custom_upload_box">
                         <span>اضغط لاختيار صورة</span>
                     </label>
-                    {{  edit_form.thumbnail_img }}
+                    <div class="thumbnail-widget-wrapper">
+                        {{ edit_form.thumbnail_img }}
+                    </div>
                     <!-- المعاينة -->
                     <div id="thumbnail_preview_box" style="display:none; margin-top:15px;">
-                        <p>معاينة الصورة</p>
-                        <img id="thumbnail_preview"
-                            style="width:200px; border-radius:10px; display:block; margin-bottom:10px;">
+                        <div id="thumbnail_preview_panels" style="display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start;">
+                            <div id="thumbnail_preview_current_box" style="display:none; width:220px;">
+                                <p>الصورة الحالية</p>
+                                <img id="thumbnail_current_preview"
+                                    style="width:100%; border-radius:10px; display:block; margin-bottom:10px;">
+                            </div>
+                            <div id="thumbnail_preview_new_box" style="display:none; width:220px;">
+                                <p>الصورة الجديدة</p>
+                                <img id="thumbnail_preview"
+                                    style="width:100%; border-radius:10px; display:block; margin-bottom:10px;">
+                            </div>
+                        </div>
                         <button type="button" id="change_image_btn">استبدال الصورة</button>
                     </div>
                     
@@ -154,6 +168,12 @@
                 </div>
                 <style>
                     #id_thumbnail_img{
+                        display:none;
+                    }
+                    .thumbnail-widget-wrapper {
+                        display: none !important;
+                    }
+                    .thumbnail-widget-wrapper input[type=file] {
                         display:none;
                     }
                     #custom_upload_box{
@@ -175,6 +195,7 @@
                 </style>
 
                 <input type="hidden" name="images_order" id="images_order"> {% comment %}  حقل مخفي للترتيب {% endcomment %}
+                <input type="hidden" name="deleted_images" id="deleted_images"> {% comment %}  حقل مخفي للصور المحذوفة {% endcomment %}
                 <div class="upload-container">
                     <h5>صور المنتج</h5>
                     <div class="upload-box" id="uploadBox">
@@ -538,13 +559,17 @@
     <script src="{% static 'js/main.js' %}"></script>
     <script>
         window.SimplexInitialColors = {{ colors_data_json|safe }};
+        window.SimplexInitialImages = {{ images_data_json|safe }};
+        window.SimplexInitialThumbnailUrl = "{% if product.thumbnail_img %}{{ product.thumbnail_img.url|escapejs }}{% else %}{% endif %}";
     </script>
+    <script src="{% static 'js/store/product_images.js' %}"></script>
     <script src="{% static 'js/store/product_colors.js' %}"></script>
     <script src="{% static 'js/store/product_pricing.js' %}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const editForm = document.getElementById('edit_product_form');
             if (editForm) {
+                SimplexImageManager.setForm(editForm);
                 SimplexColorManager.setForm(editForm);
                 SimplexPricingManager.setForm(editForm);
             }
