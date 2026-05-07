@@ -77,12 +77,8 @@ class ProductSize(models.Model):
         return f"{self.product_color.color} - {self.size}"
     
     def save(self, *args, **kwargs):
-        """تقوم هذه الدالة بحفظ مقاس المنتج وفي حال تم تحديده كمتوفر يتم ايضا جعل لون المنتج المرتبط به متوفر"""
+        """تقوم هذه الدالة بحفظ مقاس المنتج دون تغيير حالة توفر اللون الأب تلقائياً."""
         super().save(*args, **kwargs)
-        if self.available:
-            # اجعل اللون الأب متوفر إذا كان هذا المقاس متوفر
-            self.product_color.available = True
-            self.product_color.save(update_fields=['available'])
 
     
     class Meta:

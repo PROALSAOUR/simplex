@@ -37,6 +37,14 @@
     <div class="container">
         <h1>هذه صفحة تعديل منتج </h1>
         {% comment %} #change-later ضيف شرح تحت كل خانة {% endcomment %}
+        <div style="background-color:#e1e1e1; padding:10px 40px; margin-bottom: 15px;">
+            <h3>رابط المعاينة لصفحة البيع</h3>
+            <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                <a href="{% url "store:view_product" product.id %}" >معاينة كما يظهر للزبون</a>
+                {% comment %} #change-later اضف زر لنسخ الرابط واضف شرح {% endcomment %}
+            </div>
+        
+        </div>
         {% comment %} قسم حالة المنتج والمراجعة [ status, rejected_cause , upload_at] {% endcomment %}
         <div style="background-color:#e1e1e1; padding:10px 40px; margin-bottom: 15px;">
             <h3>قسم حالة المنتج</h3>
@@ -528,6 +536,9 @@
     {% include "components/store/dialogs/delete_product_dialog.html" %}
     {% include "common/toast.html" %}
     <script src="{% static 'js/main.js' %}"></script>
+    <script>
+        window.SimplexInitialColors = {{ colors_data_json|safe }};
+    </script>
     <script src="{% static 'js/store/product_colors.js' %}"></script>
     <script src="{% static 'js/store/product_pricing.js' %}"></script>
     <script>

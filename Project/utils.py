@@ -1,7 +1,6 @@
 from PIL import Image
-import io
+import io, os
 from django.core.files.base import ContentFile
-
 
 def compress_image(image_file, quality=85, max_width=1920):
     """
@@ -35,7 +34,8 @@ def compress_image(image_file, quality=85, max_width=1920):
 
     # استخراج اسم الملف الأصلي وتغيير امتداده إلى .jpg
     original_name = getattr(image_file, "name", "image.jpg")
-    file_name = original_name.rsplit(".", 1)[0] + ".jpg"
+    base_name = os.path.basename(original_name)  # ← يأخذ اسم الملف فقط بدون المسار
+    file_name = base_name.rsplit(".", 1)[0] + ".jpg"
     
     return ContentFile(output.read(), name=file_name)
 

@@ -2,6 +2,16 @@
     document.addEventListener('DOMContentLoaded', () => {
         let form = null;
         const colorsData = [];
+        if (Array.isArray(window.SimplexInitialColors) && window.SimplexInitialColors.length) {
+            colorsData.push(...window.SimplexInitialColors.map((item) => ({
+                ...item,
+                available: item.available === true || item.available === 'true' || item.available === '1' || item.available === 1,
+                imageURL: item.imageURL || '',
+                imageName: item.imageName || '',
+                imageFile: null,
+                sizes: Array.isArray(item.sizes) ? item.sizes : [],
+            })));
+        }
         let newColorSizes = [];
         let currentImageFile = null;
         let currentImageURL = null;
@@ -19,6 +29,16 @@
         }
 
         function handleFormSubmit(event) {
+            const editorVisible = document.getElementById('new-color-form')?.style.display === 'block';
+            const hasPendingEdit = editingIndex !== null;
+            if (editorVisible || hasPendingEdit) {
+                const saved = saveColor();
+                if (!saved) {
+                    event.preventDefault();
+                    return;
+                }
+            }
+
             syncField();
             if (!colorsData || colorsData.length === 0) {
                 event.preventDefault();
@@ -304,10 +324,12 @@
             }
 
             if (!valid) {
-                return;
+                return false;
             }
 
+            const existingId = editingIndex !== null ? colorsData[editingIndex]?.id : null;
             const entry = {
+                id: existingId,
                 color: colorName,
                 available: document.getElementById('nc-available')?.checked ?? true,
                 sizes: [...newColorSizes],
@@ -322,9 +344,11 @@
                 colorsData.push(entry);
             }
 
+            editingIndex = null;
             cancelForm();
             renderColorsList();
             syncField();
+            return true;
         }
 
         function deleteColor(i) {
@@ -428,5 +452,9 @@
             saveColor,
             deleteColor,
         };
+
+        if (colorsData.length) {
+            renderColorsList();
+        }
     });
 })();

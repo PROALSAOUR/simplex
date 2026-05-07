@@ -175,10 +175,16 @@ def add_product(request):
                         continue
                     else: # المنتج محددا مع مقاسات والمستخدم ضايف للألوان مقاسات
                         for size_item in sizes_list:
+                            size_available = size_item.get("available", True)
+                            if isinstance(size_available, str):
+                                size_available = size_available.lower() in ['true', '1', 'yes']
+                            else:
+                                size_available = bool(size_available)
+
                             ProductSize.objects.create(
                                 product_color=color_obj,
                                 size=size_item.get("size", ""),
-                                available=size_item.get("available", True)
+                                available=size_available
                             )
 
             messages.success(request, "تمت إضافة المنتج بنجاح")
@@ -236,15 +242,96 @@ def edit_product(request, pid):
     if request.method == "POST":
         form = ProductRegisterForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
-            form.save()
+            product = form.save()
+
+            colors_data = request.POST.get("colors_data")
+            if colors_data is not None:
+                try:
+                    colors_list = json.loads(colors_data)
+                except (json.JSONDecodeError, ValueError):
+                    colors_list = []
+
+                processed_color_ids = []
+                for i, color_item in enumerate(colors_list):
+                    color_id = color_item.get('id')
+                    image_file = request.FILES.get(f"color_image_{i}")
+
+                    color_obj = None
+                    if color_id:
+                        color_obj = ProductColor.objects.filter(id=color_id, product=product).first()
+
+                    if not color_obj:
+                        color_obj = ProductColor(product=product)
+
+                    color_obj.color = color_item.get('color', '')
+                    available_value = color_item.get('available', True)
+                    if isinstance(available_value, str):
+                        color_obj.available = available_value.lower() in ['true', '1', 'yes']
+                    else:
+                        color_obj.available = bool(available_value)
+
+                    if image_file:
+                        compressed_image = compress_image(image_file)
+                        if validate_image_file(compressed_image):
+                            color_obj.image = compressed_image
+
+                    color_obj.save()
+                    processed_color_ids.append(color_obj.id)
+
+                    color_obj.sizes.all().delete()
+                    for size_item in color_item.get('sizes', []):
+                        size_available = size_item.get('available', True)
+                        if isinstance(size_available, str):
+                            size_available = size_available.lower() in ['true', '1', 'yes']
+                        else:
+                            size_available = bool(size_available)
+
+                        ProductSize.objects.create(
+                            product_color=color_obj,
+                            size=size_item.get('size', ''),
+                            available=size_available,
+                        )
+
+                if processed_color_ids:
+                    product.colors.exclude(id__in=processed_color_ids).delete()
+                else:
+                    product.colors.all().delete()
+
             messages.success(request, "تم تعديل المنتج بنجاح")
+            return redirect('store:edit_product', pid=product.id)
 
     else:
         form = ProductRegisterForm(instance=product)
     
+    colors_data = []
+    for color in product.colors.prefetch_related('sizes').all():
+        colors_data.append({
+            'id': color.id,
+            'color': color.color,
+            'available': color.available,
+            'imageURL': color.image.url if color.image else '',
+            'imageName': color.image.name.split('/')[-1] if color.image else '',
+            'sizes': [
+                {
+                    'size': size.size,
+                    'available': size.available,
+                }
+                for size in color.sizes.all()
+            ],
+        })
+
+    colors_data_json = json.dumps(colors_data, ensure_ascii=False)
     context = {
         'product': product,
         'edit_form': form,
         'product_images': product_images,
+        'colors_data_json': colors_data_json,
     }
     return render(request, 'store/edit_product.html', context)
+
+def view_product(request, pid):
+    product = get_object_or_404(Product, id=pid)
+    context = {
+        'product': product,
+    }
+    return render(request, 'store/view_product.html', context)

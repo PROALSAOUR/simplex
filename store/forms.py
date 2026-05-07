@@ -37,7 +37,7 @@ class ProductRegisterForm(forms.ModelForm):
         image = self.cleaned_data.get("thumbnail_img")
         
         # إذا ما رفع صورة جديدة → خلي القديمة كما هي
-        if not image:
+        if not image or isinstance(image, str):
             return self.instance.thumbnail_img
 
         # إذا رفع صورة جديدة → اضغطها
