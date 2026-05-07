@@ -8,7 +8,7 @@ from Project.utils import compress_image
 class ProductRegisterForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['name', 'thumbnail_img', 'description', 'show', 'purchase_price', 'price', 'offer', 'offer_price', 'free_delivery', 'type', 'gender']
+        fields = ['name', 'thumbnail_img', 'description', 'is_visible', 'purchase_price', 'price', 'offer', 'offer_price', 'free_delivery', 'type', 'gender', 'max_quantity_per_order']
         
     def __init__(self, *args, **kwargs): # استقبال كائن المتجر عند استدعاء الفورم
         # استقبل المتجر من الـ view
@@ -16,6 +16,7 @@ class ProductRegisterForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # السعر بعد التخفيض ليس مطلوبا إلا عندما يتم تنشيط خيار التخفيض
         self.fields['offer_price'].required = False
+        self.fields['max_quantity_per_order'].required = False
         self.fields['offer_price'].widget.attrs['placeholder'] = 'إذا كان هناك تخفيض، أدخل السعر بعد التخفيض'
         
     def clean_offer_price(self):
@@ -34,28 +35,30 @@ class ProductRegisterForm(forms.ModelForm):
         
     def clean_thumbnail_img(self):
         image = self.cleaned_data.get("thumbnail_img")
+        
+        # إذا ما رفع صورة جديدة → خلي القديمة كما هي
         if not image:
-            return image 
+            return self.instance.thumbnail_img
 
+        # إذا رفع صورة جديدة → اضغطها
         compressed_image = compress_image(image)
+        
         if not validate_image_file(compressed_image):
             raise ValidationError("الصورة غير صالحة أو حجمها كبير")
+        
         return compressed_image
         
     def save(self, commit=True):
-        product = Product.objects.create(
-            store = self.store,
-            name=self.cleaned_data['name'],
-            thumbnail_img=self.cleaned_data['thumbnail_img'],
-            description=self.cleaned_data['description'],
-            show=self.cleaned_data['show'],
-            purchase_price=self.cleaned_data['purchase_price'],
-            price=self.cleaned_data['price'],
-            offer=self.cleaned_data['offer'],
-            offer_price=self.cleaned_data['offer_price'],
-            free_delivery=self.cleaned_data['free_delivery'],
-            type=self.cleaned_data['type'],
-            gender=self.cleaned_data['gender'],
-        )
+        # خذ الكائن (سواء جديد أو للتعديل)
+        product = super().save(commit=False)
+
+        # إذا كان كائن جديد (إنشاء)
+        if not product.pk:
+            product.store = self.store
+
+        # حفظ الكائن
+        if commit:
+            product.save()
+
         return product
         

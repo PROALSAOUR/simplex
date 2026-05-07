@@ -1,11 +1,17 @@
 {% load static %}
+{% load l10n %}
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
+        @font-face {
+            font-family: 'EnglishNumbers';
+            src: local('Arial');
+            unicode-range: U+0030-0039, U+002E, U+002C; /* أرقام 0-9 والنقطة والفاصلة */
+        }
         .container {
             text-align: center;
             direction: rtl;
@@ -13,53 +19,509 @@
             height: 100vh;
             font-size: 24px;
         }
+        * {
+            font-variant-numeric: normal;
+        }
+        input[type="number"],
+        input[type="text"] {
+            font-family: 'EnglishNumbers', sans-serif !important;
+        }
+
+        :lang(en) input[type="number"] {
+            direction: ltr;
+            text-align: right;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <p>هذه صفحة تعديل منتج </p>
-        <img src="{{ product.thumbnail_img.url }}"  width="200" height="200">
-        <p> اسم المنتج <span>{{ product.name }}</span></p>
-        <p> سعر المنتج <span>{{ product.price }}</span></p>
-        <p> تخفيض على المنتج <span>{{ product.offer }}</span></p>
-        <p> سعر التخفيض المنتج <span>{{ product.offer_price }}</span></p>
-        {% if USER_LEVEL in ADVANCED_PERMISSIONS %}
-            <button type="button" onclick="openDeleteProductDialog(this)"  data-id="{{ product.id }}" data-name="{{ product.name }}" data-redirect="{% url "store:show_products" %}" >حذف</button>                                
-        {% endif %}    
-        
-        {% if product_images %} 
-            {% for image in product_images %}
-                <div>
-                    <p>ترتيب الصورة: {{ image.priority }}</p>
-                    <img src="{{ image.image.url }}" alt="{{ image.product.name }}" width="200" height="200">
+        <h1>هذه صفحة تعديل منتج </h1>
+        {% comment %} #change-later ضيف شرح تحت كل خانة {% endcomment %}
+        {% comment %} قسم حالة المنتج والمراجعة [ status, rejected_cause , upload_at] {% endcomment %}
+        <div style="background-color:#e1e1e1; padding:10px 40px; margin-bottom: 15px;">
+            <h3>قسم حالة المنتج</h3>
+            <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                <p> الحالة:{{  product.get_status_display }}</p> 
+                <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  product.status.help_text }}</p> #change-later اعرض نص المساعدة هنا 
+            </div>
+            {% if product.rejected_cause %}
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <p> سبب الرفض:{{  product.rejected_cause }}</p> 
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  product.rejected_cause.help_text }}</p> #change-later اعرض نص المساعدة هنا 
                 </div>
-            {% endfor %}
-        {% else %}
-            <p>لا توجد صور للمنتج.</p>
-        {% endif %}                   
-        
-        {% if product.colors.all  %}
-            {% for color in product.colors.all %}
-                <p>  اللون {{color.color}} </p>
-                <img src="{{ color.image.url }}"  width="100" height="100">
-                {% if color.sizes.all %}
-                    {% for size in color.sizes.all %}
-                    <p> المقاس: {{size.size}} </p>
-                    {% endfor %}
-                {% else %}
-                    لايوجد مقاسات لهذا اللون
-                {% endif %}
-            {% endfor %}
-        {% else %}
-            لايوجد الوان لهذا المنتج
-        {% endif %}
+            {% endif %}
+            <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                <p>تاريخ الإنشاء:{{  product.upload_at }}</p> #change-later  نسق التاريخ هنا 
+            </div>
+        </div>
 
-        {% comment %} قسم المعلومات الأساسية [name, description, type, gender , upload_at] {% endcomment %}
-        {% comment %} قسم الصور [thumbnail_img] {% endcomment %}
-        {% comment %} قسم التسعير والعروض [purchase_price, price, offer, offer_price , free_delivery] {% endcomment %}
-        {% comment %} قسم المقاسات والمتغيرات [has_sizes] {% endcomment %}
-        {% comment %} قسم المخزون والطلبات [max_quantity_per_order, total_sales] {% endcomment %}
-        {% comment %} قسم حالة المنتج والمراجعة [show, status, rejected_cause , upload_at] {% endcomment %}
+        <form method="POST" id="edit_product_form" enctype="multipart/form-data">
+            {% csrf_token %}    
+            {% if edit_form.non_field_errors %}
+                <div style="padding:10px; background-color:#f8d7da; color:#721c24; margin-bottom: 15px; border-radius:8px;">
+                    {{ edit_form.non_field_errors }}
+                </div>
+            {% endif %}
+        
+            {% comment %} قسم المعلومات الأساسية [name, description, type, gender, is_visible] {% endcomment %}
+            <div style="background-color:#e1e1e1; padding:10px 40px; margin-bottom: 15px;">
+                <h3>قسم المعلومات الأساسية</h3>
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  edit_form.name.label }}</label> 
+                    {{  edit_form.name }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.name.help_text }}</p>
+                    {% if  edit_form.name.errors %}
+                    <div style="padding:5px; background-color:red; color:white;">{{  edit_form.name.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  edit_form.description.label }}</label> 
+                    {{  edit_form.description }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.description.help_text }}</p>
+                    {% if  edit_form.description.errors %}
+                    <div style="padding:5px; background-color:red; color:white;">{{  edit_form.description.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  edit_form.type.label }}</label> 
+                    {{  edit_form.type }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.type.help_text }}</p>
+                    {% if  edit_form.type.errors %}
+                    <div style="padding:5px; background-color:red; color:white;">{{  edit_form.type.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  edit_form.gender.label }}</label> 
+                    {{  edit_form.gender }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.gender.help_text }}</p>
+                    {% if  edit_form.gender.errors %}
+                    <div style="padding:5px; background-color:red; color:white;">{{  edit_form.gender.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  edit_form.is_visible.label }}</label> 
+                    {{  edit_form.is_visible }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.is_visible.help_text }}</p>
+                    {% if  edit_form.is_visible.errors %}
+                    <div style="padding:5px; background-color:red; color:white;">{{  edit_form.is_visible.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  edit_form.max_quantity_per_order.label }}</label> 
+                    {{  edit_form.max_quantity_per_order }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.max_quantity_per_order.help_text }}</p>
+                    {% if  edit_form.max_quantity_per_order.errors %}
+                    <div style="padding:5px; background-color:red; color:white;">{{  edit_form.max_quantity_per_order.errors }}</div>
+                    {% endif %}
+                </div>
+
+            </div>
+                
+            {% comment %} قسم الصور [thumbnail_img] {% endcomment %}
+            <div style="background-color:#e1e1e1; padding:10px 40px; margin-bottom: 15px;">
+                <h3>قسم الصور </h3>
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <p> صورة المنتج الرئيسية </p>
+                    <label for="id_thumbnail_img" id="custom_upload_box">
+                        <span>اضغط لاختيار صورة</span>
+                    </label>
+                    {{  edit_form.thumbnail_img }}
+                    <!-- المعاينة -->
+                    <div id="thumbnail_preview_box" style="display:none; margin-top:15px;">
+                        <p>معاينة الصورة</p>
+                        <img id="thumbnail_preview"
+                            style="width:200px; border-radius:10px; display:block; margin-bottom:10px;">
+                        <button type="button" id="change_image_btn">استبدال الصورة</button>
+                    </div>
+                    
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.thumbnail_img.help_text }}</p>
+                    {% if  edit_form.thumbnail_img.errors %}
+                    <div style="padding:5px; background-color:red; color:white;">{{  edit_form.thumbnail_img.errors }}</div>
+                    {% endif %}
+                </div>
+                <style>
+                    #id_thumbnail_img{
+                        display:none;
+                    }
+                    #custom_upload_box{
+                        display:flex;
+                        justify-content:center;
+                        align-items:center;
+                        height:100px;
+                        width:90%;
+                        border:3px dashed #888;
+                        border-radius:15px;
+                        background-color:white;
+                        cursor:pointer;
+                        font-size:20px;
+                        margin:auto;
+                    }
+                    #custom_upload_box:hover{
+                        background-color:#f5f5f5;
+                    }
+                </style>
+
+                <input type="hidden" name="images_order" id="images_order"> {% comment %}  حقل مخفي للترتيب {% endcomment %}
+                <div class="upload-container">
+                    <h5>صور المنتج</h5>
+                    <div class="upload-box" id="uploadBox">
+                        <input type="file" id="fileInput" multiple accept="image/*">
+                        <h2>اسحب الصور هنا</h2>
+                        <p>أو اضغط للإضافة</p>
+                    </div>
+                    <div class="images-list" id="imagesList"></div>
+                </div>
+                <style>
+
+                    .upload-container{
+                        max-width:900px;
+                        margin:auto;
+                    }
+
+                    /* مربع الرفع الرئيسي */
+
+                    .upload-box{
+                        border:3px dashed #999;
+                        background:white;
+                        padding:50px 20px;
+                        text-align:center;
+                        border-radius:12px;
+                        cursor:pointer;
+                        transition:.2s;
+                    }
+
+                    .upload-box.dragover{
+                        border-color:#2196f3;
+                        background:#eef7ff;
+                    }
+
+                    .upload-box.hidden{
+                        display:none;
+                    }
+
+                    .upload-box input{
+                        display:none;
+                    }
+
+                    /* القائمة */
+
+                    .images-list{
+                        margin-top:20px;
+                        display:flex;
+                        flex-direction:column;
+                        gap:12px;
+                    }
+
+                    /* عنصر صورة */
+
+                    .image-item{
+                        background:white;
+                        border-radius:12px;
+                        padding:10px;
+                        display:flex;
+                        align-items:center;
+                        gap:15px;
+                        border:1px solid #ddd;
+                    }
+
+                    .drag-handle{
+                        cursor:grab;
+                        font-size:24px;
+                        user-select:none;
+                    }
+
+                    .image-number{
+                        width:35px;
+                        text-align:center;
+                        font-size:18px;
+                        font-weight:bold;
+                    }
+
+                    .image-preview{
+                        width:80px;
+                        height:80px;
+                        object-fit:cover;
+                        border-radius:8px;
+                        border:1px solid #ddd;
+                        display:block;
+                        flex-shrink:0;
+                    }
+
+                    .image-info{
+                        flex:1;
+                    }
+
+                    .image-info p{
+                        margin:4px 0;
+                        font-size:14px;
+                    }
+
+                    .remove-btn{
+                        background:red;
+                        color:white;
+                        border:none;
+                        padding:10px 14px;
+                        border-radius:8px;
+                        cursor:pointer;
+                    }
+
+                    /* مربع الإضافة */
+
+                    .mini-upload{
+                        border:2px dashed #bbb;
+                        background:white;
+                        padding:20px;
+                        border-radius:12px;
+                        text-align:center;
+                        cursor:pointer;
+                    }
+
+                    .mini-upload input{
+                        display:none;
+                    }
+
+                    .dragging{
+                        opacity:.5;
+                    }
+
+                </style>
+
+            </div>
+                
+            {% comment %} قسم التسعير والعروض [purchase_price, price, offer, offer_price , free_delivery] {% endcomment %}
+            <div style="background-color:#e1e1e1; padding:10px 40px; margin-bottom: 15px;">
+                <h3>قسم التسعير </h3>
+                <!-- سعر الشراء -->
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  edit_form.purchase_price.label }}</label> 
+                    {{ edit_form.purchase_price }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.purchase_price.help_text }}</p>
+                    {% if  edit_form.purchase_price.errors %}
+                    <div style="padding:5px; background-color:red; color:white;">{{  edit_form.purchase_price.errors }}</div>
+                    {% endif %}
+                </div>  
+                <!-- السعر -->     
+                <div id="price_field" style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  edit_form.price.label }}</label> 
+                    {{  edit_form.price }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.price.help_text }}</p>
+                    {% if  edit_form.price.errors %}
+                        <div style="padding:5px; background-color:red; color:white;">{{  edit_form.price.errors }}</div>
+                    {% endif %}         
+                </div>
+                <!-- خيار التخفيض --> 
+                <div id="offer_checkbox_field" style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  edit_form.offer.label }}</label> 
+                    {{  edit_form.offer }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.offer.help_text }}</p>
+                    {% if  edit_form.offer.errors %}
+                        <div style="padding:5px; background-color:red; color:white;">{{  edit_form.offer.errors }}</div>
+                    {% endif %}
+                </div>
+                <!-- سعر التخفيض -->
+                <div id="offer_price_field" style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  edit_form.offer_price.label }}</label> 
+                    {{  edit_form.offer_price }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.offer_price.help_text }}</p>
+                    <span id="offer_percentage" >نسبة التخفيض 20%</span>
+                    {% if  edit_form.offer_price.errors %}
+                        <div style="padding:5px; background-color:red; color:white;">{{  edit_form.offer_price.errors }}</div>
+                    {% endif %}
+                </div>
+                <!-- توصيل مجاني -->
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  edit_form.free_delivery.label }}</label> 
+                    {{  edit_form.free_delivery }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.free_delivery.help_text }}</p>
+                    {% if  edit_form.free_delivery.errors %}
+                        <div style="padding:5px; background-color:red; color:white;">{{  edit_form.free_delivery.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% comment %} قسم المقاسات والألوان {% endcomment %}
+            <div style="background-color:#e1e1e1; padding:10px 40px; margin-bottom:15px;">
+                <h3>قسم الألوان والمقاسات</h3>
+                <input type="hidden" name="colors_data" id="colors_data"> {% comment %}  حقل مخفي لبيانات الألوان {% endcomment %}
+                
+                <div id="color_form_container">
+                    <!-- قائمة الألوان المضافة -->
+                    <div id="colors-list" style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;">
+                        <!-- #change-later
+                         مثال لبطاقات الالوان التي سوف يتم انشائها بجافاسكريبت لاحقا كي تنسقها عند انشاء كود الواجهة الامامية
+                        <div class="cv-card">
+                            <div class="cv-header">
+                                <img src=""
+                                    style="width:34px; height:34px; border-radius:50%; object-fit:cover; border:1px solid #ddd; flex-shrink:0;"
+                                >
+                                <span>لون احمر</span> {% comment %} اسم اللون {% endcomment %}
+                                <span class="">  {% comment %} حالة توفر اللون {% endcomment %}
+                                    متوفر
+                                </span>
+                            </div>
+                            <div style="font-size:13px; font-weight:600; color:#555; margin-bottom:6px;">المقاسات:</div>
+                            <div class="cv-sizes">  {% comment %} قائمة مقاسات اللون {% endcomment %}
+                                <span class="cv-chip ">small</span>
+                                <span class="cv-chip ">medium</span>
+                                <span class="cv-chip ">large</span>
+                            </div>
+                            <div class="cv-actions">
+                                <button type="button" class="btn-cv-edit" onclick="openEditForm(${i})">تعديل</button>
+                                <button type="button" class="btn-cv-del"  onclick="deleteColor(${i})">حذف</button>
+                            </div>
+                        </div>
+                        -->
+                    </div>
+
+                    <!-- نموذج إضافة لون -->
+                    <div id="new-color-form" style="display:none;">  
+                        <div style="background:white; border:2px dashed #1d9e75; border-radius:12px; padding:1.25rem; margin-bottom:10px;">
+                            <!-- قسم اسم اللون وحالة التوفر -->
+                            <p id="form-title-text" style="font-size:15px; font-weight:600; color:#0f6e56; margin:0 0 1rem;"></p>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                                <div>
+                                    <label style="display:block; font-size:13px; color:#555; margin-bottom:4px;">
+                                        اسم اللون <span style="color:#e24b4a;">*</span>
+                                    </label>
+                                    <input type="text" id="nc-color" placeholder="مثال: أسود، أحمر، بيج..."
+                                        style="width:100%; padding:9px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px; font-family:inherit; direction:rtl; outline:none;">
+                                    <span id="err-color" style="display:none; font-size:12px; color:#a32d2d; margin-top:3px; display:none;">
+                                        اسم اللون مطلوب
+                                    </span>
+                                </div>
+                                <div>
+                                    <label style="display:block; font-size:13px; color:#555; margin-bottom:8px;">حالة التوفر</label>
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <input type="checkbox" id="nc-available" checked
+                                            style="width:16px; height:16px; cursor:pointer; accent-color:#1d9e75;">
+                                        <label for="nc-available" style="font-size:13px; color:#555; cursor:pointer;">هذا اللون متوفر</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- قسم الصورة -->
+                            <div style="margin-bottom:12px;">
+                                <label style="display:block; font-size:13px; color:#555; margin-bottom:6px;">
+                                    صورة اللون <span style="color:#e24b4a;">*</span>
+                                </label>
+
+                                <!-- منطقة الرفع (قبل اختيار صورة) -->
+                                <div id="upload-area-wrap">
+                                    <label for="nc-image"
+                                        style="display:flex; flex-direction:column; align-items:center; justify-content:center;
+                                                height:110px; border:2px dashed #bbb; border-radius:10px; background:#fafafa;
+                                                cursor:pointer; transition:.15s;">
+                                        <span style="font-size:20px; margin-bottom:6px; line-height:1; color:#aaa;">&#8679;</span>
+                                        <span style="font-size:13px; color:#777;">اضغط لاختيار صورة اللون</span>
+                                    </label>
+                                    <input type="file" id="nc-image" accept="image/*"
+                                        style="display:none;" onchange="SimplexColorManager.onImageSelected(this)">
+                                </div>
+
+                                <!-- معاينة الصورة بعد الاختيار -->
+                                <div id="img-selected-wrap" style="display:none;">
+                                    <div style="display:flex; gap:10px; align-items:center; background:#f8f8f8; border-radius:10px; padding:10px;">
+                                        <img id="nc-preview" src="" alt="معاينة"
+                                            style="width:70px; height:70px; border-radius:8px; object-fit:cover; border:1px solid #ddd; flex-shrink:0;">
+                                        <div style="flex:1; min-width:0;">
+                                            <div id="nc-fname" style="font-size:12px; color:#888; word-break:break-all;"></div>
+                                            <div style="margin-top:8px;">
+                                                <button type="button"
+                                                        style="background:white; border:1px solid #ddd; border-radius:8px; padding:7px 14px;
+                                                            font-size:13px; cursor:pointer; font-family:inherit; position:relative; overflow:hidden;">
+                                                    <input type="file" accept="image/*" onchange="SimplexColorManager.onImageSelected(this)"
+                                                        style="position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;">
+                                                    تغيير الصورة
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <span id="err-image" style="display:none; font-size:12px; color:#a32d2d; margin-top:3px;">
+                                    صورة اللون مطلوبة
+                                </span>
+                                <p style="font-size:11px; color:#999; margin:4px 0 0;">تساعد زبائنك على تمييز اللون بسهولة</p>
+                            </div>
+
+                            <!-- قسم المقاسات  -->
+                            <div id="nc-sizes-container"> 
+                                <hr style="border:none; border-top:1px solid #eee; margin:12px 0;">
+                                <p style="font-size:13px; font-weight:600; color:#555; margin:0 0 8px;">
+                                    المقاسات
+                                    <span style="font-weight:400; color:#aaa; font-size:12px;">(يجب عليك اضافة مقاس واحد على الأقل )</span>
+                                </p>
+                                <div id="nc-sizes-list" style="margin-bottom:8px;"></div>
+                                <div style="display:flex; gap:8px; align-items:center;">
+                                    <input type="text" id="nc-size-input" placeholder="مثال: S أو M أو 42"
+                                        style="flex:1; padding:8px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px; font-family:inherit; direction:rtl; outline:none;">
+                                    <div style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
+                                        <input type="checkbox" id="nc-size-av" checked
+                                            style="width:15px; height:15px; accent-color:#1d9e75;">
+                                        <label for="nc-size-av" style="font-size:13px; color:#555; cursor:pointer;">متوفر</label>
+                                    </div>
+                                    <button type="button" onclick="SimplexColorManager.addSizeToNew()"
+                                            style="background:#f0f0f0; border:1px solid #ddd; border-radius:8px; padding:8px 16px;
+                                                font-size:13px; cursor:pointer; font-family:inherit; white-space:nowrap;">
+                                        حفظ المقاس
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- قسم ازرار حفظ وإلغاء اللون -->
+                            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:14px;">
+                                <button type="button" onclick="SimplexColorManager.cancelForm()"
+                                        style="background:white; border:1px solid #ccc; border-radius:8px; padding:8px 18px;
+                                            font-size:14px; cursor:pointer; font-family:inherit; color:#555;">
+                                    إلغاء
+                                </button>
+                                <button type="button" onclick="SimplexColorManager.saveColor()"
+                                        style="background:#1d9e75; color:white; border:none; border-radius:8px; padding:8px 22px;
+                                            font-size:14px; cursor:pointer; font-family:inherit;">
+                                    حفظ اللون
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- زر إضافة لون -->
+                    <button type="button" id="add-color-btn" onclick="SimplexColorManager.openNewColorForm()"
+                            style="width:100%; padding:14px; border:2px dashed #aaa; border-radius:12px; background:none;
+                                cursor:pointer; font-size:14px; color:#666; font-family:inherit;">
+                        + إضافة لون جديد
+                    </button>
+                    <style>
+                        .cv-card { background:white; border:1px solid #e0e0e0; border-radius:12px; padding:1.25rem; }
+                        .cv-card.warn { border:2px solid #EF9F27; }
+                        .cv-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; font-weight:600; font-size:15px; }
+                        .cv-badge { font-size:12px; padding:2px 10px; border-radius:99px; }
+                        .cv-yes { background:#e1f5ee; color:#0f6e56; }
+                        .cv-no  { background:#fcebeb; color:#a32d2d; }
+                        .cv-warn { background:#FAEEDA; color:#633806; }
+                        .cv-sizes { display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+                        .cv-chip { background:#f0f0f0; border-radius:8px; padding:4px 14px; font-size:13px; }
+                        .cv-chip.off { opacity:.4; text-decoration:line-through; }
+                        .cv-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:10px; }
+                        .btn-cv-edit { background:none; border:1px solid #b5d4f4; color:#185fa5; border-radius:8px; padding:5px 14px; font-size:12px; cursor:pointer; font-family:inherit; }
+                        .btn-cv-edit:hover { background:#e6f1fb; }
+                        .btn-cv-del { background:none; border:1px solid #f0c4b3; color:#993c1d; border-radius:8px; padding:5px 14px; font-size:12px; cursor:pointer; font-family:inherit; }
+                        .btn-cv-del:hover { background:#faece7; }
+                        .nc-size-item { display:flex; align-items:center; gap:8px; background:#f8f8f8; border-radius:8px; padding:7px 10px; margin-bottom:6px; }
+                    </style>
+                    
+                </div>
+            </div>
+            
+
+            <button type="submit">حفظ</button>
+            <button type="button" id="reset_form_btn"> إعادة تعيين</button>
+            
+        </form>
 
     </div>
 
@@ -67,15 +529,22 @@
     {% include "common/toast.html" %}
     <script src="{% static 'js/main.js' %}"></script>
     <script src="{% static 'js/store/product_colors.js' %}"></script>
+    <script src="{% static 'js/store/product_pricing.js' %}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // #change-later عدل معرف فورم التعديل
-            const editForm = document.getElementById('my_edit_form');
+            const editForm = document.getElementById('edit_product_form');
             if (editForm) {
                 SimplexColorManager.setForm(editForm);
                 SimplexPricingManager.setForm(editForm);
             }
         });
     </script>
+    {% if messages %}
+        {% for message in messages %}
+            <script>
+                showToast('success-toast', "{{ message }}");
+            </script>
+        {% endfor %}
+    {% endif %}
 </body>
 </html>

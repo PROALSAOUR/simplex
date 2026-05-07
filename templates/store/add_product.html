@@ -28,7 +28,7 @@
                 </div>
             {% endif %}
         
-            {% comment %} قسم المعلومات الأساسية [name, description, type, gender , upload_at] {% endcomment %}
+            {% comment %} قسم المعلومات الأساسية [name, description, type, gender, is_visible ] {% endcomment %}
             <div style="background-color:#e1e1e1; padding:10px 40px; margin-bottom: 15px;">
                 <h3>قسم المعلومات الأساسية</h3>
                 <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
@@ -64,6 +64,15 @@
                     <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  add_form.gender.help_text }}</p>
                     {% if  add_form.gender.errors %}
                     <div style="padding:5px; background-color:red; color:white;">{{  add_form.gender.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  add_form.is_visible.label }}</label> 
+                    {{  add_form.is_visible }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  add_form.is_visible.help_text }}</p>
+                    {% if  add_form.is_visible.errors %}
+                    <div style="padding:5px; background-color:red; color:white;">{{  add_form.is_visible.errors }}</div>
                     {% endif %}
                 </div>
             </div>

@@ -152,6 +152,10 @@ LANGUAGE_CODE = 'ar'
 TIME_ZONE = 'Africa/Tripoli'
 USE_I18N = True
 USE_TZ = True
+# يبقي اللغة العربية لكن يوقف تحويل الأرقام
+USE_L10N = False
+USE_THOUSAND_SEPARATOR = False
+NUMBER_GROUPING = 0
 
 
 # Static files (CSS, JavaScript, Images)

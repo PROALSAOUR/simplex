@@ -233,8 +233,18 @@ def edit_product(request, pid):
     product = get_object_or_404(Product, id=pid)
     product_images = product.images.all()
     
+    if request.method == "POST":
+        form = ProductRegisterForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "تم تعديل المنتج بنجاح")
+
+    else:
+        form = ProductRegisterForm(instance=product)
+    
     context = {
         'product': product,
+        'edit_form': form,
         'product_images': product_images,
     }
     return render(request, 'store/edit_product.html', context)

@@ -601,7 +601,7 @@
                         <th style="padding:10px; border:1px solid #ccc;">الصورة</th>
                         <th style="padding:10px; border:1px solid #ccc;">الاسم</th>
                         <th style="padding:10px; border:1px solid #ccc;">الحالة</th>
-                        <th style="padding:10px; border:1px solid #ccc;">معروض؟</th>
+                        <th style="padding:10px; border:1px solid #ccc;">الظهور</th>
                         <th style="padding:10px; border:1px solid #ccc;">السعر</th>
                         <th style="padding:10px; border:1px solid #ccc;">الإجراءات</th>
                     </tr>
@@ -615,7 +615,7 @@
                         </td>
                         <td style="padding:10px; border:1px solid #ccc;">{{ product.name }}</td>
                         <td style="padding:10px; border:1px solid #ccc;">{{ product.get_status_display }}</td>
-                        <td style="padding:10px; border:1px solid #ccc;">{{ product.show }}</td>
+                        <td style="padding:10px; border:1px solid #ccc;">{{ product.get_is_visible_display }}</td>
                         <td style="padding:10px; border:1px solid #ccc;">${{ product.get_price }}</td>
                         <td style="padding:10px; border:1px solid #ccc;">
                         <a href="{% url "store:edit_product" product.id %}">تعديل</a>
