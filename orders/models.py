@@ -1,0 +1,52 @@
+from django.db import models
+from django_ckeditor_5.fields import CKEditor5Field 
+from store.models import Store, Product
+
+class Order(models.Model):
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='orders', verbose_name='المتجر')
+    
+    # حقول بيانات الطلب
+    serial_number = models.PositiveIntegerField(default=1, verbose_name='الرقم التسلسلي') 
+    verification_status = models.CharField(verbose_name='حالة التحقق', max_length=20, choices=[('checking','جاري التحقق'), ('approved','طلب حقيقي'), ('rejected','طلب وهمي'),], default='checking')
+    status = models.CharField(verbose_name='حالة الطلب', max_length=20, choices=[('processing', 'جاري التجهيز'), ('delivered', 'تم التسليم'), ('canceled', 'ملغي')], default='processing')
+    free_delivery = models.BooleanField(default=False , verbose_name="توصيل مجاني", )    # يتم تحديد هذا الخيار تلقائيا عند انشاء طلب وفقا لحاله قرينه في المنتج المطلوب
+    order_date = models.DateTimeField(auto_now_add=True, verbose_name='تاريخ الطلب')
+    
+    # حقول بيانات الزبون 
+    customer_name = models.CharField(max_length=100, verbose_name='اسم الزبون')
+    customer_phone = models.CharField(max_length=100, verbose_name='رقم هاتف الزبون')
+    customer_location = models.CharField(max_length=100, verbose_name='عنوان الزبون')
+    note =  CKEditor5Field('ملاحظة', config_name='default',)
+    
+    class Meta:
+        verbose_name = 'طلب'
+        verbose_name_plural = 'الطلبات'
+        
+    def __str__(self):
+        return self.store.name + " - " + str(self.serial_number)
+    
+    def create_serial_number(self):
+        """تقوم هذه الدالة بإنشاء رقم تسلسلي فريد لكل طلب يتم انشاءه في المتجر بناءا على عدد الطلبات السابقة للمتجر"""
+        last_order = Order.objects.filter(store=self.store).order_by('serial_number').last()
+        if last_order:
+            return last_order.serial_number + 1
+        else:
+            return 1
+    
+  
+class OredrItem(models.Model):
+    # حقول المنتج المطلوب
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL , verbose_name='المنتج', null=True) 
+    image = models.ImageField(upload_to='orders/OrderItems/' , verbose_name="صورة المنتج ",)
+    color = models.CharField(max_length=100,  verbose_name='لون المنتج' )
+    size = models.CharField(max_length=100,  verbose_name='مقاس المنتج', null=True)
+    qty = models.PositiveIntegerField(verbose_name='الكمية المطلوبة')
+    purchase_price = models.PositiveIntegerField(verbose_name='سعر الشراء',) # يتم تحديد هذا الخيار تلقائيا عند انشاء طلب وفقا لحاله قرينه في المنتج المطلوب
+    selling_price = models.PositiveIntegerField(verbose_name='سعر البيع',) # يتم تحديد هذا الخيار تلقائيا عند انشاء طلب وفقا لحاله قرينه في المنتج المطلوب
+    
+    class Meta:
+        verbose_name = 'منتج للطلب'
+        verbose_name_plural = 'منتجات للطلب'
+        
+    def __str__(self):
+        return self.product.name if self.product else "منتج محذوف"

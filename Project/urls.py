@@ -25,6 +25,7 @@ urlpatterns = [
     path('', landing_page, name='landing_page'), 
     path('admin/', admin.site.urls),
     path('store/', include('store.urls')),
+    path('orders/', include('orders.urls')),
     path('account/', include('accounts.urls')),
     path('management/', include('management.urls')),
     path('ckeditor5/', include('django_ckeditor_5.urls')),

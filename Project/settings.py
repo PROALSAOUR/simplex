@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'management',
     'store',
     'accounts',
+    'orders',
     
     # RichTextField
     "django_ckeditor_5",
