@@ -608,25 +608,26 @@
                     </thead>
                     <tbody>
                     {% for product in page_obj %}
-                    <tr style="border:1px solid #ccc;">
-                        <td style="padding:10px; border:1px solid #ccc; text-align:center;">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
-                        <td style="padding:10px; border:1px solid #ccc; text-align:center;">
-                        <img src="{{ product.thumbnail_img.url }}" alt="{{ product.name }}" style="max-width:100px; height:auto;">
-                        </td>
-                        <td style="padding:10px; border:1px solid #ccc;">{{ product.name }}</td>
-                        <td style="padding:10px; border:1px solid #ccc;">{{ product.get_status_display }}</td>
-                        <td style="padding:10px; border:1px solid #ccc;">{{ product.get_is_visible_display }}</td>
-                        <td style="padding:10px; border:1px solid #ccc;">${{ product.get_price }}</td>
-                        <td style="padding:10px; border:1px solid #ccc;">
-                        <a href="{% url "store:edit_product" product.id %}">تعديل</a>
-                        {% if USER_LEVEL in ADVANCED_PERMISSIONS %}
-                            <button type="button" onclick="openDeleteProductDialog(this)"
+                        <tr style="border:1px solid #ccc;">
+                            <td style="padding:10px; border:1px solid #ccc; text-align:center;">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
+                            <td style="padding:10px; border:1px solid #ccc; text-align:center;">
+                            <img src="{{ product.thumbnail_img.url }}" alt="{{ product.name }}" style="max-width:100px; height:auto;">
+                            </td>
+                            <td style="padding:10px; border:1px solid #ccc;">{{ product.name }}</td>
+                            <td style="padding:10px; border:1px solid #ccc;">{{ product.get_status_display }}</td>
+                            <td style="padding:10px; border:1px solid #ccc;">{{ product.get_is_visible_display }}</td>
+                            <td style="padding:10px; border:1px solid #ccc;">${{ product.get_price }}</td>
+                            <td style="padding:10px; border:1px solid #ccc;">
+                            <a href="{% url "store:edit_product" product.id %}">تعديل</a>
+                            {% if USER_LEVEL in ADVANCED_PERMISSIONS %}
+                                <button type="button" onclick="openDeleteProductDialog(this)"
                                     data-id="{{ product.id }}" data-name="{{ product.name }}"
-                                    data-redirect="{% url "store:show_products" %}">حذف</button>
-                        {% endif %}
-                        <a href="#">معاينة</a>
-                        </td>
-                    </tr>
+                                    data-redirect="{% url "store:show_products" %}">حذف
+                                </button>
+                            {% endif %}
+                            <a href="{% url "store:view_product" product.id %}">معاينة</a>
+                            </td>
+                        </tr>
                     {% endfor %}
                     </tbody>
                 </table>

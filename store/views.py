@@ -1,11 +1,11 @@
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse, Http404
 from django.contrib import messages
 from django.db import transaction , models as db_models
 from django.core.paginator import Paginator
-import json
-import hashlib
+import hashlib, json
 
 from Project.utils import compress_image
 from accounts.decorators import vendor_only , advanced_permission_required
@@ -16,11 +16,13 @@ from store.forms import ProductRegisterForm
 @login_required(login_url='accounts:log_in')
 @vendor_only
 def store_dashboard(request):
+    #change-later قم بإنشاء دالة الداشبورد
     return render(request, 'store/dashboard.html')
 
 @login_required(login_url='accounts:log_in')
 @vendor_only
 def show_products(request):
+    """دالة عرض جميع المنتجات الخاصة بالمستخدم كما تحتوي على ألية البحث والفلترة """
     vendor = request.user.vendor
     products = vendor.store.products.all()
 
@@ -118,7 +120,7 @@ def show_products(request):
 @vendor_only
 @transaction.atomic # تجعل كل العمليات داخل الدالة تُنفَّذ كحزمة واحدة، إذا حدث خطأ في أي خطوة يتم التراجع عن كل العمليات السابقة
 def add_product(request):
-    """دالة وظيفتها اضافة منتج جديد """
+    """الدالة المسؤولة عن صفحة اضافة منتج جديد """
     store = request.user.vendor.store
     if request.method == "POST":
         form = ProductRegisterForm(request.POST, request.FILES, store=store)
@@ -201,24 +203,23 @@ def add_product(request):
     }
     return render(request, 'store/add_product.html', context)
 
+
 @login_required(login_url='accounts:log_in')
 @vendor_only
 @advanced_permission_required()
+@require_POST
 def delete_product(request):
     "الدالة المسؤولة عن حذف منتج من المتجر, لايمكن الا لمالك المتجر او التحكم الكامل"
     if request.method == "POST":
         product_id  = request.POST.get('product_id')
-        store = request.user.vendor.store
         
         try:
             product_id = int(product_id)
-            product = Product.objects.get(id=product_id)
-            # لو المتجر الخاص بالمنتج مو نفس التجر الخاص بالمستخدم لا تحذف المنتج ورجع خطأ
-            if product.store != store :
-                return JsonResponse({
-                    "status": "error",
-                    "message":'عذراً, يبدو انك  تحاول حذف منتج لا ينتمي الى متجرك!'
-                })
+            product =get_object_or_404(
+                Product,
+                id=product_id,
+                store=request.user.vendor.store
+            )
                 
             product.delete()
             return JsonResponse({
@@ -231,14 +232,18 @@ def delete_product(request):
             "message": str(e)
         })
     
-    else:
-        return JsonResponse({"status": "error", "message": "طلب غير صالح"})
 
 @login_required(login_url='accounts:log_in')
-@vendor_only
 def edit_product(request, pid):
+    """الدالة المسؤولة عن صفحة التعديل الخاصة بالمنتج"""
     product = get_object_or_404(Product, id=pid)
     product_images = product.images.all()
+    
+    # تحقق ان المستخدم بائع وان المنتج الذي يريد تعديله تابع لمتجره
+    if  request.user.userprofile.user_type == 'vendor':
+        if request.user.vendor.store != product.store :
+            raise Http404("المنتج غير موجود")
+        
     
     if request.method == "POST":
         form = ProductRegisterForm(request.POST, request.FILES, instance=product)
@@ -399,6 +404,7 @@ def edit_product(request, pid):
     return render(request, 'store/edit_product.html', context)
 
 def view_product(request, pid):
+    """الدالة المسؤولة عن عرض صفحة المنتج للزبون ليتمكن من اجراء عملية الشراء منها"""
     product = get_object_or_404(Product, id=pid)
     product_images = product.images.all()
 

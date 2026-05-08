@@ -2,16 +2,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         let form = null;
         const colorsData = [];
-        if (Array.isArray(window.SimplexInitialColors) && window.SimplexInitialColors.length) {
-            colorsData.push(...window.SimplexInitialColors.map((item) => ({
-                ...item,
-                available: item.available === true || item.available === 'true' || item.available === '1' || item.available === 1,
-                imageURL: item.imageURL || '',
-                imageName: item.imageName || '',
-                imageFile: null,
-                sizes: Array.isArray(item.sizes) ? item.sizes : [],
-            })));
-        }
+        let initialColorsData = [];
         let newColorSizes = [];
         let currentImageFile = null;
         let currentImageURL = null;
@@ -29,16 +20,6 @@
         }
 
         function handleFormSubmit(event) {
-            const editorVisible = document.getElementById('new-color-form')?.style.display === 'block';
-            const hasPendingEdit = editingIndex !== null;
-            if (editorVisible || hasPendingEdit) {
-                const saved = saveColor();
-                if (!saved) {
-                    event.preventDefault();
-                    return;
-                }
-            }
-
             syncField();
             if (!colorsData || colorsData.length === 0) {
                 event.preventDefault();
@@ -63,6 +44,32 @@
 
         // Default form lookup for the current product add page.
         setForm('add_product_form');
+
+        function loadInitialColors() {
+            if (window.SimplexInitialColors && Array.isArray(window.SimplexInitialColors)) {
+                colorsData.length = 0;
+                window.SimplexInitialColors.forEach((c) => {
+                    colorsData.push({
+                        color: c.color,
+                        available: c.available,
+                        sizes: c.sizes ? c.sizes.map((s) => ({ ...s })) : [],
+                        imageFile: null,
+                        imageURL: c.imageURL || c.image_url || null,
+                        imageName: c.imageName || c.image_name || '',
+                        isExisting: true,
+                        id: c.id || null,
+                    });
+                });
+                // Save initial state for reset on edit page
+                initialColorsData = colorsData.map((c) => ({ ...c, sizes: c.sizes.map((s) => ({ ...s })) }));
+                renderColorsList();
+                syncField();
+            }
+        }
+
+        function isEditPage() {
+            return window.SimplexInitialColors && Array.isArray(window.SimplexInitialColors) && window.SimplexInitialColors.length > 0;
+        }
 
         function showForm(show) {
             const newColorForm = document.getElementById('new-color-form');
@@ -193,7 +200,17 @@
             showForm(false);
         }
 
-        function resetColors() {
+        function resetToLastSavedState() {
+            colorsData.length = 0;
+            initialColorsData.forEach((c) => {
+                colorsData.push({ ...c, sizes: c.sizes.map((s) => ({ ...s })) });
+            });
+            renderColorsList();
+            syncField();
+            cancelForm();
+        }
+
+        function resetToEmpty() {
             colorsData.length = 0;
             renderColorsList();
             syncField();
@@ -201,6 +218,14 @@
             const colorsField = document.getElementById('colors_data');
             if (colorsField) {
                 colorsField.value = '';
+            }
+        }
+
+        function resetColors() {
+            if (isEditPage()) {
+                resetToLastSavedState();
+            } else {
+                resetToEmpty();
             }
         }
 
@@ -324,12 +349,10 @@
             }
 
             if (!valid) {
-                return false;
+                return;
             }
 
-            const existingId = editingIndex !== null ? colorsData[editingIndex]?.id : null;
             const entry = {
-                id: existingId,
                 color: colorName,
                 available: document.getElementById('nc-available')?.checked ?? true,
                 sizes: [...newColorSizes],
@@ -344,11 +367,9 @@
                 colorsData.push(entry);
             }
 
-            editingIndex = null;
             cancelForm();
             renderColorsList();
             syncField();
-            return true;
         }
 
         function deleteColor(i) {
@@ -440,6 +461,9 @@
             sizesList.addEventListener('click', handleSizeListClick);
         }
 
+        // Load initial colors for edit page
+        loadInitialColors();
+
         window.SimplexColorManager = {
             setForm,
             openNewColorForm,
@@ -452,9 +476,5 @@
             saveColor,
             deleteColor,
         };
-
-        if (colorsData.length) {
-            renderColorsList();
-        }
     });
 })();

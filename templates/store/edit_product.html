@@ -41,6 +41,12 @@
             <h3>رابط المعاينة لصفحة البيع</h3>
             <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
                 <a href="{% url "store:view_product" product.id %}" >معاينة كما يظهر للزبون</a>
+                {% if USER_LEVEL in ADVANCED_PERMISSIONS %}
+                    <button type="button" onclick="openDeleteProductDialog(this)"
+                        data-id="{{ product.id }}" data-name="{{ product.name }}"
+                        data-redirect="{% url "store:show_products" %}">حذف
+                    </button>
+                {% endif %}
                 {% comment %} #change-later اضف زر لنسخ الرابط واضف شرح {% endcomment %}
             </div>
         

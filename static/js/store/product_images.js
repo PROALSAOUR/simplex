@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let uploadedFiles = [];
     const uploadedFileKeys = new Set();
     let existingImages = [];
+    let initialExistingImages = []; // Store initial state for edit page
     const existingImageKeys = new Set();
     let deletedImages = [];
 
@@ -59,6 +60,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 priority: img.priority,
                 isExisting: true,
             }));
+            // Save initial state for reset functionality in edit page
+            initialExistingImages = JSON.parse(JSON.stringify(existingImages));
             existingImageKeys.clear();
             existingImages.forEach((img) => {
                 existingImageKeys.add(`${img.name}|${img.size}`);
@@ -142,6 +145,34 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    function isEditPage() {
+        return window.SimplexInitialImages && Array.isArray(window.SimplexInitialImages) && window.SimplexInitialImages.length > 0;
+    }
+
+    function resetToLastSavedState() {
+        // Reset images to last saved state (for edit page)
+        uploadedFiles = [];
+        uploadedFileKeys.clear();
+        existingImages = JSON.parse(JSON.stringify(initialExistingImages));
+        deletedImages = [];
+        existingImageKeys.clear();
+        existingImages.forEach((img) => {
+            existingImageKeys.add(`${img.name}|${img.size}`);
+        });
+        renderImages();
+        syncFilesToForm();
+    }
+
+    function resetToEmpty() {
+        // Reset images to empty state (for create page)
+        uploadedFiles = [];
+        uploadedFileKeys.clear();
+        existingImages = [];
+        deletedImages = [];
+        renderImages();
+        syncFilesToForm();
+    }
+
     function resetImages() {
         uploadedFiles = [];
         uploadedFileKeys.clear();
@@ -201,7 +232,13 @@ document.addEventListener("DOMContentLoaded", function () {
             resetBtn.addEventListener("click", () => {
                 form.reset();
                 resetFormStorage();
-                resetImages();
+                
+                if (isEditPage()) {
+                    resetToLastSavedState();
+                } else {
+                    resetToEmpty();
+                }
+                
                 resetThumbnailPreview();
 
                 if (window.SimplexColorManager?.resetColors) {
