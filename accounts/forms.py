@@ -65,6 +65,17 @@ class VendorRegisterForm(forms.ModelForm):
                 'required': 'الاسم مطلوب',
             }
         }
+    def clean_store_name(self):
+        store_name = self.cleaned_data["store_name"].strip()
+
+        if store_name.isdigit():
+            raise ValidationError("اسم المتجر لا يجب أن يكون رقماً فقط.")
+
+        if len(store_name) < 3:
+            raise ValidationError("اسم المتجر  يجب أن يكون 3 أحرف أو أكثر.")
+
+        return store_name
+    
     # password match
     def clean(self):
         cleaned_data = super().clean()
@@ -183,6 +194,18 @@ class EmployeeRegisterForm(forms.ModelForm):
             if choice[0] != excluded_choice
         ]
 
+    def clean_name(self):
+        name = self.cleaned_data["name"].strip()
+
+        if name.isdigit():
+            raise ValidationError("اسم الموظف لا يجب أن يكون رقماً فقط.")
+
+        if len(name) < 3:
+            raise ValidationError("اسم الموظف  يجب أن يكون 3 أحرف أو أكثر.")
+
+        return name
+    
+
     # password match
     def clean(self):
         cleaned_data = super().clean()
@@ -200,6 +223,8 @@ class EmployeeRegisterForm(forms.ModelForm):
         username = self.cleaned_data.get('username')
         validate_username(username)  # تحقق من صحة اليوزر نيم باستخدام الدالة في validators.py
         return username
+    
+    
         
 
     def save(self, commit=True):
@@ -229,6 +254,28 @@ class StoreBasicForm(forms.ModelForm):
     class Meta:
         model = Store
         fields = ['name', 'location', 'check_orders']
+        
+    def clean_name(self):
+        store_name = self.cleaned_data["name"].strip()
+
+        if store_name.isdigit():
+            raise ValidationError("اسم المتجر لا يجب أن يكون رقماً فقط.")
+
+        if len(store_name) < 3:
+            raise ValidationError("اسم المتجر  يجب أن يكون 3 أحرف أو أكثر.")
+
+        return store_name
+    
+    def clean_location(self):
+        location = self.cleaned_data["location"].strip()
+
+        if location.isdigit():
+            raise ValidationError("موقع المتجر لا يجب أن يكون رقماً فقط.")
+
+        if len(location) < 3:
+            raise ValidationError("موقع المتجر  يجب أن يكون 3 أحرف أو أكثر.")
+
+        return location
         
 # نموذج تحديث حسابات المتجر الاجتماعية
 class StoreSocialForm(forms.ModelForm):

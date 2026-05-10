@@ -4,7 +4,6 @@ from store.models import *
 from django.core.exceptions import ValidationError
 from Project.utils import compress_image
 
-
 class ProductRegisterForm(forms.ModelForm):
     images_order = forms.CharField(required=False, widget=forms.HiddenInput())
     deleted_images = forms.CharField(required=False, widget=forms.HiddenInput())

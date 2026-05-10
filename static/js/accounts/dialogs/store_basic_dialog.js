@@ -14,10 +14,12 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("store_name").innerText = data.name;
             document.getElementById("store_location").innerText = data.location;
             document.getElementById("store_check_orders").innerText = data.check_orders;
+            basic_dialog.close();
             showToast("success-toast", data.message);
         } else {
-            showToast("failed-toast", data.message);
+            const firstError = Object.values(data.errors)[0][0];
+            showToast("failed-toast", firstError);
         }
-        basic_dialog.close();
+        
     };
 });

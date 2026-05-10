@@ -105,24 +105,21 @@ def edit_store_basic(request):
     """
     الدالة المسؤولة عن تعديل بيانات المتجر الاساسية وهي الاسم والموقع 
     """
-    if request.method == "POST":
-        
-        store = request.user.vendor.store
-        form = StoreBasicForm(request.POST, instance=store)
-        if form.is_valid():
-            form.save()
-            return JsonResponse({
-                "status": "success",
-                "message": "تم إجراء التعديل بنجاح",
-                "name": store.name,
-                "location": store.location,
-                "check_orders": store.get_check_orders_display()
-            })
-        else:
-            return JsonResponse({"status": "error", "message": form.errors})
-        
+
+    store = request.user.vendor.store
+    form = StoreBasicForm(request.POST, instance=store)
+    if form.is_valid():
+        form.save()
+        return JsonResponse({
+            "status": "success",
+            "message": "تم إجراء التعديل بنجاح",
+            "name": store.name,
+            "location": store.location,
+            "check_orders": store.get_check_orders_display()
+        })
     else:
-        return JsonResponse({"status": "error", "message": "طلب غير صالح"})
+        return JsonResponse({"status": "error", "errors": form.errors})
+        
 
 @login_required(login_url='accounts:log_in')
 @vendor_only
