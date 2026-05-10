@@ -32,7 +32,7 @@
             {% endif %}
             {% for field in order_form  %}
                 <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                    <label>{{  field.label }}</label> 
+                    <label for="{{ field.id_for_label }}" >{{  field.label }}</label> 
                     {{  field }}
                     <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{ field.help_text }}</p>
                     {% if  field.errors %}
@@ -42,7 +42,7 @@
             {% endfor %}
             {% for field in item_form %}
                 <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                    <label>{{  field.label }}</label> 
+                    <label for="{{ field.id_for_label }}">{{  field.label }}</label> 
                     {{  field }}
                     <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{ field.help_text }}</p>
                     {% if  field.errors %}

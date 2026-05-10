@@ -6,15 +6,15 @@
     <form id="basic_form" method="POST" action="{% url "accounts:edit_store_basic" %}">
         {% csrf_token %}
         <div>
-            <label>اسم المتجر</label>
+            <label for="{{ basic_form.name.id_for_label }}">اسم المتجر</label>
             {{ basic_form.name }}
         </div>
         <div>
-            <label>الموقع</label>
+            <label for="{{ basic_form.location.id_for_label }}">الموقع</label>
             {{ basic_form.location }}
         </div>
         <div>
-            <label>تحقق من الطلبات</label>
+            <label for="{{ basic_form.check_orders.id_for_label }}">تحقق من الطلبات</label>
             {{ basic_form.check_orders }}
         </div>
         <button type="submit">حفظ</button>
@@ -29,19 +29,19 @@
     <form id="social_form" method="POST" action="{% url "accounts:edit_store_social" %}">
         {% csrf_token %}
         <div>
-            <label>Telegram</label>
+            <label for="{{ social_form.telegram.id_for_label }}">Telegram</label>
             {{ social_form.telegram }}
         </div>
         <div>
-            <label>Facebook</label>
+            <label for="{{ social_form.facebook.id_for_label }}">Facebook</label>
             {{ social_form.facebook }}
         </div>
         <div>
-            <label>Instagram</label>
+            <label for="{{ social_form.instagram.id_for_label }}">Instagram</label>
             {{ social_form.instagram }}
         </div>
         <div>
-            <label>TikTok</label>
+            <label for="{{ social_form.tiktok.id_for_label }}">TikTok</label>
             {{ social_form.tiktok }}
         </div>
         <button type="submit">حفظ</button>

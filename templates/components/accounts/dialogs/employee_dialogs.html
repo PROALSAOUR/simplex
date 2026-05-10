@@ -13,14 +13,14 @@
         <div style="color:red; display:none;" id="errors">سوف يتم عرض الاخطاء هنا </div>
         
         <div>
-            <label>المعرف</label>
+            <label for="username" >المعرف</label>
             <input type="text" id="username" name="username" >
             <div id="username-feedback" style="font-size:14px;"></div>
         </div>
         {% for field in employee_form %}
             {% if field.name != 'username' %}
                 <div>
-                    <label>{{ field.label }}</label>
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                     {{ field }}
 
                     {% if field.errors %}
@@ -45,7 +45,7 @@
         <input type="hidden" name="employee_id" id="edit-employee-id">
         <p> الموظف : <span id="edit-employee-name"></span></p>
         <div>
-            <label>{{ employee_form.permission_level.label }}</label>
+            <label for="{{ employee_form.permission_level.id_for_label }}">{{ employee_form.permission_level.label }}</label>
             {{ employee_form.permission_level }}                    
         </div>
         

@@ -84,7 +84,7 @@
             <div style="background-color:#e1e1e1; padding:10px 40px; margin-bottom: 15px;">
                 <h3>قسم المعلومات الأساسية</h3>
                 <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                    <label>{{  edit_form.name.label }}</label> 
+                    <label for="{{ edit_form.name.id_for_label }}" >{{  edit_form.name.label }}</label> 
                     {{  edit_form.name }}
                     <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.name.help_text }}</p>
                     {% if  edit_form.name.errors %}
@@ -93,7 +93,7 @@
                 </div>
                 
                 <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                    <label>{{  edit_form.description.label }}</label> 
+                    <label for="{{ edit_form.description.id_for_label }}">{{  edit_form.description.label }}</label> 
                     {{  edit_form.description }}
                     <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.description.help_text }}</p>
                     {% if  edit_form.description.errors %}
@@ -102,7 +102,7 @@
                 </div>
                 
                 <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                    <label>{{  edit_form.type.label }}</label> 
+                    <label for="{{ edit_form.type.id_for_label }}">{{  edit_form.type.label }}</label> 
                     {{  edit_form.type }}
                     <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.type.help_text }}</p>
                     {% if  edit_form.type.errors %}
@@ -111,7 +111,7 @@
                 </div>
                 
                 <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                    <label>{{  edit_form.gender.label }}</label> 
+                    <label for="{{ edit_form.gender.id_for_label }}">{{  edit_form.gender.label }}</label> 
                     {{  edit_form.gender }}
                     <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.gender.help_text }}</p>
                     {% if  edit_form.gender.errors %}
@@ -120,7 +120,7 @@
                 </div>
 
                 <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                    <label>{{  edit_form.is_visible.label }}</label> 
+                    <label for="{{ edit_form.is_visible.id_for_label }}">{{  edit_form.is_visible.label }}</label> 
                     {{  edit_form.is_visible }}
                     <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.is_visible.help_text }}</p>
                     {% if  edit_form.is_visible.errors %}
@@ -129,7 +129,7 @@
                 </div>
 
                 <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                    <label>{{  edit_form.max_quantity_per_order.label }}</label> 
+                    <label for="{{ edit_form.max_quantity_per_order.id_for_label }}">{{  edit_form.max_quantity_per_order.label }}</label> 
                     {{  edit_form.max_quantity_per_order }}
                     <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.max_quantity_per_order.help_text }}</p>
                     {% if  edit_form.max_quantity_per_order.errors %}
@@ -333,7 +333,7 @@
                 <h3>قسم التسعير </h3>
                 <!-- سعر الشراء -->
                 <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                    <label>{{  edit_form.purchase_price.label }}</label> 
+                    <label for="{{ edit_form.purchase_price.id_for_label }}" >{{  edit_form.purchase_price.label }}</label> 
                     {{ edit_form.purchase_price }}
                     <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.purchase_price.help_text }}</p>
                     {% if  edit_form.purchase_price.errors %}
@@ -342,7 +342,7 @@
                 </div>  
                 <!-- السعر -->     
                 <div id="price_field" style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                    <label>{{  edit_form.price.label }}</label> 
+                    <label for="{{ edit_form.price.id_for_label }}">{{  edit_form.price.label }}</label> 
                     {{  edit_form.price }}
                     <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.price.help_text }}</p>
                     {% if  edit_form.price.errors %}
@@ -351,7 +351,7 @@
                 </div>
                 <!-- خيار التخفيض --> 
                 <div id="offer_checkbox_field" style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                    <label>{{  edit_form.offer.label }}</label> 
+                    <label for="{{ edit_form.offer.id_for_label }}">{{  edit_form.offer.label }}</label> 
                     {{  edit_form.offer }}
                     <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.offer.help_text }}</p>
                     {% if  edit_form.offer.errors %}
@@ -360,7 +360,7 @@
                 </div>
                 <!-- سعر التخفيض -->
                 <div id="offer_price_field" style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                    <label>{{  edit_form.offer_price.label }}</label> 
+                    <label for="{{ edit_form.offer_price.id_for_label }}">{{  edit_form.offer_price.label }}</label> 
                     {{  edit_form.offer_price }}
                     <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.offer_price.help_text }}</p>
                     <span id="offer_percentage" >نسبة التخفيض 20%</span>
@@ -370,7 +370,7 @@
                 </div>
                 <!-- توصيل مجاني -->
                 <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                    <label>{{  edit_form.free_delivery.label }}</label> 
+                    <label for="{{ edit_form.free_delivery.id_for_label }}">{{  edit_form.free_delivery.label }}</label> 
                     {{  edit_form.free_delivery }}
                     <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.free_delivery.help_text }}</p>
                     {% if  edit_form.free_delivery.errors %}
@@ -420,7 +420,7 @@
                             <p id="form-title-text" style="font-size:15px; font-weight:600; color:#0f6e56; margin:0 0 1rem;"></p>
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
                                 <div>
-                                    <label style="display:block; font-size:13px; color:#555; margin-bottom:4px;">
+                                    <label style="display:block; font-size:13px; color:#555; margin-bottom:4px;"  for="nc-color">
                                         اسم اللون <span style="color:#e24b4a;">*</span>
                                     </label>
                                     <input type="text" id="nc-color" placeholder="مثال: أسود، أحمر، بيج..."
@@ -430,7 +430,7 @@
                                     </span>
                                 </div>
                                 <div>
-                                    <label style="display:block; font-size:13px; color:#555; margin-bottom:8px;">حالة التوفر</label>
+                                    <label style="display:block; font-size:13px; color:#555; margin-bottom:8px;" for="nc-available">حالة التوفر</label>
                                     <div style="display:flex; align-items:center; gap:8px;">
                                         <input type="checkbox" id="nc-available" checked
                                             style="width:16px; height:16px; cursor:pointer; accent-color:#1d9e75;">
@@ -441,7 +441,7 @@
 
                             <!-- قسم الصورة -->
                             <div style="margin-bottom:12px;">
-                                <label style="display:block; font-size:13px; color:#555; margin-bottom:6px;">
+                                <label for="nc-image" style="display:block; font-size:13px; color:#555; margin-bottom:6px;">
                                     صورة اللون <span style="color:#e24b4a;">*</span>
                                 </label>
 

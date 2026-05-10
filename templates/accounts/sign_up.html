@@ -31,7 +31,7 @@
                 <p>بياناتك الشخصية</p>
                 <!-- اليوزرنيم -->
                 <div style="margin-bottom: 15px; background-color:green;">
-                    <label>المعرف</label> 
+                    <label for="username">المعرف</label> 
                     <input type="text" id="username" name="username" placeholder="{{form.username.field.widget.attrs.placeholder}}" required>
                     <div id="username-feedback" style="font-size:14px; background-color:#f5f5dc; "></div>
                     <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{ form.username.field.help_text }}</p>
@@ -41,7 +41,7 @@
                 </div>
                 <!-- الاسم -->
                 <div  style="margin-bottom: 15px; background-color:green;">
-                    <label> {{form.name.label}}</label>
+                    <label for="{{ form.name.id_for_label }}"> {{form.name.label}}</label>
                     {{form.name}}
                     <br>
                     <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{ form.name.field.help_text }}</p>
@@ -51,7 +51,7 @@
                 </div>
                 <!-- كلمة السر -->
                 <div  style="margin-bottom: 15px; background-color:green;">
-                    <label> {{form.password.label}}</label>
+                    <label for="{{ form.password.id_for_label }}"> {{form.password.label}}</label>
                     {{form.password}}
                     <br>
                     <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; ">{{ form.password.field.help_text }}</p>
@@ -61,7 +61,7 @@
                 </div>
                 <!-- تأكيد كلمة السر -->
                 <div  style="margin-bottom: 15px; background-color:green;">
-                    <label> {{form.confirm_password.label}}</label>
+                    <label for="{{ form.confirm_password.id_for_label }}"> {{form.confirm_password.label}}</label>
                     {{form.confirm_password}}
                     {% if form.confirm_password.errors %}
                         <div style="padding:5px; background-color:red; color:white;">{{ form.confirm_password.errors }}</div>
@@ -73,7 +73,7 @@
                 <p>بيانات متجرك</p>
                 <!-- اسم المتجر -->
                 <div  style="margin-bottom: 15px; background-color:green;">
-                    <label> {{form.store_name.label}}</label>
+                    <label for="{{ form.store_name.id_for_label }}"> {{form.store_name.label}}</label>
                     {{form.store_name}}
                     <br>
                     <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; ">{{ form.store_name.field.help_text }}</p>
@@ -83,7 +83,7 @@
                 </div>
                 <!-- رقم الهاتف -->
                 <div  style="margin-bottom: 15px; background-color:green;">
-                    <label> {{form.phone_number1.label}}</label>
+                    <label for="{{ form.phone_number1.id_for_label }}"> {{form.phone_number1.label}}</label>
                     {{form.phone_number1}}
                     <br>
                     <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; ">{{ form.phone_number1.field.help_text }}</p>
