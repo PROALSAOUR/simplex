@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data.status === "success") {
             document.getElementById("store_name").innerText = data.name;
             document.getElementById("store_location").innerText = data.location;
+            document.getElementById("store_check_orders").innerText = data.check_orders;
             showToast("success-toast", data.message);
         } else {
             showToast("failed-toast", data.message);

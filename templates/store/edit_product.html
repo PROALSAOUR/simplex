@@ -583,9 +583,15 @@
     </script>
     {% if messages %}
         {% for message in messages %}
-            <script>
-                showToast('success-toast', "{{ message }}");
-            </script>
+            {% if "success" in message.tags %}
+                <script>
+                    showToast('success-toast', "{{ message|escapejs }}");
+                </script>
+            {% elif "error" in message.tags %}
+                <script>
+                    showToast('failed-toast', "{{ message|escapejs }}");
+                </script>
+            {% endif %}
         {% endfor %}
     {% endif %}
 </body>

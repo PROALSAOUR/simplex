@@ -228,7 +228,7 @@ class EmployeeRegisterForm(forms.ModelForm):
 class StoreBasicForm(forms.ModelForm):
     class Meta:
         model = Store
-        fields = ['name', 'location']
+        fields = ['name', 'location', 'check_orders']
         
 # نموذج تحديث حسابات المتجر الاجتماعية
 class StoreSocialForm(forms.ModelForm):

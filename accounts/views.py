@@ -115,8 +115,9 @@ def edit_store_basic(request):
                 "status": "success",
                 "message": "تم إجراء التعديل بنجاح",
                 "name": store.name,
-                "location": store.location
-                })
+                "location": store.location,
+                "check_orders": store.get_check_orders_display()
+            })
         else:
             return JsonResponse({"status": "error", "message": form.errors})
         

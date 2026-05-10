@@ -49,6 +49,7 @@ class Store(models.Model):
     status = models.CharField(verbose_name='حالة المتجر', max_length=20, choices=[('pending', 'قيد  المراجعة'), ('active', 'مُفعل'), ('inactive', 'غير مُفعل')], default='pending')
     logo = models.ImageField(upload_to='vendors/Stores/logos' , verbose_name="صورة لوجو المتجر", default='default/default_store_logo.png') 
     location = models.CharField(max_length=255 , verbose_name="الموقع", blank=True, help_text="قم بإدخال موقع المتجر الخاص بك \n يمكنك كتابة اسم المدينة فقط أو العنوان الكامل حسب رغبتك")
+    check_orders = models.BooleanField(default=True, choices=[(False, 'غير مُفعل'), (True, 'مُفعل'),], verbose_name="تحقق من الطلبات " , help_text="في حال التفعيل سيقوم احد الموظفين لدينا من الاتصال بالزبون والتأكد من الطلب قبل ارسال اشعار اليك مما يقلل من الطلبات الوهمية")
     # جميع حقول السوشيال ميديا يتم اضافتها بعد انشاء الحساب وتفعيله الا رقم الهاتف يجب ادخاله اثناء انشاء الحساب لانه يستخدم في التواصل مع الادارة لتفعيل الحساب
     phone_number1 = models.CharField(verbose_name='رقم الهاتف',  max_length=20, help_text='قم بإدخال رقم الهاتف الخاص بمتجرك (ملاحظة : يجب ان يكون الرقم مربوطاً بواتساب لأننا سوف نقوم بالتواصل معك على واتساب لتفعيل حسابك) ')# يجب ان يقوم بإدخاله لان الادارة سوف تتواصل معه على هذا الرقم لتفعيل حسابه
     telegram = models.CharField(verbose_name='معرف التليجرام', blank=True, max_length=20, help_text="قم بإدخال رقم التليجرام الخاص بالمتجر حيث سوف يتم ارسال التنبيهات الخاصة بمتجرك من خلاله")
@@ -63,7 +64,6 @@ class Store(models.Model):
         verbose_name = 'متجر'
         verbose_name_plural = 'المتاجر'
 
-#change-later اضافة خيار التحقق من الطلبات للمتجر اذا مفعل يتم التواصل مع الزبون للتحقق من الطلب والا يصل الطلب مباشرة للبائع
 
 class Vendor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

@@ -39,11 +39,11 @@ def show_products(request):
     if gender in ['male', 'female', 'unisex']:
         products = products.filter(gender=gender)
 
-    show = request.GET.get('show')
-    if show == 'true':
-        products = products.filter(show=True)
-    elif show == 'false':
-        products = products.filter(show=False)
+    is_visible = request.GET.get('is_visible')
+    if is_visible == 'true':
+        products = products.filter(is_visible=True)
+    elif is_visible == 'false':
+        products = products.filter(is_visible=False)
 
     offer = request.GET.get('offer')
     if offer == 'true':
@@ -107,7 +107,7 @@ def show_products(request):
         'selected_status': status or '',
         'selected_type': product_type or '',
         'selected_gender': gender or '',
-        'selected_show': show or '',
+        'selected_is_visible': is_visible or '',
         'selected_offer': offer or '',
         'price_min': request.GET.get('price_min', ''),
         'price_max': request.GET.get('price_max', ''),

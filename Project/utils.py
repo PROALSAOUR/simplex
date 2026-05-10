@@ -39,4 +39,3 @@ def compress_image(image_file, quality=85, max_width=1920):
     
     return ContentFile(output.read(), name=file_name)
 
-    

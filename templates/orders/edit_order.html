@@ -1,0 +1,95 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .container {
+            text-align: center;
+            direction: rtl;
+            padding: 50px;
+            height: 100vh;
+            font-size: 24px;
+        }
+    </style> 
+</head>
+<body>
+    <div class="container">
+        <h3> صفحة عرض وتعديل الطلب </h3>
+        {% comment %} #change-later لون مميز ان كان الطلب وهمي {% endcomment %}
+        {% if  order.verification_status == 'checking' %}
+            <!-- لو المنتج لم يتم التحقق من صحته بعد لاتعرض بيانات الطلب  -->
+            <h1> هذا المنتج لايزال قيد المراجعة لذا لن تتمكن من رؤية بيانته الى حين التحقق منه </h1>
+        {% else %}
+            <div style="background-color:#e1e2e3; padding:10px; margin:10px;">
+                <h2>الحقول الي ما بتتعدل </h2>
+                <p> الرقم التسلسلي للطلب =<span> {{ order.serial_number }} </span>  </p>
+                <p> حالة التحقق =<span> {{ order.get_verification_status_display }} </span>  </p>
+                <p>
+                    تاريخ الطلب:
+                    {{ order.order_date|date:"l Y/m/d" }}
+                    الساعة {{ order.order_date|time:"g:iA" }}
+                </p>    
+            </div>
+        
+            {% if order.status != "processing" or order.verification_status == 'rejected'  %}
+                <!-- لو المنتج تم تسليمه او بعد التحقق طلع وهمي لاتعرض فورم التعديل واعرض فقط بيانات الفورم  -->
+                <div style="background-color:#e1e2e3; padding:10px; margin:10px;">
+                    <h2>الحقول الي بتتعدل </h2>
+                    <p> حالة الطلب =<span> {{ order.get_status_display }} </span>  </p>
+                    <p>  التوصيل  =<span> {{ order.get_free_delivery_display }} </span>  </p>
+                    <p> اسم الزبون =<span> {{ order.customer_name }} </span>  </p>
+                    <p> رقم الزبون =<span> {{ order.customer_phone }} </span>  </p>
+                    <p> موقع الزبون =<span> {{ order.customer_location }} </span>  </p>
+                    <p> ملاحظة =<span> {{ order.note }} </span> </p>
+                </div>
+
+            {% else %}
+                <form method="post" >
+                    {% csrf_token %}
+                    {% if edit_form.non_field_errors %}
+                        <div style="padding:10px; background-color:#f8d7da; color:#721c24; margin-bottom: 15px; border-radius:8px;">
+                            {{ edit_form.non_field_errors }}
+                        </div>
+                    {% endif %}
+                    
+                    {% for field in edit_form  %}
+                        <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                            <label>{{  field.label }}</label> 
+                            {{  field }}
+                            <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{ field.help_text }}</p>
+                            {% if  field.errors %}
+                            <div style="padding:5px; background-color:red; color:white;">{{  field.errors }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    <button type="submit"> حفظ </button>
+
+                </form>
+            {% endif %}
+        {% endif %}
+        
+
+    </div>
+
+    {% include "common/toast.html" %}
+    <script src="{% static 'js/main.js' %}"></script>
+    {% if messages %}
+        {% for message in messages %}
+            {% if "success" in message.tags %}
+                <script>
+                    showToast('success-toast', "{{ message|escapejs }}");
+                </script>
+            {% elif "error" in message.tags %}
+                <script>
+                    showToast('failed-toast', "{{ message|escapejs }}");
+                </script>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+</body>
+</html>

@@ -34,10 +34,22 @@
                         <button onclick="logo_dialog.showModal()" ><i>تعديل</i></button>
                     {% endif %}
                 </div>    
-                <p id="store_name">{{ store.name }}</p>
-                <hr>
-                <p id="store_location">{% if store.location %}{{ store.location }}{% else %}لم تتم الاضافة بعد{% endif %}</p>
-                <hr>
+                <div>
+                    اسم المتجر:
+                    <p id="store_name">{{ store.name }}</p>
+                    <hr>
+                </div>    
+                <div>
+                    العنوان:
+                    <p id="store_location">{% if store.location %}{{ store.location }}{% else %}لم تتم الاضافة بعد{% endif %}</p>
+                    <hr>
+                </div>
+                <div>
+                    التحقق من الطلبات : 
+                    <p id="store_check_orders"> {{ store.get_check_orders_display }}</p>
+                    <hr>
+                </div>
+                
                 {% if USER_LEVEL in ADVANCED_PERMISSIONS %}
                     <button onclick="basic_dialog.showModal()" ><i>تعديل</i></button>
                 {% endif %}

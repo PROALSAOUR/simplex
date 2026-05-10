@@ -4,5 +4,7 @@ from .views import *
 app_name = 'orders'
 
 urlpatterns = [
-    # path('', store_dashboard, name='store_dashboard'), 
+    path('', show_orders, name='show_orders'), 
+    path('edit/<int:oid>', edit_order, name='edit_order'), 
+    path('add/', add_order_manually, name='add_order_manually'), 
 ]

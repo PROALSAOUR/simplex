@@ -17,8 +17,8 @@
 </head>
 <body>
     <div class="container">
-        <p> صفحة المنتجات الرئيسية </p>
-        <a href="{% url 'store:add_product' %}"> اضافة منتج جديد </a>
+        <p> صفحة الطلبات الرئيسية </p>
+        <a href="{% url 'orders:add_order_manually' %}"> اضافة طلب يدوياً </a>
         
     
         {% comment %} كود تنسيق خاص بتنسيق الجدول مبدئيا  {% endcomment %}
@@ -395,7 +395,7 @@
                         <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
                     </svg>
                     <input type="text" name="search" class="sp-search-input"
-                            placeholder="ابحث عن منتج..." value="{{ search }}"
+                            placeholder="ابحث عن طلب عن طريق الرقم التسلسلي او اسم المستلم" value="{{ search }}"
                             oninput="updateBadge()">
                     <button type="submit" class="sp-search-submit">بحث</button>
                     </div>
@@ -406,7 +406,7 @@
                         <path d="M3 6h18M7 12h10M11 18h2"/>
                     </svg>
                     فلترة
-                    <span class="sp-filter-badge {% if selected_status or selected_type or selected_gender or selected_is_visible or selected_offer or price_min or price_max %}show{% endif %}" id="sp-badge">
+                    <span class="sp-filter-badge {% if selected_status or selected_verification_status %}show{% endif %}" id="sp-badge">
                         ✓
                     </span>
                     </button>
@@ -424,36 +424,17 @@
 
                     <div class="sp-sort-menu" id="sp-sort-menu">
                         {% with sorts=sort_options %}
-                        <button type="button" class="sp-sort-item {% if selected_sort == '-upload_at' %}selected{% endif %}"
-                                onclick="applySort('-upload_at')">
+                        <button type="button" class="sp-sort-item {% if selected_sort == '-order_date' %}selected{% endif %}"
+                                onclick="applySort('-order_date')">
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
                         الأحدث أولاً
                         </button>
-                        <button type="button" class="sp-sort-item {% if selected_sort == 'upload_at' %}selected{% endif %}"
-                                onclick="applySort('upload_at')">
+                        <button type="button" class="sp-sort-item {% if selected_sort == 'order_date' %}selected{% endif %}"
+                                onclick="applySort('order_date')">
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
                         الأقدم أولاً
                         </button>
-                        <button type="button" class="sp-sort-item {% if selected_sort == 'name' %}selected{% endif %}"
-                                onclick="applySort('name')">
-                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h6"/></svg>
-                        أبجدياً (أ → ي)
-                        </button>
-                        <button type="button" class="sp-sort-item {% if selected_sort == '-name' %}selected{% endif %}"
-                                onclick="applySort('-name')">
-                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h6"/></svg>
-                        أبجدياً (ي → أ)
-                        </button>
-                        <button type="button" class="sp-sort-item {% if selected_sort == 'price' %}selected{% endif %}"
-                                onclick="applySort('price')">
-                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-                        السعر: الأرخص أولاً
-                        </button>
-                        <button type="button" class="sp-sort-item {% if selected_sort == '-price' %}selected{% endif %}"
-                                onclick="applySort('-price')">
-                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-                        السعر: الأغلى أولاً
-                        </button>
+                    
                         {% endwith %}
                     </div>
                     <!-- hidden sort input -->
@@ -463,73 +444,33 @@
                 </div><!-- /topbar -->
 
                 <!-- ══ FILTER PANEL ═════════════════════════════════════ -->
-                <div class="sp-filter-panel {% if selected_status or selected_type or selected_gender or selected_is_visible or selected_offer or price_min or price_max %}open{% endif %}"
+                <div class="sp-filter-panel {% if selected_status or selected_verification_status %}open{% endif %}"
                     id="sp-filter-panel">
                     <div class="sp-filter-grid">
 
-                    <div class="sp-field">
-                        <label>نوع المنتج</label>
-                        <select name="type" class="sp-select">
-                        <option value="">الكل</option>
-                        <option value="clothes"     {% if selected_type == 'clothes' %}selected{% endif %}>ملابس</option>
-                        <option value="watches"     {% if selected_type == 'watches' %}selected{% endif %}>ساعات</option>
-                        <option value="Accessories" {% if selected_type == 'Accessories' %}selected{% endif %}>اكسسوارات</option>
-                        </select>
-                    </div>
-
-                    <div class="sp-field">
-                        <label>الجنس</label>
-                        <select name="gender" class="sp-select">
-                        <option value="">الكل</option>
-                        <option value="male"   {% if selected_gender == 'male' %}selected{% endif %}>رجالي</option>
-                        <option value="female" {% if selected_gender == 'female' %}selected{% endif %}>نسائي</option>
-                        <option value="unisex" {% if selected_gender == 'unisex' %}selected{% endif %}>كلا الجنسين</option>
-                        </select>
-                    </div>
-
-                    <div class="sp-field">
-                        <label>الحالة</label>
-                        <select name="status" class="sp-select">
-                        <option value="">الكل</option>
-                        <option value="checking" {% if selected_status == 'checking' %}selected{% endif %}>جاري المراجعة</option>
-                        <option value="approved" {% if selected_status == 'approved' %}selected{% endif %}>مقبول</option>
-                        <option value="rejected" {% if selected_status == 'rejected' %}selected{% endif %}>مرفوض</option>
-                        </select>
-                    </div>
-
-                    <div class="sp-field">
-                        <label>الظهور</label>
-                        <select name="is_visible" class="sp-select">
-                        <option value="">الكل</option>
-                        <option value="true"  {% if selected_is_visible == 'true' %}selected{% endif %}>ظاهر</option>
-                        <option value="false" {% if selected_is_visible == 'false' %}selected{% endif %}>مخفي</option>
-                        </select>
-                    </div>
-
-                    <div class="sp-field">
-                        <label>التخفيض</label>
-                        <select name="offer" class="sp-select">
-                        <option value="">الكل</option>
-                        <option value="true"  {% if selected_offer == 'true' %}selected{% endif %}>عليه تخفيض</option>
-                        <option value="false" {% if selected_offer == 'false' %}selected{% endif %}>بدون تخفيض</option>
-                        </select>
-                    </div>
-
-                    <div class="sp-field">
-                        <label>نطاق السعر</label>
-                        <div class="sp-price-row">
-                        <input type="number" name="price_min" class="sp-number"
-                                placeholder="من" min="0" value="{{ price_min }}">
-                        <span class="sp-price-sep">—</span>
-                        <input type="number" name="price_max" class="sp-number"
-                                placeholder="إلى" min="0" value="{{ price_max }}">
+                        <div class="sp-field">
+                            <label>حالة الطلب</label>
+                            <select name="status" class="sp-select">
+                                <option value="">الكل</option>
+                                <option value="checking" {% if selected_status == 'processing' %}selected{% endif %}>جاري التجهيز</option>
+                                <option value="approved" {% if selected_status == 'delivered' %}selected{% endif %}>تم التسليم</option>
+                                <option value="rejected" {% if selected_status == 'canceled' %}selected{% endif %}>ملغي</option>
+                            </select>
                         </div>
-                    </div>
+
+                        <div class="sp-field">
+                            <label>حالة التحقق</label>
+                            <select name="verification_status" class="sp-select">
+                                <option value="">الكل</option>
+                                <option value="approved" {% if selected_verification_status == 'approved' %}selected{% endif %}>طلب حقيقي</option>
+                                <option value="rejected" {% if selected_verification_status == 'rejected' %}selected{% endif %}>طلب وهمي</option>
+                            </select>
+                        </div>
 
                     </div>
 
                     <div class="sp-filter-actions">
-                    <a href="{% url 'store:show_products' %}" class="sp-btn sp-btn-ghost">مسح الكل</a>
+                    <a href="{% url 'orders:show_orders' %}" class="sp-btn sp-btn-ghost">مسح الكل</a>
                     <button type="submit" class="sp-btn sp-btn-primary">
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L19 7"/></svg>
                         تطبيق
@@ -542,7 +483,7 @@
             <!-- ══ META ROW ═════════════════════════════════════════ -->
             <div class="sp-meta">
                 <span class="sp-count">
-                    إجمالي المنتجات: <strong style="color:black;">{{ page_obj.paginator.count }}</strong> منتج
+                    إجمالي الطلبات: <strong style="color:black;">{{ page_obj.paginator.count }}</strong> منتج
                     &nbsp;·&nbsp; الصفحة <strong style="color:black;">{{ page_obj.number }}</strong> من <strong style="color:black;">{{ page_obj.paginator.num_pages }}</strong>
                 </span>
 
@@ -550,39 +491,16 @@
                 {% if selected_status %}
                     <span class="sp-chip">
                     <button class="sp-chip-close" onclick="clearParam('status')">×</button>
-                    الحالة: {{ selected_status }}
+                    حالة الطلب: {{ selected_status }}
                     </span>
                 {% endif %}
-                {% if selected_type %}
+                {% if selected_verification_status %}
                     <span class="sp-chip">
-                    <button class="sp-chip-close" onclick="clearParam('type')">×</button>
-                    النوع: {{ selected_type }}
+                    <button class="sp-chip-close" onclick="clearParam('verification_status')">×</button>
+                    حالة التحقق: {{ selected_verification_status }}
                     </span>
                 {% endif %}
-                {% if selected_gender %}
-                    <span class="sp-chip">
-                    <button class="sp-chip-close" onclick="clearParam('gender')">×</button>
-                    الجنس: {{ selected_gender }}
-                    </span>
-                {% endif %}
-                {% if selected_is_visible %}
-                    <span class="sp-chip">
-                    <button class="sp-chip-close" onclick="clearParam('is_visible')">×</button>
-                    الظهور: {% if selected_is_visible == 'true' %}ظاهر{% else %}مخفي{% endif %}
-                    </span>
-                {% endif %}
-                {% if selected_offer %}
-                    <span class="sp-chip">
-                    <button class="sp-chip-close" onclick="clearParam('offer')">×</button>
-                    {% if selected_offer == 'true' %}عليه تخفيض{% else %}بدون تخفيض{% endif %}
-                    </span>
-                {% endif %}
-                {% if price_min or price_max %}
-                    <span class="sp-chip">
-                    <button class="sp-chip-close" onclick="clearParam('price_min');clearParam('price_max')">×</button>
-                    السعر: {{ price_min|default:"0" }} — {{ price_max|default:"∞" }}
-                    </span>
-                {% endif %}
+                
                 {% if search %}
                     <span class="sp-chip">
                     <button class="sp-chip-close" onclick="clearParam('search')">×</button>
@@ -592,40 +510,29 @@
             </div>
 
             <!-- ══ TABLE ═════════════════════════════════════════════ -->
-            {% if page_obj.object_list %}
+            {% if  page_obj.object_list %}
                 <div class="sp-table-wrap">
                 <table style="width:100%; border-collapse:collapse; margin:20px;">
                     <thead>
                     <tr style="background-color:#f9f9f9; border:1px solid #ccc;">
                         <th>#</th>
-                        <th style="padding:10px; border:1px solid #ccc;">الصورة</th>
-                        <th style="padding:10px; border:1px solid #ccc;">الاسم</th>
+                        <th style="padding:10px; border:1px solid #ccc;">الرقم التسلسلي</th>
+                        <th style="padding:10px; border:1px solid #ccc;">اسم المستلم</th>
                         <th style="padding:10px; border:1px solid #ccc;">الحالة</th>
-                        <th style="padding:10px; border:1px solid #ccc;">الظهور</th>
-                        <th style="padding:10px; border:1px solid #ccc;">السعر</th>
+                        <th style="padding:10px; border:1px solid #ccc;">التحقق</th>
                         <th style="padding:10px; border:1px solid #ccc;">الإجراءات</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {% for product in page_obj %}
-                        <tr style="border:1px solid #ccc;">
+                    {% for order in page_obj %}
+                        <tr style="border:1px solid #ccc; {% if order.verification_status == 'rejected' %}background-color: rgba(220, 53, 69, 0.35);{% endif %}">
                             <td style="padding:10px; border:1px solid #ccc; text-align:center;">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
-                            <td style="padding:10px; border:1px solid #ccc; text-align:center;">
-                            <img src="{{ product.thumbnail_img.url }}" alt="{{ product.name }}" style="max-width:100px; height:auto;">
-                            </td>
-                            <td style="padding:10px; border:1px solid #ccc;">{{ product.name }}</td>
-                            <td style="padding:10px; border:1px solid #ccc;">{{ product.get_status_display }}</td>
-                            <td style="padding:10px; border:1px solid #ccc;">{{ product.get_is_visible_display }}</td>
-                            <td style="padding:10px; border:1px solid #ccc;">${{ product.get_price }}</td>
+                            <td style="padding:10px; border:1px solid #ccc;">{{ order.serial_number }}</td>
+                            <td style="padding:10px; border:1px solid #ccc;">{{ order.customer_name }}</td>
+                            <td style="padding:10px; border:1px solid #ccc;">{{ order.get_status_display }}</td>
+                            <td style="padding:10px; border:1px solid #ccc;">{{ order.get_verification_status_display }}</td>
                             <td style="padding:10px; border:1px solid #ccc;">
-                            <a href="{% url "store:edit_product" product.id %}">تعديل</a>
-                            {% if USER_LEVEL in ADVANCED_PERMISSIONS %}
-                                <button type="button" onclick="openDeleteProductDialog(this)"
-                                    data-id="{{ product.id }}" data-name="{{ product.name }}"
-                                    data-redirect="{% url "store:show_products" %}">حذف
-                                </button>
-                            {% endif %}
-                            <a href="{% url "store:view_product" product.id %}">معاينة</a>
+                                <a href="{% url "orders:edit_order" order.id %}">عرض</a>
                             </td>
                         </tr>
                     {% endfor %}
@@ -638,7 +545,7 @@
                 <svg width="56" height="56" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2">
                     <path d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                <p>لا توجد منتجات تطابق الفلترة المحددة</p>
+                <p>لا توجد طلبات تطابق الفلترة المحددة</p>
                 </div>
             {% endif %}
 
@@ -764,7 +671,6 @@
             {% endif %}
         {% endfor %}
     {% endif %}
-    {% include "components/store/dialogs/delete_product_dialog.html" %}
 
 </body>
 </html>

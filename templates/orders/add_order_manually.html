@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .container {
+            text-align: center;
+            direction: rtl;
+            padding: 50px;
+            height: 100vh;
+            font-size: 24px;
+        }
+    </style> 
+</head>
+<body>
+    <div class="container">
+        <p> صفحة اضافة طلب يدويا </p>
+        <form method="post">
+            {% csrf_token %}
+            {% if order_form.non_field_errors %}
+                <div style="padding:10px; background-color:#f8d7da; color:#721c24; margin-bottom: 15px; border-radius:8px;">
+                    {{ order_form.non_field_errors }}
+                </div>
+            {% endif %}
+            {% if item_form.non_field_errors %}
+                <div style="padding:10px; background-color:#f8d7da; color:#721c24; margin-bottom: 15px; border-radius:8px;">
+                    {{ item_form.non_field_errors }}
+                </div>
+            {% endif %}
+            {% for field in order_form  %}
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  field.label }}</label> 
+                    {{  field }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{ field.help_text }}</p>
+                    {% if  field.errors %}
+                    <div style="padding:5px; background-color:red; color:white;">{{  field.errors }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            {% for field in item_form %}
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <label>{{  field.label }}</label> 
+                    {{  field }}
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{ field.help_text }}</p>
+                    {% if  field.errors %}
+                    <div style="padding:5px; background-color:red; color:white;">{{  field.errors }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit"> اضافة </button>
+
+        </form>
+
+    </div>
+    {% include "common/toast.html" %}
+    <script src="{% static 'js/main.js' %}"></script>
+    {% if messages %}
+        {% for message in messages %}
+            {% if "success" in message.tags %}
+                <script>
+                    showToast('success-toast', "{{ message|escapejs }}");
+                </script>
+            {% elif "error" in message.tags %}
+                <script>
+                    showToast('failed-toast', "{{ message|escapejs }}");
+                </script>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+</body>
+</html>
