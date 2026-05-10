@@ -1,12 +1,14 @@
 from django.shortcuts import redirect, render
-from .forms import *
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
 from django.core.exceptions import ValidationError
-from .validators import validate_username, get_redirect_url_for_user
-from .decorators import vendor_only , advanced_permission_required
 from django.contrib.auth.decorators import login_required
-from .models import Vendor
+from django.views.decorators.http import require_POST
+
+from accounts.models import Vendor
+from accounts.forms import *
+from accounts.validators import validate_username, get_redirect_url_for_user
+from accounts.decorators import vendor_only , advanced_permission_required
 
 @login_required(login_url='accounts:log_in') #تمنع الوصول تلقائيًا لأي مستخدم غير مسجل دخول، وتعيد توجيهه إلى صفحة التسجيل   
 @vendor_only
@@ -33,6 +35,7 @@ def account_details(request):
 
 @login_required(login_url='accounts:log_in') 
 @vendor_only
+@require_POST
 def edit_account_details(request):
     """
     الدالة المسؤولة عن تعديل بيانات الحساب الخاص بالبائع 
@@ -97,6 +100,7 @@ def store_details(request):
 @login_required(login_url='accounts:log_in')
 @vendor_only
 @advanced_permission_required()
+@require_POST
 def edit_store_basic(request):
     """
     الدالة المسؤولة عن تعديل بيانات المتجر الاساسية وهي الاسم والموقع 
@@ -122,6 +126,7 @@ def edit_store_basic(request):
 @login_required(login_url='accounts:log_in')
 @vendor_only
 @advanced_permission_required()
+@require_POST
 def edit_store_social(request):
     """
     الدالة المسؤولة عن تعديل حسابات المتجر الاجتماعية  
@@ -149,6 +154,7 @@ def edit_store_social(request):
 @login_required(login_url='accounts:log_in')
 @vendor_only
 @advanced_permission_required()
+@require_POST
 def edit_store_logo(request):
     """
     الدالة المسؤولة عن تعديل لوجو المتجر  
@@ -171,6 +177,7 @@ def edit_store_logo(request):
 
 @login_required(login_url='accounts:log_in')
 @vendor_only
+@require_POST
 def add_employee(request):
     "دالة وظيفتها اضافة موظف جديد للمتجر, لايمكن الا لمالك المتجر "
     if request.method == "POST":
@@ -203,6 +210,7 @@ def add_employee(request):
 
 @login_required(login_url='accounts:log_in')
 @vendor_only
+@require_POST
 def remove_employee(request):
     "الدالة المسؤولة عن ازالة موظف من المتجر, لايمكن الا لمالك المتجر "
     if request.method == "POST":
@@ -238,6 +246,7 @@ def remove_employee(request):
         
 @login_required(login_url='accounts:log_in')
 @vendor_only
+@require_POST
 def edit_employee(request):
     "الدالة المسؤولة عن تعديل صلاحيات موظف من المتجر, لايمكن الا لمالك المتجر "
     if request.method == "POST":
