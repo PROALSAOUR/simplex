@@ -8,11 +8,7 @@ from store.models import Product, ProductColor, ProductSize
 
 
 class OrderRegisterForm(forms.ModelForm):
-    """
-    Form used for creating an order from either a customer page or the
-    vendor dashboard. Pass store=... and is_vendor=True when the creator is a
-    vendor.
-    """
+    """Customer data form used when creating an order."""
 
     class Meta:
         model = Order
@@ -30,39 +26,32 @@ class OrderRegisterForm(forms.ModelForm):
     def clean_customer_phone(self):
         return validate_phone_number(self.cleaned_data["customer_phone"])
 
-    def clean(self):
-        cleaned_data = super().clean()
-        if self.store is None:
-            raise ValidationError("يجب تحديد المتجر قبل إنشاء الطلب.")
-        return cleaned_data
+    def clean_customer_name(self):
+        customer_name = self.cleaned_data["customer_name"].strip()
 
-    def save(self, commit=True, order_item_form=None):
-        order = super().save(commit=False)
-        order.store = self.store
-        order.serial_number = order.create_serial_number()
-        order.note = self.cleaned_data.get("note", "")
+        if customer_name.isdigit():
+            raise ValidationError("اسم المستلم لا يجب أن يكون رقما فقط.")
 
-        if self.is_vendor:
-            order.verification_status = "approved"
-        else:
-            order.verification_status = "checking" if self.store.check_orders else "approved"
+        if len(customer_name) < 4:
+            raise ValidationError("اسم المستلم يجب أن يكون 4 أحرف أو أكثر.")
 
-        if order_item_form is not None and not order_item_form.is_valid():
-            raise ValueError("Order item form must be valid before saving the order.")
+        return customer_name
 
-        if order_item_form is not None:
-            order.free_delivery = order_item_form.cleaned_data["product"].free_delivery
+    def clean_customer_location(self):
+        customer_location = self.cleaned_data["customer_location"].strip()
 
-        if not commit:
-            return order
+        if customer_location.isdigit():
+            raise ValidationError("العنوان لا يجب أن يكون رقما فقط.")
 
-        with transaction.atomic():
-            order.save()
-            if order_item_form is not None:
-                order_item_form.save(order=order)
-        return order
+        if len(customer_location) < 3:
+            raise ValidationError("العنوان يجب أن يكون 3 أحرف أو أكثر.")
+
+        return customer_location
+
 
 class OrderItemRegisterForm(forms.ModelForm):
+    """نموذج عنصر الطلب"""
+
     product = forms.ModelChoiceField(queryset=Product.objects.none())
     product_color = forms.ModelChoiceField(queryset=ProductColor.objects.none())
     product_size = forms.ModelChoiceField(
@@ -78,19 +67,19 @@ class OrderItemRegisterForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.store = store
 
-        products = Product.objects.all()
+        products = Product.objects.filter(is_visible=True)
         if store is not None:
             products = products.filter(store=store)
         self.fields["product"].queryset = products
 
-        colors = ProductColor.objects.filter(available=True)
+        colors = ProductColor.objects.filter(available=True, product__is_visible=True)
         if product is not None:
             colors = colors.filter(product=product)
         elif store is not None:
             colors = colors.filter(product__store=store)
         self.fields["product_color"].queryset = colors
 
-        sizes = ProductSize.objects.filter(available=True)
+        sizes = ProductSize.objects.filter(available=True, product_color__available=True)
         if product is not None:
             sizes = sizes.filter(product_color__product=product)
         elif store is not None:
@@ -111,13 +100,18 @@ class OrderItemRegisterForm(forms.ModelForm):
             if product_color.product_id != product.id:
                 self.add_error("product_color", "هذا اللون لا يتبع المنتج المحدد.")
             elif not product_color.available:
-                self.add_error("product_color", "هذا اللون غير متوفر حالياً.")
+                self.add_error("product_color", "هذا اللون غير متوفر حاليا.")
+
+        if product_color:
+            has_sizes = product_color.sizes.filter(available=True).exists()
+            if has_sizes and not product_size:
+                self.add_error("product_size", "يرجى اختيار المقاس.")
 
         if product_color and product_size:
             if product_size.product_color_id != product_color.id:
                 self.add_error("product_size", "هذا المقاس لا يتبع اللون المحدد.")
             elif not product_size.available:
-                self.add_error("product_size", "هذا المقاس غير متوفر حالياً.")
+                self.add_error("product_size", "هذا المقاس غير متوفر حاليا.")
 
         if product and qty and qty > product.max_quantity_per_order:
             self.add_error(
@@ -138,7 +132,7 @@ class OrderItemRegisterForm(forms.ModelForm):
         order_item = super().save(commit=False)
         order_item.order = order
         order_item.product = product
-        order_item.image = product_color.image or product.thumbnail_img
+        order_item.image = product_color.image
         order_item.color = product_color.color
         order_item.size = product_size.size if product_size else ""
         order_item.purchase_price = product.purchase_price
@@ -147,6 +141,7 @@ class OrderItemRegisterForm(forms.ModelForm):
         if commit:
             order_item.save()
         return order_item
+
 
 class OrderEditForm(forms.ModelForm):
     class Meta:

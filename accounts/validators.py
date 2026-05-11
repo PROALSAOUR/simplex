@@ -22,23 +22,22 @@ def validate_username(username, current_user_id=None):
 
 def validate_phone_number(phone_number):
     """هذه الدالة تتحقق من صحة رقم الهاتف بحيث يكون رقم ليبي صالح ويتم تحويله لصيغة دولية موحدة"""
+
     try:
-        parsed_phone = phonenumbers.parse(phone_number, 'LY') # يتم قبول ارقام ليبية فقط
-        if not phonenumbers.is_valid_number(parsed_phone):
-            raise ValidationError("رقم الهاتف غير صالح.")
-        
-        # تحويل الرقم لصيغة موحدة دولية (+218...)
-        phone_number = phonenumbers.format_number(
-            parsed_phone,
-            phonenumbers.PhoneNumberFormat.E164
-        )
-            
+        parsed_phone = phonenumbers.parse(phone_number, "LY")
+
     except phonenumbers.NumberParseException:
         raise ValidationError("يرجى إدخال رقم هاتف صحيح.")
-    except Exception:
-        raise ValidationError( 'حدث خطأ غير متوقع، الرجاء المحاولة لاحقًا')
-        
-    return phone_number
+
+    # التحقق من كونه رقمًا صالحًا فعلاً
+    if not phonenumbers.is_valid_number(parsed_phone):
+        raise ValidationError("رقم الهاتف غير صالح.")
+
+    # إرجاع الرقم بصيغة دولية موحدة
+    return phonenumbers.format_number(
+        parsed_phone,
+        phonenumbers.PhoneNumberFormat.E164
+    )
 
 def get_redirect_url_for_user(user):
     """

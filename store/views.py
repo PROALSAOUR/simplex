@@ -10,6 +10,7 @@ import hashlib, json
 from Project.utils import compress_image
 from accounts.decorators import vendor_only , advanced_permission_required
 from store.validators import validate_image_file
+from accounts.models import Vendor
 from store.models import *
 from store.forms import ProductRegisterForm
 
@@ -407,9 +408,27 @@ def view_product(request, pid):
     """الدالة المسؤولة عن عرض صفحة المنتج للزبون ليتمكن من اجراء عملية الشراء منها"""
     product = get_object_or_404(Product, id=pid)
     product_images = product.images.all()
+    colors = product.colors.filter(available=True).prefetch_related(
+        db_models.Prefetch(
+            'sizes',
+            queryset=ProductSize.objects.filter(available=True),
+        )
+    )
+    is_product_owner = False
+    if request.user.is_authenticated:
+        try:
+            is_product_owner = request.user.vendor.store == product.store
+        except Vendor.DoesNotExist:
+            pass
+    # [يعرض المنتج دائما للبائع لكن مع الاخطاء الخاصة به] [لعرض المنتج: [للزبون يجب ان يكون موافق عليه من الادارة ومعروض من البائع 
+    can_view = is_product_owner or (product.is_visible and product.status == "approved")
 
     context = {
         'product': product,
+        'is_product_owner': is_product_owner,
+        "can_view": can_view,
         'product_images': product_images,
+        'colors': colors,
+        'product_price': str(product.get_price()),
     }
     return render(request, 'store/view_product.html', context)

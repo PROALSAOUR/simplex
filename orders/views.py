@@ -3,7 +3,10 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import JsonResponse, Http404
 from django.contrib import messages
+from django.db import transaction
 from django.db.models import Q
+from django.views.decorators.http import require_POST
+import json
 
 
 from orders.models import *
@@ -92,11 +95,98 @@ def add_order_manually(request):
     }
     return render(request, "orders/add_order_manually.html", context)
 
+# هذه الدالة لاتتطلب تسجيل دخول لأنها مخصصة للزبائن
+@require_POST
+def add_order(request):
+    """ الدالة المسؤولة عن انشاء طلب عن طريق الزبون من صفحة عرض المنتج """
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({
+            "success": False,
+            "message": "صيغة البيانات المرسلة غير صحيحة.",
+        }, status=400)
+
+    customer_data = {
+        "customer_name": data.get("customer_name", ""),
+        "customer_phone": data.get("customer_phone", ""),
+        "customer_location": data.get("customer_location", ""),
+    }
+    items_data = data.get("items", [])
+
+    order_form = OrderRegisterForm(customer_data)
+    item_forms = []
+    item_errors = {}
+
+    if not isinstance(items_data, list) or not items_data:
+        item_errors["__all__"] = ["السلة فارغة."]
+        items_data = []
+
+    for index, item in enumerate(items_data):
+        form_data = {
+            "product": item.get("product_id", ""),
+            "product_color": item.get("color_id", ""),
+            "product_size": item.get("size_id", ""),
+            "qty": item.get("qty", ""),
+        }
+        item_form = OrderItemRegisterForm(form_data)
+        item_forms.append(item_form)
+        if not item_form.is_valid():
+            item_errors[str(index)] = {
+                field: [str(error) for error in errors]
+                for field, errors in item_form.errors.items()
+            }
+
+    form_is_valid = order_form.is_valid()
+    items_are_valid = not item_errors
+
+    if form_is_valid and items_are_valid:
+        products = [item_form.cleaned_data["product"] for item_form in item_forms]
+        store = products[0].store
+
+        if any(product.store_id != store.id for product in products):
+            return JsonResponse({
+                "success": False,
+                "message": "لا يمكن إنشاء طلب يحتوي على منتجات من أكثر من متجر.",
+                "errors": {},
+                "item_errors": {"__all__": ["منتجات السلة يجب أن تكون من نفس المتجر."]},
+            })
+
+        with transaction.atomic():
+            order = order_form.save(commit=False)
+            order.store = store
+            order.serial_number = order.create_serial_number()
+            order.note = ""
+            order.free_delivery = products[0].free_delivery
+            order.verification_status = "checking" if store.check_orders else "approved"
+            order.save()
+
+            for item_form in item_forms:
+                item_form.save(order=order)
+
+        return JsonResponse({
+            "success": True,
+            "message": "شكرا لك، تم إرسال طلبك بنجاح.",
+            "order_id": order.id,
+            "serial_number": order.serial_number,
+        })
+
+    return JsonResponse({
+        "success": False,
+        "message": "يرجى تصحيح البيانات وإعادة إرسال الطلب.",
+        "errors": {
+            field: [str(error) for error in errors]
+            for field, errors in order_form.errors.items()
+        },
+        "item_errors": item_errors,
+    })
+    
 @login_required(login_url='accounts:log_in')
 @vendor_only
 def edit_order(request, oid):
     """الدالة المسؤولة عن صفحة التعديل الخاصة بالمنتج"""
     order = get_object_or_404(Order, id=oid)
+    items = order.items.all()
         
     # تحقق ان المستخدم بائع وان المنتج الذي يريد تعديله تابع لمتجره
     if  request.user.userprofile.user_type == 'vendor':
@@ -119,5 +209,6 @@ def edit_order(request, oid):
     context = {
         "order": order,
         "edit_form": form,
+        "items": items
     }
     return render(request, 'orders/edit_order.html', context)

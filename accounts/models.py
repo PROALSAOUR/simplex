@@ -64,7 +64,6 @@ class Store(models.Model):
         verbose_name = 'متجر'
         verbose_name_plural = 'المتاجر'
 
-
 class Vendor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, verbose_name='الاسم الثنائي', help_text='قم بإدخال اسمك الثنائي (الاسم الأول والاسم الأخير)')

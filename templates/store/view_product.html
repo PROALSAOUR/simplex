@@ -1,40 +1,539 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>{{ product.name }}</title>
     <style>
-        .container {
-            text-align: center;
-            direction: rtl;
-            padding: 50px;
-            height: 100vh;
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Tahoma, Arial, sans-serif;
+            background: #f5f7fb;
+            color: #1f2937;
+        }
+
+        .page {
+            width: min(1100px, calc(100% - 24px));
+            margin: 0 auto;
+            padding: 24px 0 48px;
+        }
+
+        .product {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .gallery,
+        .panel,
+        .cart {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .main-image {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            background: #eef2f7;
+        }
+
+        .thumbs {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .thumbs img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 28px;
+            line-height: 1.4;
+        }
+
+        .price {
             font-size: 24px;
+            font-weight: 700;
+            color: #0f766e;
+            margin: 10px 0;
+        }
+
+        .description {
+            line-height: 1.8;
+            color: #4b5563;
+            margin-bottom: 18px;
+        }
+
+        .field {
+            margin-top: 16px;
+        }
+
+        .field label,
+        .field-title {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .choices {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .choice input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .choice span {
+            display: inline-flex;
+            min-height: 40px;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #fff;
+            transition: 0.15s ease;
+        }
+
+        .color-choice span {
+            width: 92px;
+            min-height: auto;
+            padding: 8px;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .color-choice img {
+            width: 72px;
+            height: 72px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .choice input:checked + span {
+            border-color: #0f766e;
+            background: #e6fffb;
+            color: #0f766e;
+            box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.12);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .size-group {
+            display: none;
+        }
+
+        .size-group.active {
+            display: flex;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        input[type="tel"],
+        textarea {
+            width: 100%;
+            min-height: 42px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 10px 12px;
+            font: inherit;
+        }
+
+        .quantity-control {
+            display: inline-grid;
+            grid-template-columns: 42px 58px 42px;
+            align-items: center;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .quantity-control button {
+            width: 42px;
+            height: 42px;
+            border: 0;
+            background: #f8fafc;
+            color: #1f2937;
+            font: inherit;
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        .quantity-control button:hover {
+            background: #eef2f7;
+        }
+
+        .quantity-control input {
+            width: 58px;
+            min-height: 42px;
+            border: 0;
+            border-right: 1px solid #e5e7eb;
+            border-left: 1px solid #e5e7eb;
+            border-radius: 0;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .quantity-control input::-webkit-outer-spin-button,
+        .quantity-control input::-webkit-inner-spin-button {
+            margin: 0;
+            -webkit-appearance: none;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 76px;
+        }
+
+        .button {
+            width: 100%;
+            border: 0;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-top: 18px;
+            background: #0f766e;
+            color: #fff;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background: #115e59;
+        }
+
+        .cart {
+            display: none;
+            margin-top: 24px;
+        }
+
+        .cart.show {
+            display: block;
+        }
+
+        .cart-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 18px;
+        }
+
+        .cart-items {
+            display: grid;
+            gap: 10px;
+        }
+
+        .cart-item {
+            display: grid;
+            grid-template-columns: 64px 1fr auto;
+            gap: 10px;
+            align-items: center;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .cart-item img {
+            width: 64px;
+            height: 64px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .cart-item h3 {
+            margin: 0 0 4px;
+            font-size: 16px;
+        }
+
+        .cart-item p {
+            margin: 2px 0;
+            color: #4b5563;
+            font-size: 14px;
+        }
+
+        .remove {
+            border: 1px solid #fecaca;
+            background: #fff1f2;
+            color: #b91c1c;
+            border-radius: 6px;
+            padding: 8px 10px;
+            cursor: pointer;
+        }
+
+        .summary {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid #e5e7eb;
+            font-weight: 700;
+        }
+
+        .empty-message {
+            color: #6b7280;
+            margin: 0;
+        }
+
+        .form-error {
+            display: block;
+            margin-top: 6px;
+            color: #b91c1c;
+            font-size: 14px;
+        }
+
+        .order-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            place-items: center;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.42);
+        }
+
+        .order-modal.show {
+            display: grid;
+        }
+
+        .order-modal-content {
+            width: min(420px, 100%);
+            border-radius: 8px;
+            background: #fff;
+            border: 1px solid #a7f3d0;
+            padding: 28px 22px;
+            text-align: center;
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.22);
+        }
+
+        .order-modal-icon {
+            display: inline-grid;
+            width: 56px;
+            height: 56px;
+            place-items: center;
+            border-radius: 999px;
+            background: #dcfce7;
+            color: #047857;
+            font-size: 30px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .order-modal-content h3 {
+            margin: 0 0 8px;
+            color: #047857;
+            font-size: 22px;
+        }
+
+        .order-modal-content p {
+            margin: 0;
+            color: #374151;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 760px) {
+            .product,
+            .cart-layout {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        {% if product.is_visible %}
-            <p>هذه صفحة المنتج التي تظهر للزبون </p>
-            <p> اسم المنتج <span> {{ product.name }} </span> </P>
-            <p> وصف المنتج <span> {{ product.description }} </span> </P>
-            <p> السعر <span> {{ product.get_price }} </span> </P>
-            <p> توصيل مجاني  <span> {{ product.free_delivery }} </span> </P>
-            <p> النوع  <span> {{ product.type }} </span> </P>
-            <p> التصنيف  <span> {{ product.gender }} </span> </P>
-            <p>  المتجر <span> {{ product.store.name }} </span> </P>
-            <img src="{{ product.thumbnail_img.url }}" width="200" height="200" alt="{{ product.name }}">   
-            {% for img in product_images  %}
-            <div style="background-color:gray; margin:10px; padding:10px;">
-                <p> الترتيب <span> {{ img.priority }} </span> </p>
-                <img src="{{ img.image.url }}" width="200" height="200" alt="{{ product.name }}"> 
-            </div>  
-            {% endfor %}
+    <main class="page">
+        {% if can_view %}
+            {% if is_product_owner %}
+                {% if  product.status == "checking" %}
+                    <h1 style="background-color:red;color:#ffffff; text-align:center; padding:10px;"> هذا المنتج قيد المراجعة ولن يظهر لزبائنك الى ان تتم الموافقة عليه</h1>
+                {% elif product.status == "rejected" %}
+                <div style="background-color:#d9534f;color:#ffffff;text-align:center;padding:10px;">
+                    <h1 >
+                        تم رفض هذا المنتج
+                    </h1>
+                    <p style="margin-top:10px;">
+                        تم رفض هذا المنتج بعد المراجعة، يرجى مراجعة السبب التالي وإجراء التعديلات المطلوبة ثم إعادة رفع المنتج ليتم مراجعته من جديد:
+                    </p>
+                    <div style="background:#f8d7da;padding:10px;border-radius:5px;">
+                        <strong>سبب الرفض:</strong>
+                        <p>{{ product.rejected_cause }}</p>
+                    </div>
+                    <p style="margin-top:10px;">
+                        بعد التعديل يمكنك إعادة إرسال المنتج ليتم مراجعته مرة أخرى.
+                    </p>
+                </div>
+                {% elif not product.is_visible %} 
+                    <h1 style="background-color:red;color:#ffffff; text-align:center; padding:10px;"> هذا المنتج مخفي</h1>
+                {% endif %}
+            {% endif %}
+            <section class="product">
+                <div class="gallery">
+                    <img class="main-image" src="{{ product.thumbnail_img.url }}" alt="{{ product.name }}">
+                    <div class="thumbs">
+                        <img src="{{ product.thumbnail_img.url }}" alt="{{ product.name }}">
+                        {% for img in product_images %}
+                            <img src="{{ img.image.url }}" alt="{{ product.name }}">
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h1>{{ product.name }}</h1>
+                    <div class="price"><span id="product-price">{{ product_price }}</span> د.ل</div> {% comment %}  #change-later غير طريقة جلب  السعر هون {% endcomment %}
+                    <div class="description">{{ product.description|safe }}</div>
+
+                    {% if colors %}
+                        <form
+                            id="product-form"
+                            data-product-id="{{ product.id }}"
+                            data-product-name="{{ product.name }}"
+                            data-product-price="{{ product_price }}" 
+                            data-product-image="{{ product.thumbnail_img.url }}"
+                        > {% comment %}  #change-later غير طريقة جلب  السعر هون {% endcomment %}
+                            <div class="field">
+                                <span class="field-title">اللون</span>
+                                <div class="choices" id="color-choices">
+                                    {% for color in colors %}
+                                        <label class="choice color-choice">
+                                            <input
+                                                type="radio"
+                                                name="color"
+                                                value="{{ color.id }}"
+                                                data-color-name="{{ color.color }}"
+                                                data-color-image="{% if color.image %}{{ color.image.url }}{% else %}{{ product.thumbnail_img.url }}{% endif %}"
+                                                {% if forloop.first %}checked{% endif %}
+                                            >
+                                            <span>
+                                                <img
+                                                    src="{% if color.image %}{{ color.image.url }}{% else %}{{ product.thumbnail_img.url }}{% endif %}"
+                                                    alt="{{ color.color }}"
+                                                >
+                                                {{ color.color }}
+                                            </span>
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div class="field" id="sizes-wrapper">
+                                <span class="field-title">المقاس</span>
+                                {% for color in colors %}
+                                    {% with sizes=color.sizes.all %}
+                                        {% if sizes %}
+                                            <div class="choices size-group" data-color-id="{{ color.id }}">
+                                                {% for size in sizes %}
+                                                    <label class="choice">
+                                                        <input
+                                                            type="radio"
+                                                            name="size_{{ color.id }}"
+                                                            value="{{ size.id }}"
+                                                            data-size-name="{{ size.size }}"
+                                                            {% if forloop.first %}checked{% endif %}
+                                                        >
+                                                        <span>{{ size.size }}</span>
+                                                    </label>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endfor %}
+                            </div>
+
+                            <div class="field">
+                                <label for="quantity">الكمية</label>
+                                <div class="quantity-control">
+                                    <button type="button" id="qty-minus" aria-label="إنقاص الكمية">-</button>
+                                    <input
+                                        id="quantity"
+                                        type="number"
+                                        min="1"
+                                        max="{{ product.max_quantity_per_order }}"
+                                        value="1"
+                                        required
+                                    >
+                                    <button type="button" id="qty-plus" aria-label="زيادة الكمية">+</button>
+                                </div>
+                            </div>
+
+                            <button class="button" type="submit">إضافة إلى السلة</button>
+                        </form>
+                    {% else %}
+                        <p class="empty-message">لا توجد ألوان متوفرة لهذا المنتج حاليا.</p>
+                    {% endif %}
+                </div>
+            </section>
+
+            <div class="order-modal" id="order-modal" aria-live="polite">
+                <div class="order-modal-content">
+                    <div class="order-modal-icon">✓</div>
+                    <h3>شكرا لك</h3>
+                    <p id="order-message"></p>
+                </div>
+            </div>
+
+            <section class="cart" id="cart">
+                <h2>السلة</h2>
+                <div class="cart-layout">
+                    <form id="order-form" action="{% url 'orders:add_order' %}">
+                        {% csrf_token %}
+                        <div class="field">
+                            <label for="customer-name">الاسم</label>
+                            <input id="customer-name" type="text" name="customer_name"  placeholder="أدخل اسم المستلم الثنائي " required>
+                            <small class="form-error" id="error-customer_name"></small>
+                        </div>
+                        <div class="field">
+                            <label for="customer-phone">رقم الهاتف</label>
+                            <input id="customer-phone" type="tel" name="customer_phone" placeholder="أدخل رقم الهاتف مثل 0912345678" required>
+                            <small class="form-error" id="error-customer_phone"></small>
+                        </div>
+                        <div class="field">
+                            <label for="customer-location">العنوان</label>
+                            <textarea id="customer-location" name="customer_location" placeholder="ادخل اسم المدينة والحي الخاص بك" required></textarea>
+                            <small class="form-error" id="error-customer_location"></small>
+                        </div>
+                        <small class="form-error" id="error-order"></small>
+                        <button class="button" type="submit">إرسال الطلب</button>
+                    </form>
+
+                    <div>
+                        <div class="cart-items" id="cart-items"></div>
+                        <div class="summary">
+                            <span>عدد القطع: <strong id="total-qty">0</strong></span>
+                            <span>الإجمالي: <strong id="total-price">0.00</strong> د.ل</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
         {% else %}
-            <h1> عذا يبدو ان صاحب المتجر  قام بإزالة هذا المنتج </h1>
+            <h1> عذرا يبدو ان صاحب المتجر  قام بإزالة هذا المنتج </h1>
         {% endif %}
-    </div>
+    </main>
+
+    <script src="{% static 'js/store/product_cart.js' %}"></script>
 </body>
 </html>

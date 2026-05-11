@@ -70,6 +70,20 @@
 
                 </form>
             {% endif %}
+            <h1> عناصر الطلب </h1>
+            {% for item in items %}
+                <div style="background-color:#f3f3f3; padding:10px; margin:10px;">
+                    <p> المنتج = <span> {{ item.product }} </span> </p>
+                    {% if item.image %}
+                        <img src="{{ item.image.url }}" width="100">
+                    {% else %}
+                        <p>لا توجد صورة لهذا العنصر</p>
+                    {% endif %}
+                    <p> اللون = <span> {{ item.color }} </span> </p>
+                    <p> المقاس = <span> {{ item.size }} </span> </p>
+                    <p> الكمية = <span>{{ item.qty }} </span> </p>
+                </div>
+            {% endfor %}
         {% endif %}
         
 
