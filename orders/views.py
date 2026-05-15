@@ -90,7 +90,12 @@ def add_order_manually(request):
         order_form = OrderRegisterForm(store=store, is_vendor=True)
         item_form = OrderItemRegisterForm(store=store)
         
-        products = store.products.filter(status="approved", is_visible=True)
+        products = store.products.filter(status="approved", is_visible=True).prefetch_related("colors__sizes")
+        for product in products:
+            product.available_colors = [
+                color for color in product.colors.all()
+                if color.available
+            ]
 
     context = {
         "order_form": order_form,

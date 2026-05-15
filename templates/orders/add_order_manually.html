@@ -94,88 +94,103 @@
 
             {% for product in products %}
 
-            <div class="product-container">
+                <div class="product-container">
 
-                <!-- عند الضغط هنا تظهر التفاصيل -->
-                <div class="product-details">
-                    <img src="{{ product.thumbnail_img.url }}" width="100">
-                    <div>
-                        <p>{{ product.name }}</p>
-                        <p>{{ product.get_price }}</p>
-                    </div>
-                </div>
-                <!-- تفاصيل المنتج -->
-                <div class="product-colors">
-                    <div class="field">
-                        <label>اللون</label>
-                        <select class="color-select">
-                            {% for color in product.colors.all %}
-                                {% if color.available %}
-                                    <option 
-                                        value="{{ color.id }}"
-                                        data-sizes="{% for size in color.sizes.all %}{{ size.size }}|{% endfor %}"
-                                    >
-                                        {{ color.color }}
-                                    </option>
-                                {% endif %}
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="field">
-                        <label>المقاس</label>
-                        <select class="size-select"></select>
-                    </div>
-                                                        
-                    <div class="field">
-                        <label>الكمية</label>
-                        <div class="quantity-box">
-                            <button type="button" class="minus-btn">-</button>
-                            <input type="number" value="1" min="1" max="{{ product.max_quantity_per_order }}" class="quantity-input" >
-                            <button type="button" class="plus-btn">+</button>
+                    <div class="product-details">
+                        <img src="{{ product.thumbnail_img.url }}" width="100">
+                        <div>
+                            <p>{{ product.name }}</p>
+                            <p>{{ product.get_price }}</p>
                         </div>
                     </div>
+                    <!-- تفاصيل المنتج -->
+                    <div class="product-colors">
+                        {% if product.available_colors %}
+                        
+                            <div class="field">
+                                <label>اللون</label>
+                                <select class="color-select">
+                                    {% for color in product.available_colors %}
+                                        
+                                        <option 
+                                            value="{{ color.id }}"
+                                            data-sizes="{% for size in color.sizes.all %}{{ size.size }}|{% endfor %}"
+                                        >
+                                            {{ color.color }}
+                                        </option>
+                                        
+                                    {% endfor %}
+                                </select>
+                            </div>
 
-                    <button class="add-cart-btn">
-                        اضافة الى السلة
-                    </button>
+                            <div class="field size-field">
+                                <label>المقاس</label>
+                                <select class="size-select"></select>
+                            </div>
+                                                                
+                            <div class="field">
+                                <label>الكمية</label>
+                                <div class="quantity-box">
+                                    <button type="button" class="minus-btn">-</button>
+                                    <input type="number" value="1" min="1" max="{{ product.max_quantity_per_order }}" class="quantity-input" >
+                                    <button type="button" class="plus-btn">+</button>
+                                </div>
+                            </div>
+
+                            <button class="add-cart-btn">
+                                اضافة الى السلة
+                            </button>
+                        {% else %}
+                            لايوجد الوان متوفرة لهذا المنتج
+                        {% endif %}
+                    </div>
 
                 </div>
 
-            </div>
-
             {% endfor %}
-
 
             <script>
                 document.querySelectorAll(".product-container").forEach(product => {
 
                     let colorSelect = product.querySelector(".color-select");
                     let sizeSelect = product.querySelector(".size-select");
+                    let sizeField = product.querySelector(".size-field");
 
+                    if(!colorSelect || !sizeSelect || !sizeField){
+                        return;
+                    }
 
                     // دالة تحديث المقاسات حسب اللون
                     function updateSizes(){
 
-                        // تنظيف القائمة
                         sizeSelect.innerHTML = "";
 
-                        // الحصول على اللون المحدد
+                        // تأكد أن هناك خيارات
+                        if(colorSelect.options.length === 0){
+                            sizeField.style.display = "none";
+                            return;
+                        }
+
                         let selectedOption = colorSelect.options[colorSelect.selectedIndex];
 
-                        // الحصول على المقاسات
-                        let sizes = selectedOption.dataset.sizes
+                        if(!selectedOption){
+                            sizeField.style.display = "none";
+                            return;
+                        }
+
+                        let sizesRaw = selectedOption.dataset.sizes || "";
+
+                        let sizes = sizesRaw
                             .split("|")
                             .filter(size => size.trim() !== "");
 
-
-                        // في حال وجود مقاسات
                         if(sizes.length > 0){
+
+                            sizeField.style.display = "block";
 
                             sizes.forEach(size => {
 
                                 let option = document.createElement("option");
-
                                 option.value = size;
                                 option.textContent = size;
 
@@ -183,22 +198,12 @@
 
                             });
 
-                        }
+                        } else {
 
-                        // في حال عدم وجود مقاسات
-                        else{
-
-                            let option = document.createElement("option");
-
-                            option.textContent = "لا توجد مقاسات";
-                            option.value = "";
-
-                            sizeSelect.appendChild(option);
+                            sizeField.style.display = "none";
 
                         }
-
                     }
-
 
                     // عند تغيير اللون
                     colorSelect.addEventListener("change", updateSizes);
@@ -236,6 +241,10 @@
                     let plusBtn = product.querySelector(".plus-btn");
                     let minusBtn = product.querySelector(".minus-btn");
                     let quantityInput = product.querySelector(".quantity-input");
+
+                    if(!plusBtn || !minusBtn || !quantityInput){
+                        return;
+                    }
 
 
                     plusBtn.addEventListener("click", function(e){

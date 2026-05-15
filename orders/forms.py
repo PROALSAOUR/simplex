@@ -79,7 +79,7 @@ class OrderItemRegisterForm(forms.ModelForm):
             colors = colors.filter(product__store=store)
         self.fields["product_color"].queryset = colors
 
-        sizes = ProductSize.objects.filter(available=True, product_color__available=True)
+        sizes = ProductSize.objects.filter(product_color__available=True)
         if product is not None:
             sizes = sizes.filter(product_color__product=product)
         elif store is not None:

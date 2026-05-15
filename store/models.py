@@ -56,13 +56,6 @@ class ProductColor(models.Model):
     def __str__(self):
         return f"{self.product.name} - {self.color}"
     
-    def save(self, *args, **kwargs):
-        """تقوم هذه الدالة بحفظ لون المنتج وفي حال تم تحديده كغير متوفر يتم ايضا جعل جميع المقاسات المرتبطة به غير متوفرة"""
-        super().save(*args, **kwargs)
-        if not self.available:
-            # اجعل كل المقاسات التابعة لهذا اللون غير متوفرة
-            self.sizes.update(available=False)
-    
     class Meta:
         verbose_name = 'لون المنتج'
         verbose_name_plural = 'ألوان المنتج'

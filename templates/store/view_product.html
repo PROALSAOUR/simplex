@@ -483,7 +483,11 @@
                             <button class="button" type="submit">إضافة إلى السلة</button>
                         </form>
                     {% else %}
-                        <p class="empty-message">لا توجد ألوان متوفرة لهذا المنتج حاليا.</p>
+                        {% if  is_product_owner %}
+                            <p class="empty-message">لا توجد ألوان متوفرة لهذا المنتج حاليا.</p>
+                        {% else %}
+                            <p class="empty-message">نفذت الكمية</p>
+                        {% endif %}
                     {% endif %}
                 </div>
             </section>
