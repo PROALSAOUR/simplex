@@ -71,15 +71,9 @@ class ProductSize(models.Model):
     # يتم انشاء هذا النموذج فقط في حال كان المنتج له مقاسات متعددة 
     product_color = models.ForeignKey(ProductColor, related_name='sizes', on_delete=models.CASCADE , verbose_name='المنتج')
     size = models.CharField(max_length=10 , verbose_name='المقاس' , help_text='قم بإدخال المقاس الخاص بالمنتج مثل S أو M أو L أو 40 أو 41 أو أي مقاس آخر يتناسب مع نوع المنتج')
-    available = models.BooleanField(default=True , verbose_name='متوفر', help_text='قم بتحديد هذا الخيار في حال كان هذا المقاس متوفر حاليا في المخزون \n ان لم تقم بتحديده سيتم إخفاء هذا المقاس ولن يتمكن زبائنك من رؤيته ')
 
     def __str__(self):
         return f"{self.product_color.color} - {self.size}"
-    
-    def save(self, *args, **kwargs):
-        """تقوم هذه الدالة بحفظ مقاس المنتج دون تغيير حالة توفر اللون الأب تلقائياً."""
-        super().save(*args, **kwargs)
-
     
     class Meta:
         verbose_name = 'مقاس المنتج'

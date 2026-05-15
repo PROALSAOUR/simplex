@@ -90,14 +90,12 @@
             const nfAvailable = document.getElementById('nc-available');
             const nfImage = document.getElementById('nc-image');
             const nfSizeInput = document.getElementById('nc-size-input');
-            const nfSizeAv = document.getElementById('nc-size-av');
             const formTitle = document.getElementById('form-title-text');
 
             if (nfColor) nfColor.value = '';
             if (nfAvailable) nfAvailable.checked = true;
             if (nfImage) nfImage.value = '';
             if (nfSizeInput) nfSizeInput.value = '';
-            if (nfSizeAv) nfSizeAv.checked = true;
             if (formTitle) formTitle.textContent = title;
 
             clearErrors();
@@ -147,9 +145,6 @@
             el.innerHTML = newColorSizes.map((s, i) => `
                 <div class="nc-size-item">
                     <span style="font-size:13px; font-weight:600; flex:1;">${s.size}</span>
-                    <span class="cv-badge ${s.available ? 'cv-yes' : 'cv-no'}">
-                        ${s.available ? 'متوفر' : 'غير متوفر'}
-                    </span>
                     <button type="button" class="remove-size-btn" data-index="${i}"
                             style="background:none; border:none; color:#bbb; cursor:pointer; font-size:16px; padding:0 2px; line-height:1;">✕</button>
                 </div>`).join('');
@@ -254,7 +249,6 @@
 
             newColorSizes.push({
                 size: val,
-                available: document.getElementById('nc-size-av')?.checked ?? true,
             });
 
             if (inp) inp.value = '';
@@ -314,7 +308,7 @@
                         <div style="font-size:13px; font-weight:600; color:#555; margin-bottom:6px;">المقاسات:</div>
                         <div class="cv-sizes">
                             ${c.sizes.length
-                                ? c.sizes.map((s) => `<span class="cv-chip ${s.available ? '' : 'off'}">${s.size}</span>`).join('')
+                                ? c.sizes.map((s) => `<span class="cv-chip ">${s.size}</span>`).join('')
                                 : '<span style="color:#aaa; font-size:13px;">مقاس موحد</span>'}
                         </div>
                         <div class="cv-actions">

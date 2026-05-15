@@ -18,42 +18,303 @@
 <body>
     <div class="container">
         <p> صفحة اضافة طلب يدويا </p>
-        <form method="post">
-            {% csrf_token %}
-            {% if order_form.non_field_errors %}
-                <div style="padding:10px; background-color:#f8d7da; color:#721c24; margin-bottom: 15px; border-radius:8px;">
-                    {{ order_form.non_field_errors }}
+        {% if products %}
+            <style>
+                .product-container{
+                    border:1px solid #ccc;
+                    border-radius:10px;
+                    padding:15px;
+                    margin-bottom:15px;
+                    background:#fff;
+                }
+
+                /* القسم القابل للنقر */
+                .product-details{
+                    display:flex;
+                    align-items:center;
+                    gap:15px;
+                    cursor:pointer;
+                }
+
+                .product-details img{
+                    border-radius:8px;
+                }
+
+                /* تفاصيل الألوان والمقاسات */
+                .product-colors{
+                    margin-top:15px;
+                    padding-top:15px;
+                    border-top:1px solid #eee;
+                    display:none;
+                }
+
+                .product-colors.active{
+                    display:block;
+                }
+
+                .field{
+                    margin-bottom:12px;
+                }
+
+                select{
+                    width:100%;
+                    padding:8px;
+                }
+
+                /* الكمية */
+                .quantity-box{
+                    display:flex;
+                    align-items:center;
+                    gap:10px;
+                }
+
+                .quantity-box button{
+                    width:35px;
+                    height:35px;
+                    cursor:pointer;
+                }
+
+                .quantity-input{
+                    width:60px;
+                    text-align:center;
+                    height:35px;
+                }
+
+                .add-cart-btn{
+                    width:100%;
+                    padding:10px;
+                    border:none;
+                    background:black;
+                    color:white;
+                    cursor:pointer;
+                    border-radius:6px;
+                }
+            </style>
+
+
+            {% for product in products %}
+
+            <div class="product-container">
+
+                <!-- عند الضغط هنا تظهر التفاصيل -->
+                <div class="product-details">
+                    <img src="{{ product.thumbnail_img.url }}" width="100">
+                    <div>
+                        <p>{{ product.name }}</p>
+                        <p>{{ product.get_price }}</p>
+                    </div>
                 </div>
-            {% endif %}
-            {% if item_form.non_field_errors %}
-                <div style="padding:10px; background-color:#f8d7da; color:#721c24; margin-bottom: 15px; border-radius:8px;">
-                    {{ item_form.non_field_errors }}
+                <!-- تفاصيل المنتج -->
+                <div class="product-colors">
+                    <div class="field">
+                        <label>اللون</label>
+                        <select class="color-select">
+                            {% for color in product.colors.all %}
+                                {% if color.available %}
+                                    <option 
+                                        value="{{ color.id }}"
+                                        data-sizes="{% for size in color.sizes.all %}{{ size.size }}|{% endfor %}"
+                                    >
+                                        {{ color.color }}
+                                    </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>المقاس</label>
+                        <select class="size-select"></select>
+                    </div>
+                                                        
+                    <div class="field">
+                        <label>الكمية</label>
+                        <div class="quantity-box">
+                            <button type="button" class="minus-btn">-</button>
+                            <input type="number" value="1" min="1" max="{{ product.max_quantity_per_order }}" class="quantity-input" >
+                            <button type="button" class="plus-btn">+</button>
+                        </div>
+                    </div>
+
+                    <button class="add-cart-btn">
+                        اضافة الى السلة
+                    </button>
+
                 </div>
-            {% endif %}
-            {% for field in order_form  %}
-                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                    <label for="{{ field.id_for_label }}" >{{  field.label }}</label> 
-                    {{  field }}
-                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{ field.help_text }}</p>
-                    {% if  field.errors %}
-                    <div style="padding:5px; background-color:red; color:white;">{{  field.errors }}</div>
-                    {% endif %}
-                </div>
-            {% endfor %}
-            {% for field in item_form %}
-                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                    <label for="{{ field.id_for_label }}">{{  field.label }}</label> 
-                    {{  field }}
-                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{ field.help_text }}</p>
-                    {% if  field.errors %}
-                    <div style="padding:5px; background-color:red; color:white;">{{  field.errors }}</div>
-                    {% endif %}
-                </div>
+
+            </div>
+
             {% endfor %}
 
-            <button type="submit"> اضافة </button>
 
-        </form>
+            <script>
+                document.querySelectorAll(".product-container").forEach(product => {
+
+                    let colorSelect = product.querySelector(".color-select");
+                    let sizeSelect = product.querySelector(".size-select");
+
+
+                    // دالة تحديث المقاسات حسب اللون
+                    function updateSizes(){
+
+                        // تنظيف القائمة
+                        sizeSelect.innerHTML = "";
+
+                        // الحصول على اللون المحدد
+                        let selectedOption = colorSelect.options[colorSelect.selectedIndex];
+
+                        // الحصول على المقاسات
+                        let sizes = selectedOption.dataset.sizes
+                            .split("|")
+                            .filter(size => size.trim() !== "");
+
+
+                        // في حال وجود مقاسات
+                        if(sizes.length > 0){
+
+                            sizes.forEach(size => {
+
+                                let option = document.createElement("option");
+
+                                option.value = size;
+                                option.textContent = size;
+
+                                sizeSelect.appendChild(option);
+
+                            });
+
+                        }
+
+                        // في حال عدم وجود مقاسات
+                        else{
+
+                            let option = document.createElement("option");
+
+                            option.textContent = "لا توجد مقاسات";
+                            option.value = "";
+
+                            sizeSelect.appendChild(option);
+
+                        }
+
+                    }
+
+
+                    // عند تغيير اللون
+                    colorSelect.addEventListener("change", updateSizes);
+
+
+                    // تحميل اول مقاسات تلقائيا
+                    updateSizes();
+
+                });
+                // اظهار منتج واحد فقط في نفس الوقت
+                document.querySelectorAll(".product-details").forEach(details => {
+
+                    details.addEventListener("click", function(){
+
+                        let currentBox = this.nextElementSibling;
+
+                        // اغلاق جميع القوائم الاخرى
+                        document.querySelectorAll(".product-colors").forEach(box => {
+
+                            if(box !== currentBox){
+                                box.classList.remove("active");
+                            }
+
+                        });
+
+                        // فتح/اغلاق المنتج الحالي
+                        currentBox.classList.toggle("active");
+
+                    });
+
+                });
+                // ازرار زيادة ونقصان الكمية
+                document.querySelectorAll(".product-container").forEach(product => {
+
+                    let plusBtn = product.querySelector(".plus-btn");
+                    let minusBtn = product.querySelector(".minus-btn");
+                    let quantityInput = product.querySelector(".quantity-input");
+
+
+                    plusBtn.addEventListener("click", function(e){
+
+                        e.stopPropagation();
+
+                        let currentValue = parseInt(quantityInput.value);
+                        let maxValue = parseInt(quantityInput.max);
+
+                        // منع تجاوز الحد الاقصى
+                        if(currentValue < maxValue){
+
+                            quantityInput.value = currentValue + 1;
+
+                        }
+
+                    });
+
+
+                    minusBtn.addEventListener("click", function(e){
+
+                        e.stopPropagation();
+
+                        if(parseInt(quantityInput.value) > 1){
+
+                            quantityInput.value = parseInt(quantityInput.value) - 1;
+
+                        }
+
+                    });
+
+                });
+
+            </script>
+
+
+            <form method="post">
+                {% csrf_token %}
+                {% if order_form.non_field_errors %}
+                    <div style="padding:10px; background-color:#f8d7da; color:#721c24; margin-bottom: 15px; border-radius:8px;">
+                        {{ order_form.non_field_errors }}
+                    </div>
+                {% endif %}
+                {% if item_form.non_field_errors %}
+                    <div style="padding:10px; background-color:#f8d7da; color:#721c24; margin-bottom: 15px; border-radius:8px;">
+                        {{ item_form.non_field_errors }}
+                    </div>
+                {% endif %}
+                {% for field in order_form  %}
+                    <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                        <label for="{{ field.id_for_label }}" >{{  field.label }}</label> 
+                        {{  field }}
+                        <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{ field.help_text }}</p>
+                        {% if  field.errors %}
+                        <div style="padding:5px; background-color:red; color:white;">{{  field.errors }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                {% for field in item_form %}
+                    <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                        <label for="{{ field.id_for_label }}">{{  field.label }}</label> 
+                        {{  field }}
+                        <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{ field.help_text }}</p>
+                        {% if  field.errors %}
+                        <div style="padding:5px; background-color:red; color:white;">{{  field.errors }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <button type="submit"> اضافة </button>
+
+            </form>
+        {% else %}
+            <div>
+                <h1> !يبدو انه لايوجد لديك منتجات صالحة للطلب بعد  </h1>
+                <p> لكي تتمكن من انشاء طلب يجب ن يكون لديك على الاقل منتج واحد ظاهر ومقبول من الادارة </p>
+            </div>
+        {% endif %}
+        
 
     </div>
     {% include "common/toast.html" %}

@@ -179,16 +179,10 @@ def add_product(request):
                         continue
                     else: # المنتج محددا مع مقاسات والمستخدم ضايف للألوان مقاسات
                         for size_item in sizes_list:
-                            size_available = size_item.get("available", True)
-                            if isinstance(size_available, str):
-                                size_available = size_available.lower() in ['true', '1', 'yes']
-                            else:
-                                size_available = bool(size_available)
 
                             ProductSize.objects.create(
                                 product_color=color_obj,
                                 size=size_item.get("size", ""),
-                                available=size_available
                             )
 
             messages.success(request, "تمت إضافة المنتج بنجاح")
@@ -203,7 +197,6 @@ def add_product(request):
         "add_form": add_form,
     }
     return render(request, 'store/add_product.html', context)
-
 
 @login_required(login_url='accounts:log_in')
 @vendor_only
@@ -233,7 +226,6 @@ def delete_product(request):
             "message": str(e)
         })
     
-
 @login_required(login_url='accounts:log_in')
 def edit_product(request, pid):
     """الدالة المسؤولة عن صفحة التعديل الخاصة بالمنتج"""
@@ -287,16 +279,9 @@ def edit_product(request, pid):
 
                     color_obj.sizes.all().delete()
                     for size_item in color_item.get('sizes', []):
-                        size_available = size_item.get('available', True)
-                        if isinstance(size_available, str):
-                            size_available = size_available.lower() in ['true', '1', 'yes']
-                        else:
-                            size_available = bool(size_available)
-
                         ProductSize.objects.create(
                             product_color=color_obj,
                             size=size_item.get('size', ''),
-                            available=size_available,
                         )
 
                 if processed_color_ids:
@@ -376,7 +361,6 @@ def edit_product(request, pid):
             'sizes': [
                 {
                     'size': size.size,
-                    'available': size.available,
                 }
                 for size in color.sizes.all()
             ],
@@ -408,12 +392,7 @@ def view_product(request, pid):
     """الدالة المسؤولة عن عرض صفحة المنتج للزبون ليتمكن من اجراء عملية الشراء منها"""
     product = get_object_or_404(Product, id=pid)
     product_images = product.images.all()
-    colors = product.colors.filter(available=True).prefetch_related(
-        db_models.Prefetch(
-            'sizes',
-            queryset=ProductSize.objects.filter(available=True),
-        )
-    )
+    colors = product.colors.filter(available=True).prefetch_related('sizes')
     is_product_owner = False
     if request.user.is_authenticated:
         try:

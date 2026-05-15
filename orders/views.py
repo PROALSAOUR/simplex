@@ -77,6 +77,7 @@ def show_orders(request):
 def add_order_manually(request):
     """صفحة إنشاء طلب يدوي عن طريق صاحب المتجر"""
     store = request.user.vendor.store
+    products = []
 
     if request.method == "POST":
         order_form = OrderRegisterForm(request.POST, store=store, is_vendor=True)
@@ -88,10 +89,13 @@ def add_order_manually(request):
     else:
         order_form = OrderRegisterForm(store=store, is_vendor=True)
         item_form = OrderItemRegisterForm(store=store)
+        
+        products = store.products.filter(status="approved", is_visible=True)
 
     context = {
         "order_form": order_form,
         "item_form": item_form,
+        "products": products,
     }
     return render(request, "orders/add_order_manually.html", context)
 
