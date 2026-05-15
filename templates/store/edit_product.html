@@ -58,7 +58,7 @@
                 <p> الحالة:{{  product.get_status_display }}</p> 
                 <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  product.status.help_text }}</p> #change-later اعرض نص المساعدة هنا 
             </div>
-            {% if product.rejected_cause %}
+            {% if product.status == "rejected" and product.rejected_cause %}
                 <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
                     <p> سبب الرفض:{{  product.rejected_cause }}</p> 
                     <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  product.rejected_cause.help_text }}</p> #change-later اعرض نص المساعدة هنا 

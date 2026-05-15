@@ -53,6 +53,7 @@ class ProductRegisterForm(forms.ModelForm):
     def save(self, commit=True):
         # خذ الكائن (سواء جديد أو للتعديل)
         product = super().save(commit=False)
+        product.status = "checking" # عند اجراء اي تعديل اعادة حالة المنتج الى جاري المراجعة
 
         # إذا كان كائن جديد (إنشاء)
         if not product.pk:
