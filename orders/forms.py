@@ -1,6 +1,5 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django.db import transaction
 
 from accounts.validators import validate_phone_number
 from orders.models import Order, OredrItem

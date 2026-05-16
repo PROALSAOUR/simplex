@@ -91,8 +91,10 @@ def add_order_manually(request):
     
     if query:
         products = products.filter(name__icontains=query)
+    else:
+        # عرض أحدث 10 منتجات فقط عند عدم وجود بحث
+        products = products.order_by("-upload_at")[:10]
     
-    products = products[:10]
     
     for product in products:
         product.available_colors = [
@@ -124,10 +126,15 @@ def add_order(request):
         "customer_name": data.get("customer_name", ""),
         "customer_phone": data.get("customer_phone", ""),
         "customer_location": data.get("customer_location", ""),
+        "note": data.get("note", ""),
     }
     items_data = data.get("items", [])
-
-    order_form = OrderRegisterForm(customer_data)
+    # التحقق أن المستخدم بائع 
+    is_vendor = (
+        request.user.is_authenticated and
+        Vendor.objects.filter(user=request.user).exists()
+    )
+    order_form = OrderRegisterForm(customer_data, is_vendor=is_vendor)
     item_forms = []
     item_errors = {}
 
@@ -169,7 +176,6 @@ def add_order(request):
             order = order_form.save(commit=False)
             order.store = store
             order.serial_number = order.create_serial_number()
-            order.note = ""
             order.free_delivery = products[0].free_delivery
             # التحقق أن المستخدم بائع في هذا المتجر تحديداً
             is_store_vendor = (

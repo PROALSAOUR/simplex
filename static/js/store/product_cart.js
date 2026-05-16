@@ -132,6 +132,7 @@
                 customer_name: document.getElementById("customer-name").value,
                 customer_phone: document.getElementById("customer-phone").value,
                 customer_location: document.getElementById("customer-location").value,
+                note: document.getElementById("customer-note")?.value || "",  // ✅ اختياري
                 items: cartProducts.map((item) => ({
                     product_id: item.product_id,
                     color_id: item.color_id,
