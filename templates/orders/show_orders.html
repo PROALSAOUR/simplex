@@ -452,9 +452,9 @@
                             <label>حالة الطلب</label>
                             <select name="status" class="sp-select">
                                 <option value="">الكل</option>
-                                <option value="checking" {% if selected_status == 'processing' %}selected{% endif %}>جاري التجهيز</option>
-                                <option value="approved" {% if selected_status == 'delivered' %}selected{% endif %}>تم التسليم</option>
-                                <option value="rejected" {% if selected_status == 'canceled' %}selected{% endif %}>ملغي</option>
+                                <option value="processing" {% if selected_status == 'processing' %}selected{% endif %}>جاري التجهيز</option>
+                                <option value="delivered" {% if selected_status == 'delivered' %}selected{% endif %}>تم التسليم</option>
+                                <option value="canceled" {% if selected_status == 'canceled' %}selected{% endif %}>ملغي</option>
                             </select>
                         </div>
 
