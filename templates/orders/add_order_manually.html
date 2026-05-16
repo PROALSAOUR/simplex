@@ -14,13 +14,7 @@
             font-size: 24px;
         }
     </style> 
-</head>
-<body>
-    <div class="manual-order-page">
-
-        {% if products %}
-
-            <style>
+    <style>
                 /* ===== المتغيرات العامة ===== */
                 :root {
                     --clr-bg: #f5f5f0;
@@ -603,16 +597,34 @@
                     color: var(--clr-text-muted);
                     font-size: 0.9rem;
                 }
-            </style>
-
-            <!-- مودال الشكر -->
-            <div class="order-modal" id="order-modal" aria-live="polite">
-                <div class="order-modal-content">
-                    <div class="order-modal-icon">✓</div>
-                    <h3>شكرا لك</h3>
-                    <p id="order-message"></p>
-                </div>
-            </div>
+    </style>
+</head>
+<body>
+    <div class="manual-order-page">
+        <div class="search-box">
+            <form method="get" id="search-form">
+                <input 
+                    type="text" 
+                    name="q" 
+                    id="product-search"
+                    value="{{ query }}"
+                    placeholder="ابحث عن منتج بالاسم..."
+                    autocomplete="off"
+                >
+                {% if query %}
+                    <a href="?" id="search-reset">✕ إعادة تعيين</a>
+                {% endif %}
+                <button type="submit">بحث</button>
+            </form>
+        </div>
+        {% if not products and query %}
+            <p class="empty-message">لا توجد منتجات مطابقة لـ "{{ query }}"</p>
+        {% elif not products %}
+            <h1 class="empty-message">لا يوجد لديك منتجات صالحة للطلب بعد!</h1>
+            <p>لكي تتمكن من إنشاء طلب يجب أن يكون لديك على الأقل منتج واحد ظاهر ومقبول من الإدارة.</p>
+        {% else %}
+            <!-- مودل الشكر -->
+            {% include "common/thanks_modal.html" %}
 
             <div class="main-layout">
 
@@ -621,92 +633,92 @@
                     <h1 class="page-title">إضافة طلب يدوياً</h1>
 
                     {% for product in products %}
-                    <div class="product-container"
-                        data-product-id="{{ product.id }}"
-                        data-product-name="{{ product.name }}"
-                        data-product-price="{{ product.get_price|stringformat:'f' }}"
-                        data-product-image="{{ product.thumbnail_img.url }}">
+                        <div class="product-container"
+                            data-product-id="{{ product.id }}"
+                            data-product-name="{{ product.name }}"
+                            data-product-price="{{ product.get_price|stringformat:'f' }}"
+                            data-product-image="{{ product.thumbnail_img.url }}">
 
-                        <!-- رأس البطاقة القابل للنقر -->
-                        <div class="product-details">
-                            <img src="{{ product.thumbnail_img.url }}" alt="{{ product.name }}">
-                            <div class="product-info">
-                                <p class="prod-name">{{ product.name }}</p>
-                                <p class="prod-price">{{ product.get_price }} د.ل</p>
+                            <!-- رأس البطاقة القابل للنقر -->
+                            <div class="product-details">
+                                <img src="{{ product.thumbnail_img.url }}" alt="{{ product.name }}">
+                                <div class="product-info">
+                                    <p class="prod-name">{{ product.name }}</p>
+                                    <p class="prod-price">{{ product.get_price }} د.ل</p>
+                                </div>
+                                <div class="toggle-icon">▾</div>
                             </div>
-                            <div class="toggle-icon">▾</div>
-                        </div>
 
-                        <!-- منطقة الخيارات -->
-                        <div class="product-colors">
-                            {% if product.available_colors %}
+                            <!-- منطقة الخيارات -->
+                            <div class="product-colors">
+                                {% if product.available_colors %}
 
-                                <!-- الألوان -->
-                                <div class="field">
-                                    <span class="field-title">اللون</span>
-                                    <div class="choices color-choices">
+                                    <!-- الألوان -->
+                                    <div class="field">
+                                        <span class="field-title">اللون</span>
+                                        <div class="choices color-choices">
+                                            {% for color in product.available_colors %}
+                                            <label class="choice color-choice">
+                                                <input
+                                                    type="radio"
+                                                    name="color_{{ product.id }}"
+                                                    value="{{ color.id }}"
+                                                    data-color-name="{{ color.color }}"
+                                                    data-color-image="{% if color.image %}{{ color.image.url }}{% else %}{{ product.thumbnail_img.url }}{% endif %}"
+                                                    {% if forloop.first %}checked{% endif %}
+                                                >
+                                                <span>
+                                                    <img src="{% if color.image %}{{ color.image.url }}{% else %}{{ product.thumbnail_img.url }}{% endif %}" alt="{{ color.color }}">
+                                                    {{ color.color }}
+                                                </span>
+                                            </label>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+
+                                    <!-- المقاسات -->
+                                    <div class="field sizes-wrapper">
+                                        <span class="field-title">المقاس</span>
                                         {% for color in product.available_colors %}
-                                        <label class="choice color-choice">
-                                            <input
-                                                type="radio"
-                                                name="color_{{ product.id }}"
-                                                value="{{ color.id }}"
-                                                data-color-name="{{ color.color }}"
-                                                data-color-image="{% if color.image %}{{ color.image.url }}{% else %}{{ product.thumbnail_img.url }}{% endif %}"
-                                                {% if forloop.first %}checked{% endif %}
-                                            >
-                                            <span>
-                                                <img src="{% if color.image %}{{ color.image.url }}{% else %}{{ product.thumbnail_img.url }}{% endif %}" alt="{{ color.color }}">
-                                                {{ color.color }}
-                                            </span>
-                                        </label>
+                                            {% with sizes=color.sizes.all %}
+                                                {% if sizes %}
+                                                <div class="size-group" data-color-id="{{ color.id }}">
+                                                    {% for size in sizes %}
+                                                    <label class="choice">
+                                                        <input
+                                                            type="radio"
+                                                            name="size_{{ color.id }}_{{ product.id }}"
+                                                            value="{{ size.id }}"
+                                                            data-size-name="{{ size.size }}"
+                                                            {% if forloop.first %}checked{% endif %}
+                                                        >
+                                                        <span>{{ size.size }}</span>
+                                                    </label>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            {% endwith %}
                                         {% endfor %}
                                     </div>
-                                </div>
 
-                                <!-- المقاسات -->
-                                <div class="field sizes-wrapper">
-                                    <span class="field-title">المقاس</span>
-                                    {% for color in product.available_colors %}
-                                        {% with sizes=color.sizes.all %}
-                                            {% if sizes %}
-                                            <div class="size-group" data-color-id="{{ color.id }}">
-                                                {% for size in sizes %}
-                                                <label class="choice">
-                                                    <input
-                                                        type="radio"
-                                                        name="size_{{ color.id }}_{{ product.id }}"
-                                                        value="{{ size.id }}"
-                                                        data-size-name="{{ size.size }}"
-                                                        {% if forloop.first %}checked{% endif %}
-                                                    >
-                                                    <span>{{ size.size }}</span>
-                                                </label>
-                                                {% endfor %}
-                                            </div>
-                                            {% endif %}
-                                        {% endwith %}
-                                    {% endfor %}
-                                </div>
-
-                                <!-- الكمية -->
-                                <div class="field">
-                                    <label>الكمية</label>
-                                    <div class="quantity-control">
-                                        <button type="button" class="qty-minus" aria-label="إنقاص">−</button>
-                                        <input type="number" class="qty-input" value="1" min="1" max="{{ product.max_quantity_per_order }}">
-                                        <button type="button" class="qty-plus" aria-label="زيادة">+</button>
+                                    <!-- الكمية -->
+                                    <div class="field">
+                                        <label>الكمية</label>
+                                        <div class="quantity-control">
+                                            <button type="button" class="qty-minus" aria-label="إنقاص">−</button>
+                                            <input type="number" class="qty-input" value="1" min="1" max="{{ product.max_quantity_per_order }}">
+                                            <button type="button" class="qty-plus" aria-label="زيادة">+</button>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <button type="button" class="add-cart-btn">+ إضافة إلى السلة</button>
+                                    <button type="button" class="add-cart-btn">+ إضافة إلى السلة</button>
 
-                            {% else %}
-                                <p class="empty-message">لا توجد ألوان متوفرة لهذا المنتج</p>
-                            {% endif %}
+                                {% else %}
+                                    <p class="empty-message">لا توجد ألوان متوفرة لهذا المنتج</p>
+                                {% endif %}
+                            </div>
+
                         </div>
-
-                    </div>
                     {% endfor %}
                 </div>
 
@@ -755,13 +767,6 @@
                     </div>
 
                 </div>
-            </div>
-
-
-        {% else %}
-            <div class="no-products">
-                <h1>لا يوجد لديك منتجات صالحة للطلب بعد!</h1>
-                <p>لكي تتمكن من إنشاء طلب يجب أن يكون لديك على الأقل منتج واحد ظاهر ومقبول من الإدارة.</p>
             </div>
         {% endif %}
 

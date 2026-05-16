@@ -78,37 +78,40 @@ def show_orders(request):
 def add_order_manually(request):
     """صفحة إنشاء طلب يدوي عن طريق صاحب المتجر"""
     store = request.user.vendor.store
-    products = []
-
-    if request.method == "POST":
-        order_form = OrderRegisterForm(request.POST, store=store, is_vendor=True)
-        item_form = OrderItemRegisterForm(request.POST, store=store)
-
-        if order_form.is_valid() and item_form.is_valid():
-            order_form.save(order_item_form=item_form)
-            return redirect("orders:show_orders")
-    else:
-        order_form = OrderRegisterForm(store=store, is_vendor=True)
-        item_form = OrderItemRegisterForm(store=store)
-        
-        products = store.products.filter(status="approved", is_visible=True).prefetch_related("colors__sizes")
-        for product in products:
-            product.available_colors = [
-                color for color in product.colors.all()
-                if color.available
-            ]
+    
+    order_form = OrderRegisterForm(store=store, is_vendor=True)
+    item_form = OrderItemRegisterForm(store=store)
+    
+    query = request.GET.get("q", "").strip()
+    
+    products = store.products.filter(
+        status="approved", 
+        is_visible=True
+    ).prefetch_related("colors__sizes")
+    
+    if query:
+        products = products.filter(name__icontains=query)
+    
+    products = products[:10]
+    
+    for product in products:
+        product.available_colors = [
+            color for color in product.colors.all()
+            if color.available
+        ]
 
     context = {
         "order_form": order_form,
         "item_form": item_form,
         "products": products,
+        "query": query,
     }
     return render(request, "orders/add_order_manually.html", context)
 
 # هذه الدالة لاتتطلب تسجيل دخول لأنها مخصصة للزبائن
 @require_POST
 def add_order(request):
-    """ الدالة المسؤولة عن انشاء طلب عن طريق الزبون من صفحة عرض المنتج """
+    """ الدالة المسؤولة عن انشاء طلب عن طريق كل من الزبون او البائع  """
     try:
         data = json.loads(request.body.decode("utf-8"))
     except (json.JSONDecodeError, UnicodeDecodeError):
