@@ -12,6 +12,7 @@ import json
 from orders.models import *
 from orders.forms import *
 from accounts.decorators import vendor_only 
+from accounts.models import Vendor 
 
 
 @login_required(login_url='accounts:log_in')
@@ -167,7 +168,15 @@ def add_order(request):
             order.serial_number = order.create_serial_number()
             order.note = ""
             order.free_delivery = products[0].free_delivery
-            order.verification_status = "checking" if store.check_orders else "approved"
+            # التحقق أن المستخدم بائع في هذا المتجر تحديداً
+            is_store_vendor = (
+                request.user.is_authenticated and
+                Vendor.objects.filter(user=request.user, store=store).exists()
+            )
+            if is_store_vendor: # اذا كان منشئ الطلب بائع بالمتجر الطلب حقيقي تلقائيا
+                order.verification_status = "approved"
+            else: # إذا كان زبون → تحقق من إعداد المتجر
+                order.verification_status = "checking" if store.check_orders else "approved"
             order.save()
 
             for item_form in item_forms:

@@ -16,328 +16,766 @@
     </style> 
 </head>
 <body>
-    <div class="container">
-        <p> صفحة اضافة طلب يدويا </p>
+    <div class="manual-order-page">
+
         {% if products %}
+
             <style>
-                .product-container{
-                    border:1px solid #ccc;
-                    border-radius:10px;
-                    padding:15px;
-                    margin-bottom:15px;
-                    background:#fff;
+                /* ===== المتغيرات العامة ===== */
+                :root {
+                    --clr-bg: #f5f5f0;
+                    --clr-surface: #ffffff;
+                    --clr-border: #e0ddd6;
+                    --clr-text: #1a1a1a;
+                    --clr-text-muted: #888;
+                    --clr-accent: #1a1a1a;
+                    --clr-accent-hover: #333;
+                    --clr-danger: #c0392b;
+                    --clr-success: #27ae60;
+                    --clr-tag-bg: #f0ede8;
+                    --radius: 12px;
+                    --radius-sm: 8px;
+                    --shadow: 0 2px 12px rgba(0,0,0,0.07);
+                    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+                    --transition: 0.2s ease;
                 }
 
-                /* القسم القابل للنقر */
-                .product-details{
-                    display:flex;
-                    align-items:center;
-                    gap:15px;
-                    cursor:pointer;
+                /* ===== تخطيط الصفحة ===== */
+                .manual-order-page {
+                    direction: rtl;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    background: var(--clr-bg);
+                    min-height: 100vh;
+                    padding: 24px 16px;
+                    color: var(--clr-text);
                 }
 
-                .product-details img{
-                    border-radius:8px;
+                .page-title {
+                    font-size: 1.4rem;
+                    font-weight: 700;
+                    margin-bottom: 24px;
+                    color: var(--clr-text);
+                    padding-bottom: 12px;
+                    border-bottom: 2px solid var(--clr-border);
                 }
 
-                /* تفاصيل الألوان والمقاسات */
-                .product-colors{
-                    margin-top:15px;
-                    padding-top:15px;
-                    border-top:1px solid #eee;
-                    display:none;
+                .main-layout {
+                    display: grid;
+                    grid-template-columns: 1fr;
+                    gap: 24px;
+                    max-width: 960px;
+                    margin: 0 auto;
                 }
 
-                .product-colors.active{
-                    display:block;
+                @media (min-width: 768px) {
+                    .main-layout {
+                        grid-template-columns: 1fr 380px;
+                        align-items: start;
+                    }
                 }
 
-                .field{
-                    margin-bottom:12px;
+                /* ===== بطاقة المنتج ===== */
+                .product-container {
+                    background: var(--clr-surface);
+                    border: 1px solid var(--clr-border);
+                    border-radius: var(--radius);
+                    overflow: hidden;
+                    margin-bottom: 12px;
+                    box-shadow: var(--shadow);
+                    transition: box-shadow var(--transition);
                 }
 
-                select{
-                    width:100%;
-                    padding:8px;
+                .product-container:hover {
+                    box-shadow: var(--shadow-lg);
                 }
 
-                /* الكمية */
-                .quantity-box{
-                    display:flex;
-                    align-items:center;
-                    gap:10px;
+                .product-details {
+                    display: flex;
+                    align-items: center;
+                    gap: 14px;
+                    padding: 14px 16px;
+                    cursor: pointer;
+                    user-select: none;
+                    transition: background var(--transition);
                 }
 
-                .quantity-box button{
-                    width:35px;
-                    height:35px;
-                    cursor:pointer;
+                .product-details:hover {
+                    background: #fafaf8;
                 }
 
-                .quantity-input{
-                    width:60px;
-                    text-align:center;
-                    height:35px;
+                .product-details img {
+                    width: 72px;
+                    height: 72px;
+                    object-fit: cover;
+                    border-radius: var(--radius-sm);
+                    border: 1px solid var(--clr-border);
+                    flex-shrink: 0;
                 }
 
-                .add-cart-btn{
-                    width:100%;
-                    padding:10px;
-                    border:none;
-                    background:black;
-                    color:white;
-                    cursor:pointer;
-                    border-radius:6px;
+                .product-info {
+                    flex: 1;
+                    min-width: 0;
+                }
+
+                .product-info .prod-name {
+                    font-weight: 600;
+                    font-size: 0.95rem;
+                    margin: 0 0 4px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .product-info .prod-price {
+                    font-size: 0.88rem;
+                    color: var(--clr-text-muted);
+                    margin: 0;
+                }
+
+                .toggle-icon {
+                    width: 28px;
+                    height: 28px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 50%;
+                    background: var(--clr-tag-bg);
+                    color: var(--clr-text);
+                    font-size: 1rem;
+                    transition: transform var(--transition), background var(--transition);
+                    flex-shrink: 0;
+                }
+
+                .product-container.open .toggle-icon {
+                    transform: rotate(180deg);
+                    background: var(--clr-accent);
+                    color: #fff;
+                }
+
+                /* ===== منطقة الخيارات ===== */
+                .product-colors {
+                    display: none;
+                    padding: 16px;
+                    border-top: 1px solid var(--clr-border);
+                    background: #fafaf8;
+                    animation: slideDown 0.2s ease;
+                }
+
+                .product-colors.active {
+                    display: block;
+                }
+
+                @keyframes slideDown {
+                    from { opacity: 0; transform: translateY(-6px); }
+                    to   { opacity: 1; transform: translateY(0); }
+                }
+
+                /* ===== الحقول ===== */
+                .field {
+                    margin-bottom: 14px;
+                }
+
+                .field-title,
+                .field label {
+                    display: block;
+                    font-size: 0.82rem;
+                    font-weight: 600;
+                    color: var(--clr-text-muted);
+                    text-transform: uppercase;
+                    letter-spacing: 0.04em;
+                    margin-bottom: 8px;
+                }
+
+                /* ===== خيارات اللون والمقاس (radio) ===== */
+                .choices {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                }
+
+                .choice input[type="radio"] {
+                    display: none;
+                }
+
+                .choice span {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 6px 14px;
+                    border-radius: 20px;
+                    border: 1.5px solid var(--clr-border);
+                    font-size: 0.85rem;
+                    cursor: pointer;
+                    transition: all var(--transition);
+                    background: var(--clr-surface);
+                    white-space: nowrap;
+                }
+
+                .choice input[type="radio"]:checked + span {
+                    border-color: var(--clr-accent);
+                    background: var(--clr-accent);
+                    color: #fff;
+                }
+
+                .color-choice span img {
+                    width: 22px;
+                    height: 22px;
+                    border-radius: 4px;
+                    object-fit: cover;
+                }
+
+                /* ===== المقاسات (مخفية بالبداية) ===== */
+                .sizes-wrapper {
+                    display: none;
+                }
+
+                .sizes-wrapper.visible {
+                    display: block;
+                }
+
+                .size-group {
+                    display: none;
+                }
+
+                .size-group.active {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                }
+
+                /* ===== التحكم بالكمية ===== */
+                .quantity-control {
+                    display: flex;
+                    align-items: center;
+                    gap: 0;
+                    border: 1.5px solid var(--clr-border);
+                    border-radius: var(--radius-sm);
+                    overflow: hidden;
+                    width: fit-content;
+                    background: var(--clr-surface);
+                }
+
+                .quantity-control button {
+                    width: 36px;
+                    height: 36px;
+                    border: none;
+                    background: var(--clr-tag-bg);
+                    color: var(--clr-text);
+                    font-size: 1.1rem;
+                    cursor: pointer;
+                    transition: background var(--transition);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .quantity-control button:hover {
+                    background: var(--clr-border);
+                }
+
+                .quantity-control input {
+                    width: 52px;
+                    height: 36px;
+                    border: none;
+                    border-right: 1.5px solid var(--clr-border);
+                    border-left: 1.5px solid var(--clr-border);
+                    text-align: center;
+                    font-size: 0.95rem;
+                    font-weight: 600;
+                    color: var(--clr-text);
+                    background: var(--clr-surface);
+                    -moz-appearance: textfield;
+                }
+
+                .quantity-control input::-webkit-outer-spin-button,
+                .quantity-control input::-webkit-inner-spin-button {
+                    -webkit-appearance: none;
+                }
+
+                /* ===== زر الإضافة ===== */
+                .add-cart-btn {
+                    width: 100%;
+                    padding: 11px;
+                    border: none;
+                    background: var(--clr-accent);
+                    color: #fff;
+                    font-size: 0.92rem;
+                    font-weight: 600;
+                    border-radius: var(--radius-sm);
+                    cursor: pointer;
+                    transition: background var(--transition), transform var(--transition);
+                    margin-top: 4px;
+                }
+
+                .add-cart-btn:hover {
+                    background: var(--clr-accent-hover);
+                    transform: translateY(-1px);
+                }
+
+                .add-cart-btn:active {
+                    transform: translateY(0);
+                }
+
+                /* ===== السلة وفورم المستلم ===== */
+                .cart-section {
+                    display: none;
+                    position: sticky;
+                    top: 20px;
+                }
+
+                .cart-section.show {
+                    display: block;
+                }
+
+                .cart-box {
+                    background: var(--clr-surface);
+                    border: 1px solid var(--clr-border);
+                    border-radius: var(--radius);
+                    box-shadow: var(--shadow);
+                    overflow: hidden;
+                }
+
+                .cart-box-header {
+                    padding: 14px 18px;
+                    border-bottom: 1px solid var(--clr-border);
+                    background: var(--clr-accent);
+                    color: #fff;
+                }
+
+                .cart-box-header h2 {
+                    margin: 0;
+                    font-size: 1rem;
+                    font-weight: 700;
+                }
+
+                /* ===== عناصر السلة ===== */
+                .cart-items {
+                    padding: 12px;
+                    max-height: 320px;
+                    overflow-y: auto;
+                }
+
+                .cart-item {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 10px;
+                    padding: 10px;
+                    border-radius: var(--radius-sm);
+                    background: var(--clr-tag-bg);
+                    margin-bottom: 8px;
+                    border: 1px solid var(--clr-border);
+                }
+
+                .cart-item:last-child {
+                    margin-bottom: 0;
+                }
+
+                .cart-item img {
+                    width: 52px;
+                    height: 52px;
+                    object-fit: cover;
+                    border-radius: 6px;
+                    flex-shrink: 0;
+                }
+
+                .cart-item > div {
+                    flex: 1;
+                    min-width: 0;
+                }
+
+                .cart-item h3 {
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                    margin: 0 0 3px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .cart-item p {
+                    font-size: 0.78rem;
+                    color: var(--clr-text-muted);
+                    margin: 0;
+                    line-height: 1.5;
+                }
+
+                .cart-item button.remove {
+                    flex-shrink: 0;
+                    background: none;
+                    border: none;
+                    color: var(--clr-danger);
+                    font-size: 0.75rem;
+                    cursor: pointer;
+                    padding: 4px 6px;
+                    border-radius: 4px;
+                    transition: background var(--transition);
+                    align-self: flex-start;
+                    margin-top: 2px;
+                }
+
+                .cart-item button.remove:hover {
+                    background: #fdecea;
+                }
+
+                /* ===== ملخص السلة ===== */
+                .cart-summary {
+                    padding: 12px 16px;
+                    border-top: 1px solid var(--clr-border);
+                    display: flex;
+                    justify-content: space-between;
+                    font-size: 0.88rem;
+                    background: #fafaf8;
+                }
+
+                .cart-summary span {
+                    color: var(--clr-text-muted);
+                }
+
+                .cart-summary strong {
+                    color: var(--clr-text);
+                }
+
+                /* ===== فورم بيانات المستلم ===== */
+                .order-form-box {
+                    background: var(--clr-surface);
+                    border: 1px solid var(--clr-border);
+                    border-radius: var(--radius);
+                    box-shadow: var(--shadow);
+                    margin-top: 16px;
+                    overflow: hidden;
+                }
+
+                .order-form-header {
+                    padding: 14px 18px;
+                    border-bottom: 1px solid var(--clr-border);
+                    background: #fafaf8;
+                }
+
+                .order-form-header h3 {
+                    margin: 0;
+                    font-size: 0.95rem;
+                    font-weight: 700;
+                }
+
+                .order-form-body {
+                    padding: 16px;
+                }
+
+                .order-form-body .field label {
+                    font-size: 0.82rem;
+                    font-weight: 600;
+                    color: var(--clr-text-muted);
+                    text-transform: uppercase;
+                    letter-spacing: 0.04em;
+                    margin-bottom: 6px;
+                }
+
+                .order-form-body input,
+                .order-form-body textarea {
+                    width: 100%;
+                    padding: 9px 12px;
+                    border: 1.5px solid var(--clr-border);
+                    border-radius: var(--radius-sm);
+                    font-size: 0.9rem;
+                    background: var(--clr-surface);
+                    color: var(--clr-text);
+                    box-sizing: border-box;
+                    transition: border-color var(--transition);
+                    font-family: inherit;
+                }
+
+                .order-form-body input:focus,
+                .order-form-body textarea:focus {
+                    outline: none;
+                    border-color: var(--clr-accent);
+                }
+
+                .order-form-body textarea {
+                    resize: vertical;
+                    min-height: 72px;
+                }
+
+                .form-error {
+                    display: block;
+                    color: var(--clr-danger);
+                    font-size: 0.78rem;
+                    margin-top: 4px;
+                    min-height: 1em;
+                }
+
+                .submit-order-btn {
+                    width: 100%;
+                    padding: 12px;
+                    background: var(--clr-accent);
+                    color: #fff;
+                    border: none;
+                    border-radius: var(--radius-sm);
+                    font-size: 0.95rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    margin-top: 8px;
+                    transition: background var(--transition), transform var(--transition);
+                }
+
+                .submit-order-btn:hover {
+                    background: var(--clr-accent-hover);
+                    transform: translateY(-1px);
+                }
+
+                /* ===== مودال الشكر ===== */
+                .order-modal {
+                    display: none;
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0,0,0,0.45);
+                    z-index: 9999;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .order-modal.show {
+                    display: flex;
+                }
+
+                .order-modal-content {
+                    background: var(--clr-surface);
+                    border-radius: var(--radius);
+                    padding: 40px 32px;
+                    text-align: center;
+                    max-width: 320px;
+                    width: 90%;
+                    box-shadow: var(--shadow-lg);
+                    animation: popIn 0.3s ease;
+                }
+
+                @keyframes popIn {
+                    from { opacity: 0; transform: scale(0.9); }
+                    to   { opacity: 1; transform: scale(1); }
+                }
+
+                .order-modal-icon {
+                    width: 56px;
+                    height: 56px;
+                    border-radius: 50%;
+                    background: var(--clr-success);
+                    color: #fff;
+                    font-size: 1.6rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto 16px;
+                }
+
+                .order-modal-content h3 {
+                    margin: 0 0 8px;
+                    font-size: 1.2rem;
+                }
+
+                .order-modal-content p {
+                    margin: 0;
+                    color: var(--clr-text-muted);
+                    font-size: 0.9rem;
+                }
+
+                /* ===== رسالة فارغة ===== */
+                .empty-message {
+                    text-align: center;
+                    color: var(--clr-text-muted);
+                    font-size: 0.9rem;
+                    padding: 12px 0;
+                }
+
+                /* ===== شريط لا يوجد منتجات ===== */
+                .no-products {
+                    text-align: center;
+                    padding: 48px 24px;
+                    background: var(--clr-surface);
+                    border-radius: var(--radius);
+                    border: 1px solid var(--clr-border);
+                }
+
+                .no-products h1 {
+                    font-size: 1.2rem;
+                    margin-bottom: 8px;
+                }
+
+                .no-products p {
+                    color: var(--clr-text-muted);
+                    font-size: 0.9rem;
                 }
             </style>
 
+            <!-- مودال الشكر -->
+            <div class="order-modal" id="order-modal" aria-live="polite">
+                <div class="order-modal-content">
+                    <div class="order-modal-icon">✓</div>
+                    <h3>شكرا لك</h3>
+                    <p id="order-message"></p>
+                </div>
+            </div>
 
-            {% for product in products %}
+            <div class="main-layout">
 
-                <div class="product-container">
+                <!-- ===== عمود المنتجات ===== -->
+                <div class="products-column">
+                    <h1 class="page-title">إضافة طلب يدوياً</h1>
 
-                    <div class="product-details">
-                        <img src="{{ product.thumbnail_img.url }}" width="100">
-                        <div>
-                            <p>{{ product.name }}</p>
-                            <p>{{ product.get_price }}</p>
+                    {% for product in products %}
+                    <div class="product-container"
+                        data-product-id="{{ product.id }}"
+                        data-product-name="{{ product.name }}"
+                        data-product-price="{{ product.get_price|stringformat:'f' }}"
+                        data-product-image="{{ product.thumbnail_img.url }}">
+
+                        <!-- رأس البطاقة القابل للنقر -->
+                        <div class="product-details">
+                            <img src="{{ product.thumbnail_img.url }}" alt="{{ product.name }}">
+                            <div class="product-info">
+                                <p class="prod-name">{{ product.name }}</p>
+                                <p class="prod-price">{{ product.get_price }} د.ل</p>
+                            </div>
+                            <div class="toggle-icon">▾</div>
+                        </div>
+
+                        <!-- منطقة الخيارات -->
+                        <div class="product-colors">
+                            {% if product.available_colors %}
+
+                                <!-- الألوان -->
+                                <div class="field">
+                                    <span class="field-title">اللون</span>
+                                    <div class="choices color-choices">
+                                        {% for color in product.available_colors %}
+                                        <label class="choice color-choice">
+                                            <input
+                                                type="radio"
+                                                name="color_{{ product.id }}"
+                                                value="{{ color.id }}"
+                                                data-color-name="{{ color.color }}"
+                                                data-color-image="{% if color.image %}{{ color.image.url }}{% else %}{{ product.thumbnail_img.url }}{% endif %}"
+                                                {% if forloop.first %}checked{% endif %}
+                                            >
+                                            <span>
+                                                <img src="{% if color.image %}{{ color.image.url }}{% else %}{{ product.thumbnail_img.url }}{% endif %}" alt="{{ color.color }}">
+                                                {{ color.color }}
+                                            </span>
+                                        </label>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <!-- المقاسات -->
+                                <div class="field sizes-wrapper">
+                                    <span class="field-title">المقاس</span>
+                                    {% for color in product.available_colors %}
+                                        {% with sizes=color.sizes.all %}
+                                            {% if sizes %}
+                                            <div class="size-group" data-color-id="{{ color.id }}">
+                                                {% for size in sizes %}
+                                                <label class="choice">
+                                                    <input
+                                                        type="radio"
+                                                        name="size_{{ color.id }}_{{ product.id }}"
+                                                        value="{{ size.id }}"
+                                                        data-size-name="{{ size.size }}"
+                                                        {% if forloop.first %}checked{% endif %}
+                                                    >
+                                                    <span>{{ size.size }}</span>
+                                                </label>
+                                                {% endfor %}
+                                            </div>
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% endfor %}
+                                </div>
+
+                                <!-- الكمية -->
+                                <div class="field">
+                                    <label>الكمية</label>
+                                    <div class="quantity-control">
+                                        <button type="button" class="qty-minus" aria-label="إنقاص">−</button>
+                                        <input type="number" class="qty-input" value="1" min="1" max="{{ product.max_quantity_per_order }}">
+                                        <button type="button" class="qty-plus" aria-label="زيادة">+</button>
+                                    </div>
+                                </div>
+
+                                <button type="button" class="add-cart-btn">+ إضافة إلى السلة</button>
+
+                            {% else %}
+                                <p class="empty-message">لا توجد ألوان متوفرة لهذا المنتج</p>
+                            {% endif %}
+                        </div>
+
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- ===== عمود السلة وفورم المستلم ===== -->
+                <div class="cart-section" id="cart-section">
+
+                    <!-- السلة -->
+                    <div class="cart-box">
+                        <div class="cart-box-header">
+                            <h2>🛒 السلة</h2>
+                        </div>
+                        <div class="cart-items" id="cart-items"></div>
+                        <div class="cart-summary">
+                            <span>عدد القطع: <strong id="total-qty">0</strong></span>
+                            <span>الإجمالي: <strong id="total-price">0.00</strong> د.ل</span>
                         </div>
                     </div>
-                    <!-- تفاصيل المنتج -->
-                    <div class="product-colors">
-                        {% if product.available_colors %}
-                        
-                            <div class="field">
-                                <label>اللون</label>
-                                <select class="color-select">
-                                    {% for color in product.available_colors %}
-                                        
-                                        <option 
-                                            value="{{ color.id }}"
-                                            data-sizes="{% for size in color.sizes.all %}{{ size.size }}|{% endfor %}"
-                                        >
-                                            {{ color.color }}
-                                        </option>
-                                        
-                                    {% endfor %}
-                                </select>
-                            </div>
 
-                            <div class="field size-field">
-                                <label>المقاس</label>
-                                <select class="size-select"></select>
-                            </div>
-                                                                
-                            <div class="field">
-                                <label>الكمية</label>
-                                <div class="quantity-box">
-                                    <button type="button" class="minus-btn">-</button>
-                                    <input type="number" value="1" min="1" max="{{ product.max_quantity_per_order }}" class="quantity-input" >
-                                    <button type="button" class="plus-btn">+</button>
+                    <!-- فورم بيانات المستلم -->
+                    <div class="order-form-box">
+                        <div class="order-form-header">
+                            <h3>بيانات المستلم</h3>
+                        </div>
+                        <div class="order-form-body">
+                            <form id="order-form" action="{% url 'orders:add_order' %}">
+                                {% csrf_token %}
+                                <div class="field">
+                                    <label for="customer-name">الاسم</label>
+                                    <input id="customer-name" type="text" name="customer_name" placeholder="اسم المستلم الثنائي" required>
+                                    <small class="form-error" id="error-customer_name"></small>
                                 </div>
-                            </div>
-
-                            <button class="add-cart-btn">
-                                اضافة الى السلة
-                            </button>
-                        {% else %}
-                            لايوجد الوان متوفرة لهذا المنتج
-                        {% endif %}
+                                <div class="field">
+                                    <label for="customer-phone">رقم الهاتف</label>
+                                    <input id="customer-phone" type="tel" name="customer_phone" placeholder="0912345678" required>
+                                    <small class="form-error" id="error-customer_phone"></small>
+                                </div>
+                                <div class="field">
+                                    <label for="customer-location">العنوان</label>
+                                    <textarea id="customer-location" name="customer_location" placeholder="المدينة والحي" required></textarea>
+                                    <small class="form-error" id="error-customer_location"></small>
+                                </div>
+                                <small class="form-error" id="error-order"></small>
+                                <button type="submit" class="submit-order-btn">إرسال الطلب</button>
+                            </form>
+                        </div>
                     </div>
 
                 </div>
-
-            {% endfor %}
-
-            <script>
-                document.querySelectorAll(".product-container").forEach(product => {
-
-                    let colorSelect = product.querySelector(".color-select");
-                    let sizeSelect = product.querySelector(".size-select");
-                    let sizeField = product.querySelector(".size-field");
-
-                    if(!colorSelect || !sizeSelect || !sizeField){
-                        return;
-                    }
-
-                    // دالة تحديث المقاسات حسب اللون
-                    function updateSizes(){
-
-                        sizeSelect.innerHTML = "";
-
-                        // تأكد أن هناك خيارات
-                        if(colorSelect.options.length === 0){
-                            sizeField.style.display = "none";
-                            return;
-                        }
-
-                        let selectedOption = colorSelect.options[colorSelect.selectedIndex];
-
-                        if(!selectedOption){
-                            sizeField.style.display = "none";
-                            return;
-                        }
-
-                        let sizesRaw = selectedOption.dataset.sizes || "";
-
-                        let sizes = sizesRaw
-                            .split("|")
-                            .filter(size => size.trim() !== "");
-
-                        if(sizes.length > 0){
-
-                            sizeField.style.display = "block";
-
-                            sizes.forEach(size => {
-
-                                let option = document.createElement("option");
-                                option.value = size;
-                                option.textContent = size;
-
-                                sizeSelect.appendChild(option);
-
-                            });
-
-                        } else {
-
-                            sizeField.style.display = "none";
-
-                        }
-                    }
-
-                    // عند تغيير اللون
-                    colorSelect.addEventListener("change", updateSizes);
+            </div>
 
 
-                    // تحميل اول مقاسات تلقائيا
-                    updateSizes();
-
-                });
-                // اظهار منتج واحد فقط في نفس الوقت
-                document.querySelectorAll(".product-details").forEach(details => {
-
-                    details.addEventListener("click", function(){
-
-                        let currentBox = this.nextElementSibling;
-
-                        // اغلاق جميع القوائم الاخرى
-                        document.querySelectorAll(".product-colors").forEach(box => {
-
-                            if(box !== currentBox){
-                                box.classList.remove("active");
-                            }
-
-                        });
-
-                        // فتح/اغلاق المنتج الحالي
-                        currentBox.classList.toggle("active");
-
-                    });
-
-                });
-                // ازرار زيادة ونقصان الكمية
-                document.querySelectorAll(".product-container").forEach(product => {
-
-                    let plusBtn = product.querySelector(".plus-btn");
-                    let minusBtn = product.querySelector(".minus-btn");
-                    let quantityInput = product.querySelector(".quantity-input");
-
-                    if(!plusBtn || !minusBtn || !quantityInput){
-                        return;
-                    }
-
-
-                    plusBtn.addEventListener("click", function(e){
-
-                        e.stopPropagation();
-
-                        let currentValue = parseInt(quantityInput.value);
-                        let maxValue = parseInt(quantityInput.max);
-
-                        // منع تجاوز الحد الاقصى
-                        if(currentValue < maxValue){
-
-                            quantityInput.value = currentValue + 1;
-
-                        }
-
-                    });
-
-
-                    minusBtn.addEventListener("click", function(e){
-
-                        e.stopPropagation();
-
-                        if(parseInt(quantityInput.value) > 1){
-
-                            quantityInput.value = parseInt(quantityInput.value) - 1;
-
-                        }
-
-                    });
-
-                });
-
-            </script>
-
-
-            <form method="post">
-                {% csrf_token %}
-                {% if order_form.non_field_errors %}
-                    <div style="padding:10px; background-color:#f8d7da; color:#721c24; margin-bottom: 15px; border-radius:8px;">
-                        {{ order_form.non_field_errors }}
-                    </div>
-                {% endif %}
-                {% if item_form.non_field_errors %}
-                    <div style="padding:10px; background-color:#f8d7da; color:#721c24; margin-bottom: 15px; border-radius:8px;">
-                        {{ item_form.non_field_errors }}
-                    </div>
-                {% endif %}
-                {% for field in order_form  %}
-                    <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                        <label for="{{ field.id_for_label }}" >{{  field.label }}</label> 
-                        {{  field }}
-                        <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{ field.help_text }}</p>
-                        {% if  field.errors %}
-                        <div style="padding:5px; background-color:red; color:white;">{{  field.errors }}</div>
-                        {% endif %}
-                    </div>
-                {% endfor %}
-                {% for field in item_form %}
-                    <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                        <label for="{{ field.id_for_label }}">{{  field.label }}</label> 
-                        {{  field }}
-                        <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{ field.help_text }}</p>
-                        {% if  field.errors %}
-                        <div style="padding:5px; background-color:red; color:white;">{{  field.errors }}</div>
-                        {% endif %}
-                    </div>
-                {% endfor %}
-
-                <button type="submit"> اضافة </button>
-
-            </form>
         {% else %}
-            <div>
-                <h1> !يبدو انه لايوجد لديك منتجات صالحة للطلب بعد  </h1>
-                <p> لكي تتمكن من انشاء طلب يجب ن يكون لديك على الاقل منتج واحد ظاهر ومقبول من الادارة </p>
+            <div class="no-products">
+                <h1>لا يوجد لديك منتجات صالحة للطلب بعد!</h1>
+                <p>لكي تتمكن من إنشاء طلب يجب أن يكون لديك على الأقل منتج واحد ظاهر ومقبول من الإدارة.</p>
             </div>
         {% endif %}
-        
 
     </div>
+
     {% include "common/toast.html" %}
     <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/store/product_cart.js' %}"></script>
     {% if messages %}
         {% for message in messages %}
             {% if "success" in message.tags %}
-                <script>
-                    showToast('success-toast', "{{ message|escapejs }}");
-                </script>
+                <script>showToast('success-toast', "{{ message|escapejs }}");</script>
             {% elif "error" in message.tags %}
-                <script>
-                    showToast('failed-toast', "{{ message|escapejs }}");
-                </script>
+                <script>showToast('failed-toast', "{{ message|escapejs }}");</script>
             {% endif %}
         {% endfor %}
     {% endif %}

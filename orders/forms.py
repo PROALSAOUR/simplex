@@ -48,7 +48,6 @@ class OrderRegisterForm(forms.ModelForm):
 
         return customer_location
 
-
 class OrderItemRegisterForm(forms.ModelForm):
     """نموذج عنصر الطلب"""
 
@@ -103,15 +102,13 @@ class OrderItemRegisterForm(forms.ModelForm):
                 self.add_error("product_color", "هذا اللون غير متوفر حاليا.")
 
         if product_color:
-            has_sizes = product_color.sizes.filter(available=True).exists()
+            has_sizes = product_color.sizes.all().exists()
             if has_sizes and not product_size:
                 self.add_error("product_size", "يرجى اختيار المقاس.")
 
         if product_color and product_size:
             if product_size.product_color_id != product_color.id:
                 self.add_error("product_size", "هذا المقاس لا يتبع اللون المحدد.")
-            elif not product_size.available:
-                self.add_error("product_size", "هذا المقاس غير متوفر حاليا.")
 
         if product and qty and qty > product.max_quantity_per_order:
             self.add_error(
@@ -141,7 +138,6 @@ class OrderItemRegisterForm(forms.ModelForm):
         if commit:
             order_item.save()
         return order_item
-
 
 class OrderEditForm(forms.ModelForm):
     class Meta:
