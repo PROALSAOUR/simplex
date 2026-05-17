@@ -356,7 +356,17 @@
             };
 
             if (editingIndex !== null) {
-                colorsData[editingIndex] = entry;
+                // Keep original data and only update changed fields
+                colorsData[editingIndex] = {
+                    ...colorsData[editingIndex],  // Preserve id and other original fields
+                    color: colorName,
+                    available: document.getElementById('nc-available')?.checked ?? true,
+                    sizes: [...newColorSizes],
+                    // Only update image if a new one was selected
+                    imageFile: currentImageFile || colorsData[editingIndex].imageFile,
+                    imageURL: currentImageURL || colorsData[editingIndex].imageURL,
+                    imageName: currentImageName || colorsData[editingIndex].imageName,
+                };
             } else {
                 colorsData.push(entry);
             }
