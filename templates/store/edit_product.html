@@ -70,7 +70,11 @@
                     {{ product.upload_at|date:"Y/n/j" }}
                     الساعة {{ product.upload_at|time:"g:iA" }}
                 </p>          
-          </div>
+            </div>
+            <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                <p> اجمالي المبيعات : {{ product.total_sales }} </p>   
+                <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >اجمالي عدد مرات بيع المنتج</p>        
+            </div>
         </div>
         <form method="POST" id="edit_product_form" enctype="multipart/form-data">
             {% csrf_token %}    

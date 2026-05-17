@@ -43,7 +43,7 @@ class Order(models.Model):
     )
     free_delivery = models.BooleanField(default=False, verbose_name="توصيل مجاني" , choices=[(True, "مجاني"), (False, "غير مجاني")])
     order_date = models.DateTimeField(auto_now_add=True, verbose_name='تاريخ الطلب')
-    deliverey_date = models.DateTimeField(null=True, blank=True, verbose_name='تاريخ التسليم')
+    delivery_date = models.DateTimeField(null=True, blank=True, verbose_name='تاريخ التسليم')
 
     # حقول بيانات الزبون
     customer_name = models.CharField(max_length=100, verbose_name='اسم الزبون')

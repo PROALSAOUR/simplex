@@ -31,7 +31,14 @@
                     تاريخ الطلب:
                     {{ order.order_date|date:"l Y/m/d" }}
                     الساعة {{ order.order_date|time:"g:iA" }}
-                </p>    
+                </p> 
+                {% if order.delivery_date %}
+                    <p>
+                        تاريخ التسليم:
+                        {{ order.delivery_date|date:"l Y/m/d" }}
+                        الساعة {{ order.delivery_date|time:"g:iA" }}
+                    </p>
+                {% endif %}
             </div>
         
             {% if order.status != "processing" or order.verification_status == 'rejected'  %}
@@ -80,7 +87,9 @@
                         <p>لا توجد صورة لهذا العنصر</p>
                     {% endif %}
                     <p> اللون = <span> {{ item.color }} </span> </p>
-                    <p> المقاس = <span> {{ item.size }} </span> </p>
+                    {% if  item.size %}
+                        <p> المقاس = <span> {{ item.size }} </span> </p>
+                    {% endif %}
                     <p> الكمية = <span>{{ item.qty }} </span> </p>
                 </div>
             {% endfor %}
