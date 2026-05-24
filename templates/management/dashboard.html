@@ -22,7 +22,12 @@
         <button onclick="logout.showModal()">تسجيل الخروج</button>
         {% include "components/accounts/dialogs/logout_dialog.html" %}
         
-        <a href="{% url 'management:show_stores' %}">المتاجر الخاضعة للإدارة</a>
+        <div>
+            <a href="{% url 'management:show_stores' %}">المتاجر الخاضعة للإدارة</a>
+        </div>
+        <div>
+            <a href="{% url 'management:review_center' %}">مركز المراجعات</a>
+        </div>
     </div>
     
 </body>

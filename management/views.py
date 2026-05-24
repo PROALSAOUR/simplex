@@ -5,6 +5,8 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 
 from accounts.models import Store
+from store.models import Product
+from orders.models import Order
 
 @login_required(login_url='accounts:log_in')
 @admin_only
@@ -68,3 +70,19 @@ def store_list(request, sid):
     }
     return render(request, 'management/store_list.html', context)
 
+@login_required(login_url='accounts:log_in')
+@admin_only
+def review_center(request):
+    """عرض صفحة مركز المراجعات التي تحتوي على روابط و ملخص  لجميع المراجعات الواردة من المتاجر الخاضعة للإدارة"""
+    stores = Store.objects.filter(status='pending').count()  # عدد المتاجر التي تنتظر المراجعة"
+    products = Product.objects.filter(status='checking').count()  # عدد المنتجات التي تنتظر المراجعة"
+    orders = Order.objects.filter(verification_status='checking').count()  # عدد الطلبات التي تنتظر المراجعة"
+    
+    context = {
+        'stores': stores,
+        'products': products,
+        'orders': orders,
+    }
+    return render(request, 'management/review_center.html', context)
+
+#change-later ضيف  صفحة عرض لكل متجر او طلب او منتج يجب مراجعته

@@ -44,7 +44,6 @@ class UserProfile(models.Model):
         verbose_name_plural = 'الملفات الشخصية'
 
 class Store(models.Model):
-    slug = models.SlugField(max_length=100, unique=False , verbose_name='slug', blank=True , help_text=" اسم المتجر باللغة الانجليزية وبدون فراغات ") # هذا الحقل يستخدم في الروابط لتحديد المتجر بشكل فريد، يتم انشاءه من قبل الادارة قبل قبول وتفعيل المتجر 
     name = models.CharField(max_length=255 , verbose_name="اسم المتجر", help_text="قم بإدخال اسم المتجر")
     status = models.CharField(verbose_name='حالة المتجر', max_length=20, choices=[('pending', 'قيد  المراجعة'), ('active', 'مُفعل'), ('inactive', 'غير مُفعل')], default='pending')
     logo = models.ImageField(upload_to='vendors/Stores/logos' , verbose_name="صورة لوجو المتجر", default='default/default_store_logo.png') 
