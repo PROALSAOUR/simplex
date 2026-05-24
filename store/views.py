@@ -143,11 +143,13 @@ def add_product(request):
                     continue 
                 
                 if not validate_image_file(image_file):
-                    continue  # تخطي الصورة إذا لم تكن صالحة    
-                
+                    continue  # تخطي الصورة إذا لم تكن صالحة  
+                  
+                # يتم ضغط الصور بواسطة دالة جافاسكريبت وضغطها هنا مرة أخرى للتأكد من تقليل حجمها
+                compressed_image = compress_image(image_file)
                 ProductImages.objects.create(
                     product=product,
-                    image=image_file,
+                    image=compressed_image,
                     priority=priority
                 )
 
@@ -335,6 +337,7 @@ def edit_product(request, pid):
                                 image_file.seek(0)
                                 if uploaded_hash in existing_hashes:
                                     continue
+                                # يتم ضغط الصور بواسطة دالة جافاسكريبت وضغطها هنا مرة أخرى للتأكد من تقليل حجمها
                                 compressed_image = compress_image(image_file)
                                 ProductImages.objects.create(
                                     product=product,
