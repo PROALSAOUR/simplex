@@ -21,14 +21,7 @@
 
         {% comment %} تسجيل الخروج {% endcomment %}
         <button onclick="logout.showModal()">تسجيل الخروج</button>
-        <dialog id='logout'> 
-            <form method="post" action="{% url 'accounts:log_out' %}">
-                {% csrf_token %}
-                <p>هل انت متأكد من رغبتك بتسجيل الخروج؟</p>
-                <button type="button" onclick="logout.close()">تراجع</button>
-                <button type="submit">تسجيل الخروج</button>
-            </form>
-        </dialog>
+        {% include "components/accounts/dialogs/logout_dialog.html" %}
 
         {% comment %} صفحة بيانات البائع {% endcomment %}
         <div style="padding:20px; background-color:#f5f5dc; margin-bottom:20px;">

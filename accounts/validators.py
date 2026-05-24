@@ -54,10 +54,16 @@ def get_redirect_url_for_user(user):
             store = user.vendor.store
             if store.status == 'pending':
                 return 'accounts:account_under_review'
-            return 'store:store_dashboard'
+            return 'store:vendors_dashboard'
 
     elif user_profile.user_type == 'admin':
-        return 'admin_dashboard' #change-later اضف رابط صفحة الادارة الصحيح
+        return 'management:admins_dashboard'
 
     return None
         
+def get_user_type(user):
+    """دالة تستقبل كائن مستخدم وتتحقق من نوعه وتعيد نوعه"""
+    try:
+        return user.userprofile.user_type
+    except:
+        return None

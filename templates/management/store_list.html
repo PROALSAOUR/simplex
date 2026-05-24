@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .container {
+            text-align: center;
+            direction: rtl;
+            padding: 50px;
+            height: 100vh;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 >قائمة المتجر {{ store.name }} </h1>
+
+        {% comment %} صفحة بيانات المتجر {% endcomment %}
+        <div style="padding:20px; background-color:#f5f5dc; margin-bottom:20px;">
+            <p style="color:red; display:inline-block;">تفاصيل المتجر</p>
+            <a href="{% url 'accounts:store_details' %}" style=" background-color:#4CAF50; color:white; padding:10px; text-decoration:none; border-radius:5px;">==></a>
+        </div>
+        {% comment %} صفحة طلبات المتجر {% endcomment %}
+        <div style="padding:20px; background-color:#f5f5dc; margin-bottom:20px;">
+            <p style="color:red; display:inline-block;">طلبات المتجر</p>
+            <a href="{% url 'orders:show_orders' store.id %}" style=" background-color:#4CAF50; color:white; padding:10px; text-decoration:none; border-radius:5px;">==></a>
+        </div>
+
+        {% comment %} صفحة منتجات المتجر {% endcomment %}
+        <div style="padding:20px; background-color:#f5f5dc; margin-bottom:20px;">
+            <p style="color:red; display:inline-block;">منتجات المتجر</p>
+            <a href="{% url 'store:show_products' store.id %}" style=" background-color:#4CAF50; color:white; padding:10px; text-decoration:none; border-radius:5px;">==></a>
+        </div>
+
+        {% comment %} صفحة احصائيات المتجر {% endcomment %}
+        <div style="padding:20px; background-color:#f5f5dc; margin-bottom:20px;">
+            <p style="color:red; display:inline-block;">احصائيات المتجر</p>
+            <a href="#change-later" style=" background-color:#4CAF50; color:white; padding:10px; text-decoration:none; border-radius:5px;">==></a>
+        </div>
+
+    </div>
+</body>
+</html>

@@ -1,4 +1,3 @@
-{% comment %} صفحة المتجر الرئيسية {% endcomment %} 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,10 +17,12 @@
 <body>
     <div class="container">
         <h1 >مرحبا</h1>
-        <p>هذه صفحة المتجر الرئيسية </p>
-        <a href="{% url 'accounts:account_list' %}">ادارة حسابي</a>
-        <a href="{% url 'store:show_products' STORE_ID %}">عرض المنتجات</a>
-        <a href="{% url 'orders:show_orders' STORE_ID %}">عرض الطلبات</a>
+        <p>هذه صفحة التحكم الخاصة بالادارة </p>
+        {% comment %} تسجيل الخروج {% endcomment %}
+        <button onclick="logout.showModal()">تسجيل الخروج</button>
+        {% include "components/accounts/dialogs/logout_dialog.html" %}
+        
+        <a href="{% url 'management:show_stores' %}">المتاجر الخاضعة للإدارة</a>
     </div>
     
 </body>

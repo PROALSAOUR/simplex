@@ -10,6 +10,7 @@ import hashlib, json
 from Project.utils import compress_image
 from accounts.decorators import vendor_only , advanced_permission_required
 from store.validators import validate_image_file
+from accounts.validators import get_user_type 
 from accounts.models import Vendor
 from store.models import *
 from store.forms import ProductRegisterForm
@@ -21,11 +22,19 @@ def store_dashboard(request):
     return render(request, 'store/dashboard.html')
 
 @login_required(login_url='accounts:log_in')
-@vendor_only
-def show_products(request):
+def show_products(request, sid):
     """دالة عرض جميع المنتجات الخاصة بالمستخدم كما تحتوي على ألية البحث والفلترة """
-    vendor = request.user.vendor
-    products = vendor.store.products.all()
+    store = get_object_or_404(Store, id=sid)
+    
+    # تحقق من نوع المستخدم
+    user_type = get_user_type(request.user)
+    if user_type == 'vendor':
+        # لو المستخدم بائع تحقق أن المتجر الذي يريد عرض منتجاته هو متجره
+        vendor = request.user.vendor
+        if vendor.store != store:
+            raise Http404("المتجر غير موجود")  
+    
+    products = store.products.all()
 
     # ── فلترة ──────────────────────────────────────────
     status = request.GET.get('status')
@@ -102,6 +111,7 @@ def show_products(request):
     query_string = query_params.urlencode()  # مثال: status=approved&gender=male
 
     context = {
+        'sid': sid,
         'page_obj': page_obj,
         'query_string': query_string,
         # قيم الفلاتر للحفاظ عليها في الـ form

@@ -1,0 +1,8 @@
+<dialog id='logout'> 
+    <form method="post" action="{% url 'accounts:log_out' %}">
+        {% csrf_token %}
+        <p>هل انت متأكد من رغبتك بتسجيل الخروج؟</p>
+        <button type="button" onclick="logout.close()">تراجع</button>
+        <button type="submit">تسجيل الخروج</button>
+    </form>
+</dialog>

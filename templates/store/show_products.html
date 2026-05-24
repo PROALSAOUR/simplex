@@ -18,9 +18,10 @@
 <body>
     <div class="container">
         <p> صفحة المنتجات الرئيسية </p>
-        <a href="{% url 'store:add_product' %}"> اضافة منتج جديد </a>
+        {% if USER_TYPE == 'vendor' %}
+            <a href="{% url 'store:add_product' %}"> اضافة منتج جديد </a>
+        {% endif %}
         
-    
         {% comment %} كود تنسيق خاص بتنسيق الجدول مبدئيا  {% endcomment %}
         <style>
             /* ═══════════════════════════════════════════
@@ -529,7 +530,7 @@
                     </div>
 
                     <div class="sp-filter-actions">
-                    <a href="{% url 'store:show_products' %}" class="sp-btn sp-btn-ghost">مسح الكل</a>
+                    <a href="{% url 'store:show_products' sid %}" class="sp-btn sp-btn-ghost">مسح الكل</a>
                     <button type="submit" class="sp-btn sp-btn-primary">
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L19 7"/></svg>
                         تطبيق
@@ -622,7 +623,7 @@
                             {% if USER_LEVEL in ADVANCED_PERMISSIONS %}
                                 <button type="button" onclick="openDeleteProductDialog(this)"
                                     data-id="{{ product.id }}" data-name="{{ product.name }}"
-                                    data-redirect="{% url "store:show_products" %}">حذف
+                                    data-redirect="{% url "store:show_products" sid %}">حذف
                                 </button>
                             {% endif %}
                             <a href="{% url "store:view_product" product.id %}">معاينة</a>

@@ -8,19 +8,26 @@ from django.db.models import Q
 from django.views.decorators.http import require_POST
 import json
 
-
 from orders.models import *
 from orders.forms import *
 from accounts.decorators import vendor_only 
+from accounts.validators import get_user_type 
 from accounts.models import Vendor 
 
-
 @login_required(login_url='accounts:log_in')
-@vendor_only
-def show_orders(request):
+def show_orders(request, sid):
     """دالة عرض جميع الطلبات الخاصة بالمستخدم كما تحتوي على ألية البحث والفلترة """
-    vendor = request.user.vendor
-    orders =  vendor.store.orders.exclude(verification_status="checking") # جلب جميع الطلبات بإستثناء التي لم يتم التحقق منها بعد
+    store = get_object_or_404(Store, id=sid)
+    
+    # تحقق من نوع المستخدم
+    user_type = get_user_type(request.user)
+    if user_type == 'vendor':
+        # لو المستخدم بائع تحقق أن المتجر الذي يريد عرض طلباته هو متجره
+        vendor = request.user.vendor
+        if vendor.store != store:
+            raise Http404("المتجر غير موجود")    
+    
+    orders =  store.orders.exclude(verification_status="checking") # جلب جميع الطلبات بإستثناء التي لم يتم التحقق منها بعد
 
     # ── فلترة ──────────────────────────────────────────
     status = request.GET.get('status')
@@ -63,6 +70,7 @@ def show_orders(request):
     query_string = query_params.urlencode()  
 
     context = {
+        'sid': store.id,
         'page_obj': page_obj,
         'query_string': query_string,
         # قيم الفلاتر للحفاظ عليها في الـ form
@@ -209,9 +217,8 @@ def add_order(request):
     })
     
 @login_required(login_url='accounts:log_in')
-@vendor_only
 def edit_order(request, oid):
-    """الدالة المسؤولة عن صفحة التعديل الخاصة بالمنتج"""
+    """الدالة المسؤولة عن صفحة التعديل الخاصة بالطلب والتي تسمح للبائع بتعديل الطلبات التي في حالة  معالجة فقط"""
     order = get_object_or_404(Order, id=oid)
     items = order.items.all()
         
