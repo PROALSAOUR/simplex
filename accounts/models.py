@@ -56,6 +56,7 @@ class Store(models.Model):
     instagram = models.URLField(verbose_name='انستاجرام', blank=True, help_text='قم بإدخال رابط بروفايل صفحة الانستاجرام الخاصة بمتجرك')
     tiktok = models.URLField(verbose_name='تيكتوك', blank=True, help_text='قم بإدخال رابط صفحة تيكتوك الخاصة بمتجرك')
     created_at = models.DateTimeField(auto_now_add=True , verbose_name='تاريخ الإنشاء')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='تاريخ آخر تحديث')
     def __str__(self):
         return self.name
     

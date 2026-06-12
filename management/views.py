@@ -33,6 +33,8 @@ def show_stores(request):
     VALID_SORTS = {
         '-created_at': '-created_at',   # الأحدث أولاً
         'created_at':  'created_at',    # الأقدم أولاً
+        '-updated_at': '-updated_at',    # الأحدث تعديلاً أولاً
+        'updated_at': 'updated_at',     # الأقدم تعديلاً أولاً
     }
     selected_sort = request.GET.get('sort', '-created_at')
     order_by = VALID_SORTS.get(selected_sort, '-created_at')
@@ -86,3 +88,32 @@ def review_center(request):
     return render(request, 'management/review_center.html', context)
 
 #change-later ضيف  صفحة عرض لكل متجر او طلب او منتج يجب مراجعته
+@login_required(login_url='accounts:log_in')
+@admin_only
+def stores_to_review(request):
+    """عرض صفحة تحتوي على جميع المتاجر التي تنتظر المراجعة"""
+    stores = Store.objects.filter(status='pending').order_by('-updated_at')
+    context = {
+        'stores': stores,
+    }
+    return render(request, 'management/stores_to_review.html', context)
+
+@login_required(login_url='accounts:log_in')
+@admin_only
+def products_to_review(request):
+    """عرض صفحة تحتوي على جميع المنتجات التي تنتظر المراجعة"""
+    products = Product.objects.filter(status='checking').order_by('-updated_at')
+    context = {
+        'products': products,
+    }
+    return render(request, 'management/products_to_review.html', context)
+
+@login_required(login_url='accounts:log_in')
+@admin_only
+def orders_to_review(request):
+    """عرض صفحة تحتوي على جميع الطلبات التي تنتظر المراجعة"""
+    orders = Order.objects.filter(verification_status='checking').order_by('-updated_at')
+    context = {
+        'orders': orders,
+    }
+    return render(request, 'management/orders_to_review.html', context)

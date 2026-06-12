@@ -21,7 +21,7 @@
         <div style="padding:20px; background-color:#f5f5dc; margin-bottom:20px;">
             {% if stores > 0 %}
                 <p style="color:red; display:inline-block;"> {{ stores }} متاجر في انتظار المراجعة</p>
-                <a href="" style=" background-color:#4CAF50; color:white; padding:10px; text-decoration:none; border-radius:5px;">==></a>
+                <a href="{% url 'management:stores_to_review' %}" style=" background-color:#4CAF50; color:white; padding:10px; text-decoration:none; border-radius:5px;">==></a>
             {% else %}
                 <p style="color:green; display:inline-block;"> لا توجد متاجر في انتظار المراجعة</p>
             {% endif %}
@@ -30,7 +30,7 @@
         <div style="padding:20px; background-color:#f5f5dc; margin-bottom:20px;">
             {% if products > 0 %}
                 <p style="color:red; display:inline-block;"> {{ products }} منتجات في انتظار المراجعة</p>
-                <a href="" style=" background-color:#4CAF50; color:white; padding:10px; text-decoration:none; border-radius:5px;">==></a>
+                <a href="{% url 'management:products_to_review' %}" style=" background-color:#4CAF50; color:white; padding:10px; text-decoration:none; border-radius:5px;">==></a>
             {% else %}
                 <p style="color:green; display:inline-block;"> لا توجد منتجات في انتظار المراجعة</p>
             {% endif %}
@@ -39,7 +39,7 @@
         <div style="padding:20px; background-color:#f5f5dc; margin-bottom:20px;">
             {% if orders > 0 %}
                 <p style="color:red; display:inline-block;"> {{ orders }} طلبات في انتظار التحقق</p>
-                <a href="" style=" background-color:#4CAF50; color:white; padding:10px; text-decoration:none; border-radius:5px;">==></a>
+                <a href="{% url 'management:orders_to_review' %}" style=" background-color:#4CAF50; color:white; padding:10px; text-decoration:none; border-radius:5px;">==></a>
             {% else %}
                 <p style="color:green; display:inline-block;"> لا توجد طلبات في انتظار التحقق</p>
             {% endif %}

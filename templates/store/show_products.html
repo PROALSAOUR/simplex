@@ -435,6 +435,16 @@
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
                         الأقدم أولاً
                         </button>
+                        <button type="button" class="sp-sort-item {% if selected_sort == '-updated_at' %}selected{% endif %}"
+                                onclick="applySort('-updated_at')">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+                         الأحدث تعديلاً 
+                        </button>
+                        <button type="button" class="sp-sort-item {% if selected_sort == 'updated_at' %}selected{% endif %}"
+                                onclick="applySort('updated_at')">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+                        الأقدم تعديلاً 
+                        </button>
                         <button type="button" class="sp-sort-item {% if selected_sort == 'name' %}selected{% endif %}"
                                 onclick="applySort('name')">
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h6"/></svg>

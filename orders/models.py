@@ -38,16 +38,18 @@ class Order(models.Model):
             ('canceled', 'ملغي'),
         ],
         default='processing',
+        help_text='حالة الطلب: جاري التجهيز:الطلب قيد المراجعة و التجهيز | تم التسليم: تم تسليم الطلب للزبون | ملغي: تم إلغاء الطلب من قبل الزبون أو المتجر',
     )
-    free_delivery = models.BooleanField(default=False, verbose_name="توصيل مجاني" , choices=[(True, "مجاني"), (False, "غير مجاني")])
+    free_delivery = models.BooleanField(default=False, verbose_name="قيمة التوصيل" , choices=[(True, "مجاني"), (False, "غير مجاني")], help_text="حدد ما إذا كان هذا الطلب مشمولًا بالتوصيل المجاني أم لا.")
     order_date = models.DateTimeField(auto_now_add=True, verbose_name='تاريخ الطلب')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='تاريخ آخر تحديث')
     delivery_date = models.DateTimeField(null=True, blank=True, verbose_name='تاريخ التسليم')
 
     # حقول بيانات الزبون
-    customer_name = models.CharField(max_length=100, verbose_name='اسم الزبون')
-    customer_phone = models.CharField(max_length=100, verbose_name='رقم هاتف الزبون')
-    customer_location = models.CharField(max_length=100, verbose_name='عنوان الزبون')
-    note = CKEditor5Field('ملاحظة', config_name='default')
+    customer_name = models.CharField(max_length=100, verbose_name='اسم الزبون', help_text='أدخل الاسم الكامل للزبون، مثل: محمد أحمد.')
+    customer_phone = models.CharField(max_length=100, verbose_name='رقم هاتف الزبون', help_text='أدخل رقم هاتف الزبون، مثل: 0912345678.')
+    customer_location = models.CharField(max_length=100, verbose_name='عنوان الزبون', help_text='أدخل عنوان التوصيل ، مثل: بنغازي - السلماني .')
+    note = CKEditor5Field('ملاحظة', config_name='default', null=True, blank=True, help_text='يمكنك إضافة ملاحظات خاصة بالطلب، مثل تعليمات التوصيل أو طلبات خاصة من الزبون.')
 
     class Meta:
         verbose_name = 'طلب'

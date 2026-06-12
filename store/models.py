@@ -9,6 +9,7 @@ class Product(models.Model):
     thumbnail_img = models.ImageField(upload_to='store/Products/thumbnails' , verbose_name="صورة المنتج الرئيسية", help_text="قم بإدخال صورة المنتج الرئيسية التي ستظهر في صفحة المتجر وصفحة تفاصيل المنتج")
     description = CKEditor5Field('الوصف', config_name='default', help_text="قم بإدخال وصف وتفاصيل المنتج ")
     upload_at = models.DateTimeField(auto_now_add=True , verbose_name='تاريخ الإنشاء')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='تاريخ آخر تحديث')
     is_visible = models.BooleanField(default=False , choices=[(True, "ظاهر"),(False, "مخفي"),], verbose_name='الظهور للزبائن', help_text="قم بالأختيار ان كنت ترغب بإظهار المنتج للزبائن مباشرة \n ان لم تقم بتحديده سيتم إخفاء المنتج ولن يتمكن زبائنك من رؤيته")
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2 , verbose_name="سعر الشراء", help_text="أدخل سعر الجملة الذي اشتريت به المنتج")
     price = models.DecimalField(max_digits=10, decimal_places=2 , verbose_name="سعر البيع", help_text="أدخل سعر البيع النهائي للمنتج ")

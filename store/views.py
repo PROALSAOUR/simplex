@@ -89,6 +89,8 @@ def show_products(request, sid):
     VALID_SORTS = {
         '-upload_at': '-upload_at',   # الأحدث أولاً
         'upload_at':  'upload_at',    # الأقدم أولاً
+        '-updated_at': '-updated_at',    # الأحدث تعديلاً أولاً
+        'updated_at': 'updated_at',     # الأقدم تعديلاً أولاً
         'name':       'name',         # أبجدياً تصاعدي
         '-name':      '-name',        # أبجدياً تنازلي
         'price':      'price',        # الأرخص أولاً

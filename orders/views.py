@@ -52,6 +52,8 @@ def show_orders(request, sid):
     VALID_SORTS = {
         '-order_date': '-order_date',   # الأحدث أولاً
         'order_date':  'order_date',    # الأقدم أولاً
+        '-updated_at': '-updated_at',    # الأحدث تعديلاً أولاً
+        'updated_at': 'updated_at',     # الأقدم تعديلاً أولاً
     }
     selected_sort = request.GET.get('sort', '-order_date')
     order_by = VALID_SORTS.get(selected_sort, '-order_date')
