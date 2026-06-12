@@ -13,7 +13,7 @@ from store.validators import validate_image_file
 from accounts.validators import get_user_type 
 from accounts.models import Vendor
 from store.models import *
-from store.forms import ProductRegisterForm
+from store.forms import ProductAdminForm, ProductRegisterForm
 
 @login_required(login_url='accounts:log_in')
 @vendor_only
@@ -244,16 +244,26 @@ def edit_product(request, pid):
     product = get_object_or_404(Product, id=pid)
     product_images = product.images.all()
     
+    user_type = get_user_type(request.user)
+    
     # تحقق ان المستخدم بائع وان المنتج الذي يريد تعديله تابع لمتجره
-    if  request.user.userprofile.user_type == 'vendor':
+    if  user_type == 'vendor':
         if request.user.vendor.store != product.store :
             raise Http404("المنتج غير موجود")
         
-    
     if request.method == "POST":
-        form = ProductRegisterForm(request.POST, request.FILES, instance=product)
+        if user_type == "admin":
+            form = ProductAdminForm(request.POST, request.FILES, instance=product)
+        else:
+            form = ProductRegisterForm(request.POST, request.FILES, instance=product)
+            
         if form.is_valid():
             product = form.save()
+            
+            #  لو المستخدم بائع اعد حالة المنتج الى جاري المراجعة عند اجراء اي تعديل عليه ليتم مراجعته من الادارة مرة اخرى قبل عرضه للزبائن
+            if user_type == 'vendor':
+                product.status = "checking"
+                product.save()
 
             colors_data = request.POST.get("colors_data")
             if colors_data is not None:
@@ -361,7 +371,10 @@ def edit_product(request, pid):
             return redirect('store:edit_product', pid=product.id)
 
     else:
-        form = ProductRegisterForm(instance=product)
+        if user_type == "admin":
+            form = ProductAdminForm(instance=product)
+        else:
+            form = ProductRegisterForm(instance=product)
     
     colors_data = []
     for color in product.colors.prefetch_related('sizes').all():

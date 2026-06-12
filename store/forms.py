@@ -53,7 +53,6 @@ class ProductRegisterForm(forms.ModelForm):
     def save(self, commit=True):
         # خذ الكائن (سواء جديد أو للتعديل)
         product = super().save(commit=False)
-        product.status = "checking" # عند اجراء اي تعديل اعادة حالة المنتج الى جاري المراجعة
 
         # إذا كان كائن جديد (إنشاء)
         if not product.pk:
@@ -65,3 +64,10 @@ class ProductRegisterForm(forms.ModelForm):
 
         return product
         
+class ProductAdminForm(ProductRegisterForm):
+    """فورم خاصة بالمسؤول ترث حقول المنتج من الفورم الاساسي و تحتوي ايضا على الحقول الإضافية الخاصة بحالة المنتج والمراجعة"""
+    class Meta(ProductRegisterForm.Meta):
+        fields = ProductRegisterForm.Meta.fields + [
+            'status',
+            'rejected_cause'
+        ]

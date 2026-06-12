@@ -36,7 +36,6 @@
 <body>
     <div class="container">
         <h1>هذه صفحة تعديل منتج </h1>
-        {% comment %} #change-later ضيف شرح تحت كل خانة {% endcomment %}
         <div style="background-color:#e1e1e1; padding:10px 40px; margin-bottom: 15px;">
             <h3>رابط المعاينة لصفحة البيع</h3>
             <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
@@ -44,38 +43,14 @@
                 {% if USER_LEVEL in ADVANCED_PERMISSIONS %}
                     <button type="button" onclick="openDeleteProductDialog(this)"
                         data-id="{{ product.id }}" data-name="{{ product.name }}"
-                        data-redirect="{% url "store:show_products" %}">حذف
+                        data-redirect="{% url "store:show_products" product.store.id %}">حذف
                     </button>
                 {% endif %}
                 {% comment %} #change-later اضف زر لنسخ الرابط واضف شرح {% endcomment %}
             </div>
         
         </div>
-        {% comment %} قسم حالة المنتج والمراجعة [ status, rejected_cause , upload_at] {% endcomment %}
-        <div style="background-color:#e1e1e1; padding:10px 40px; margin-bottom: 15px;">
-            <h3>قسم حالة المنتج</h3>
-            <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                <p> الحالة:{{  product.get_status_display }}</p> 
-                <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  product.status.help_text }}</p> #change-later اعرض نص المساعدة هنا 
-            </div>
-            {% if product.status == "rejected" and product.rejected_cause %}
-                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                    <p> سبب الرفض:{{  product.rejected_cause }}</p> 
-                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  product.rejected_cause.help_text }}</p> #change-later اعرض نص المساعدة هنا 
-                </div>
-            {% endif %}
-            <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                <p>
-                    تاريخ الإنشاء:
-                    {{ product.upload_at|date:"Y/n/j" }}
-                    الساعة {{ product.upload_at|time:"g:iA" }}
-                </p>          
-            </div>
-            <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
-                <p> اجمالي المبيعات : {{ product.total_sales }} </p>   
-                <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >اجمالي عدد مرات بيع المنتج</p>        
-            </div>
-        </div>
+        
         <form method="POST" id="edit_product_form" enctype="multipart/form-data">
             {% csrf_token %}    
             {% if edit_form.non_field_errors %}
@@ -83,7 +58,63 @@
                     {{ edit_form.non_field_errors }}
                 </div>
             {% endif %}
-        
+            
+            {% comment %} قسم حالة المنتج والمراجعة [ status, rejected_cause , upload_at] {% endcomment %}
+            <div style="background-color:#e1e1e1; padding:10px 40px; margin-bottom: 15px;">
+                <h3>قسم حالة المنتج</h3>
+                {% if USER_TYPE == "vendor" %}
+                    <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                        <p> الحالة:{{  product.get_status_display }}</p> 
+                        <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " > 
+                            حالات المنتج: جاري المراجعة: تم رفع المنتج وسيتم مراجعته من قبل الإدارة خلال 24 ساعة | مقبول: تم قبول المنتج وهو ظاهر للزبائن | مرفوض: تم رفض المنتج لعدم مطابقته لمعايير الجودة أو لأي سبب آخر 
+                         </p> 
+                    </div>
+                    {% if product.status == "rejected" and product.rejected_cause %}
+                        <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                            <p> سبب الرفض:{{  product.rejected_cause }}</p> 
+                            <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " > تم رفض هذا المنتج مؤقتًا. يرجى تنفيذ التعديلات المطلوبة الموضحة أعلاه ثم إعادة رفع المنتج لإرساله للمراجعة مرة أخرى. </p> 
+                        </div>
+                    {% endif %}
+                {% elif USER_TYPE == "admin" %}
+                    {% comment %}  حقل سبب الرفض الذي يظهر فقط عند اختيار حالة الرفض #change-later {% endcomment %}
+                    <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                        <label for="{{ edit_form.status.id_for_label }}">{{  edit_form.status.label }}</label> 
+                        {{  edit_form.status }}
+                        <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.status.help_text }}</p>
+                        {% if  edit_form.status.errors %}
+                            <div style="padding:5px; background-color:red; color:white;">{{  edit_form.status.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                        <label for="{{ edit_form.rejected_cause.id_for_label }}">{{  edit_form.rejected_cause.label }}</label> 
+                        {{  edit_form.rejected_cause }}
+                        <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >{{  edit_form.rejected_cause.help_text }}</p>
+                        {% if  edit_form.rejected_cause.errors %}
+                            <div style="padding:5px; background-color:red; color:white;">{{  edit_form.rejected_cause.errors }}</div>
+                        {% endif %}
+                    </div>
+                    {% if product.rejected_cause %}
+                        <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                            <p> سبب الرفض السابق:{{  product.rejected_cause }}</p> 
+                        </div>
+                    {% endif %}
+                    
+                {% endif %}
+                
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <p>
+                        تاريخ الإنشاء:
+                        {{ product.upload_at|date:"Y/n/j" }}
+                        الساعة {{ product.upload_at|time:"g:iA" }}
+                    </p>          
+                </div>
+                <div style="margin-bottom: 15px; background-color:#f8f8f8; padding:10px;">
+                    <p> اجمالي المبيعات : {{ product.total_sales }} </p>   
+                    <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; " >اجمالي عدد مرات بيع المنتج</p>        
+                </div>
+            </div>
+
+
             {% comment %} قسم المعلومات الأساسية [name, description, type, gender, is_visible] {% endcomment %}
             <div style="background-color:#e1e1e1; padding:10px 40px; margin-bottom: 15px;">
                 <h3>قسم المعلومات الأساسية</h3>
@@ -551,7 +582,6 @@
                 </div>
             </div>
             
-
             <button type="submit">حفظ</button>
             <button type="button" id="reset_form_btn"> إعادة تعيين</button>
             
@@ -571,6 +601,7 @@
     <script src="{% static 'js/store/product_colors.js' %}"></script>
     <script src="{% static 'js/store/product_pricing.js' %}"></script>
     <script>
+        // إضافة script التحكم بـ form والألوان والصور والتسعير
         document.addEventListener('DOMContentLoaded', function () {
             const editForm = document.getElementById('edit_product_form');
             if (editForm) {

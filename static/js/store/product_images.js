@@ -1,3 +1,4 @@
+// JavaScript code for managing product images and reset button and showing/hiding rejected cause field in edit product page
 document.addEventListener("DOMContentLoaded", function () {
     let form = null;
     const orderInput = document.getElementById("images_order");
@@ -567,4 +568,33 @@ document.addEventListener("DOMContentLoaded", function () {
         resetThumbnailPreview,
         syncFilesToForm,
     };
+});
+// التحكم بظهور/إخفاء حقل سبب الرفض
+document.addEventListener('DOMContentLoaded', function () {
+    const statusField = document.getElementById('id_status');
+    const rejectedCauseField = document.getElementById('id_rejected_cause');
+    
+    // تحقق من وجود الحقول (قد لا تكون موجودة في صفحات المتاجر العادية)
+    if (!statusField || !rejectedCauseField) {
+        return;
+    }
+    
+    // البحث عن عنصر div الذي يحتوي على حقل سبب الرفض
+    const rejectedCauseContainer = rejectedCauseField.closest('div');
+    
+    // دالة للتحكم بالظهور والإخفاء
+    const toggleRejectedCauseField = function() {
+        const isRejected = statusField.value === 'rejected';
+        
+        if (rejectedCauseContainer) {
+            rejectedCauseContainer.style.display = isRejected ? 'block' : 'none';
+        }
+    };
+    
+    // إضافة event listener للتغيير الفوري
+    statusField.addEventListener('change', toggleRejectedCauseField);
+    statusField.addEventListener('input', toggleRejectedCauseField);
+    
+    // تشغيل الدالة عند تحميل الصفحة (للقيم المحفوظة مسبقاً)
+    toggleRejectedCauseField();
 });
