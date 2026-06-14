@@ -396,8 +396,8 @@
                         <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
                     </svg>
                     <input type="text" name="search" class="sp-search-input"
-                            placeholder="ابحث عن متجر عن طريق الاسم " value="{{ search }}"
-                            oninput="updateBadge()">
+                        placeholder="ابحث عن متجر عن طريق الاسم او رقم الهاتف " value="{{ search }}"
+                        oninput="updateBadge()">
                     <button type="submit" class="sp-search-submit">بحث</button>
                     </div>
 
@@ -455,7 +455,7 @@
                 </div><!-- /topbar -->
 
                 <!-- ══ FILTER PANEL ═════════════════════════════════════ -->
-                <div class="sp-filter-panel {% if selected_status or selected_verification_status %}open{% endif %}"
+                <div class="sp-filter-panel {% if selected_status %}open{% endif %}"
                     id="sp-filter-panel">
                     <div class="sp-filter-grid">
 

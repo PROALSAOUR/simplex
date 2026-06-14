@@ -45,7 +45,7 @@ def show_orders(request, sid):
         filters = Q(customer_name__icontains=search)
 
         if search.isdigit():
-            filters |= Q(serial_number=int(search))
+            filters |= Q(serial_number=int(search)) | Q(customer_phone__icontains=search)
 
         orders = orders.filter(filters)
     # ── ترتيب ──────────────────────────────────────────
