@@ -20,17 +20,18 @@
     <div class="container">
         {% comment %} المتجر {% endcomment %}
         <div> 
-            <h2>تفاصيل المتجر</h2>     
-            <a href="{% url 'accounts:account_list' %}">العودة الى قائمة الحسابات</a>
-            <p style="background-color:#f1f1f1; margin-bottom:10px; padding:10px;">ملاحظة يمكن فقط لمالك المتجر والموظف ذو الصلاحية الكاملة تعديل بيانات المتجر</p>
+            <h2>تفاصيل المتجر</h2>  
+            {% if USER_TYPE == 'vendor' %}
+                <a href="{% url 'accounts:account_list' %}">العودة الى قائمة الحسابات</a>
+                <p style="background-color:#f1f1f1; margin-bottom:10px; padding:10px;">ملاحظة يمكن فقط لمالك المتجر والموظف ذو الصلاحية الكاملة تعديل بيانات المتجر</p>
+            {% endif %}   
         </div>
         {% comment %} بيانات المتجر واللوجو {% endcomment %}
         <div>
-            <h3> بيانات المتجر</h3>
             <div style="background-color:#f5f5dc; margin-bottom:10px; padding:10px; position:relative;">
                 <div style="background-color: white;  position:absolute; top: 10px; left: 10px;"> 
                     <img id="store_logo" src="{{ store.logo.url }}" style="width: 100px; height: 100px; display:block;">
-                    {% if USER_LEVEL in ADVANCED_PERMISSIONS %}
+                    {% if USER_TYPE == 'admin' or USER_TYPE == 'vendor' and USER_LEVEL in ADVANCED_PERMISSIONS  %}
                         <button onclick="logo_dialog.showModal()" ><i>تعديل</i></button>
                     {% endif %}
                 </div>    
@@ -50,7 +51,7 @@
                     <hr>
                 </div>
                 
-                {% if USER_LEVEL in ADVANCED_PERMISSIONS %}
+                {% if USER_TYPE == 'admin' or USER_TYPE == 'vendor' and USER_LEVEL in ADVANCED_PERMISSIONS  %}
                     <button onclick="basic_dialog.showModal()" ><i>تعديل</i></button>
                 {% endif %}
             </div>
@@ -58,7 +59,7 @@
         {% comment %} حسابات المتجر الاجتماعية {% endcomment %}
         <div>
             <h3>حسابات المتجر الاجتماعية</h3>
-            {% if USER_LEVEL in ADVANCED_PERMISSIONS %}
+            {% if USER_TYPE == 'vendor' and USER_LEVEL in ADVANCED_PERMISSIONS or USER_TYPE == 'admin' %}
                 <button onclick="social_dialog.showModal()" ><i>تعديل</i></button>
             {% endif %}
             <div style="background-color:#f5f5dc; margin-bottom:10px; padding:10px;">   
@@ -82,7 +83,7 @@
         <div> 
             <h2>موظفين المتجر</h2>     
             <p>{% lorem 90 w random %}</p> <!-- نبذة عن الموظفين وفائدتهم وصلاحياتهم -->
-            {% if owner and counts < 5 %} <!-- اذا كان المستخدم مالك المتجر وعدد الموظفين اقل من او يساوي 5 اعرض زر اضافة موظف  -->
+            {% if USER_TYPE == 'vendor' and owner and counts < 5 %} <!-- اذا كان المستخدم مالك المتجر وعدد الموظفين اقل من او يساوي 5 اعرض زر اضافة موظف  -->
                 <button onclick="add_employee_dialog.showModal()" >اضافة موظف</button>
             {% endif %}
             {% if employees %}

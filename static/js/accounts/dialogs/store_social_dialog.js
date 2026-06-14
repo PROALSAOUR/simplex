@@ -11,10 +11,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         let data = await res.json();
         if (data.status === "success") {
-            document.getElementById("store_telegram").innerText = data.telegram;
-            document.getElementById("store_facebook").innerText = data.facebook;
-            document.getElementById("store_instagram").innerText = data.instagram;
-            document.getElementById("store_tiktok").innerText = data.tiktok;
+            document.getElementById("store_telegram").innerText = data.telegram || "لم تتم الإضافة بعد";
+            document.getElementById("store_facebook").innerText = data.facebook || "لم تتم الإضافة بعد";
+            document.getElementById("store_instagram").innerText = data.instagram || "لم تتم الإضافة بعد";
+            document.getElementById("store_tiktok").innerText = data.tiktok || "لم تتم الإضافة بعد";
             showToast("success-toast", data.message);
         } else {
             showToast("failed-toast", data.message);

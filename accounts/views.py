@@ -1,13 +1,13 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth import authenticate, login, logout
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.core.exceptions import ValidationError
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 
 from accounts.models import Vendor
 from accounts.forms import *
-from accounts.validators import validate_username, get_redirect_url_for_user
+from accounts.validators import validate_username, get_redirect_url_for_user,  get_user_type 
 from accounts.decorators import vendor_only , advanced_permission_required
 
 @login_required(login_url='accounts:log_in') #تمنع الوصول تلقائيًا لأي مستخدم غير مسجل دخول، وتعيد توجيهه إلى صفحة التسجيل   
@@ -17,7 +17,10 @@ def account_list(request):
     الدالة المسؤولة عن عرض الصفحة التي  تحتوي على قائمة الصفحات الخاصة بالحساب 
     يمكن فقط للبائعين الدخول اليها 
     """
-    return render(request, 'accounts/account_list.html')
+    context = {
+        "store" : request.user.vendor.store
+    }
+    return render(request, 'accounts/account_list.html', context) 
 
 @login_required(login_url='accounts:log_in') 
 @vendor_only
@@ -72,15 +75,22 @@ def edit_account_details(request):
     return JsonResponse({"status": "error", "message": "طلب غير صالح"})
 
 @login_required(login_url='accounts:log_in')
-@vendor_only
-def store_details(request):
+def store_details(request, sid):
     """
     الدالة المسؤولة عن عرض الصفحة التي  تحتوي على بيانات المتجر المرتبط بالبائع 
-    يمكن فقط للبائعين الدخول اليها 
     """
-    vendor = request.user.vendor
-    store = vendor.store
-    owner = True if vendor.permission_level == "owner" else False
+    store = get_object_or_404(Store, id=sid)
+    user_type = get_user_type(request.user)
+    # تحقق ان كان المستخدم بائع ان المتجر الذي يريد تعديله هو متجره
+    if  user_type == 'vendor':
+        if request.user.vendor.store != store : # لو البائع يحاول الوصول لمتجر ليس له علاقة به
+            raise Http404("المتجر غير موجود")
+        else: # لو المستخدم بائع و المتجر الذي يريد تعديله هو متجره تحقق من صلاحياته
+            owner = True if  request.user.vendor.permission_level == "owner" else False
+            
+    else: # لو المستخدم اداري ليس لديه صلاحيات المطلقة الخاصة بالمالك
+        owner = False
+    
     employees = store.vendors.all() 
     employee_form = EmployeeRegisterForm()
     store_basic_form = StoreBasicForm(instance=store)
@@ -98,15 +108,22 @@ def store_details(request):
     return render(request, 'accounts/store_details.html', context)
 
 @login_required(login_url='accounts:log_in')
-@vendor_only
-@advanced_permission_required()
 @require_POST
-def edit_store_basic(request):
+def edit_store_basic(request, sid):
     """
     الدالة المسؤولة عن تعديل بيانات المتجر الاساسية وهي الاسم والموقع 
     """
+    user_type = get_user_type(request.user)    
+    # فحص الصلاحيات
+    if user_type == 'vendor':
+        # للبائع، التحقق من أنه مالك المتجر أو لديه صلاحيات متقدمة
+        if request.user.vendor.permission_level not in ["owner", "full"]:
+            return JsonResponse({
+                "status": "error",
+                "message": "عذراً, لا تمتلك الصلاحية لتنفيذ هذا الإجراء"
+            }, status=403)
 
-    store = request.user.vendor.store
+    store = get_object_or_404(Store, id=sid)
     form = StoreBasicForm(request.POST, instance=store)
     if form.is_valid():
         form.save()
@@ -120,59 +137,65 @@ def edit_store_basic(request):
     else:
         return JsonResponse({"status": "error", "errors": form.errors})
         
-
 @login_required(login_url='accounts:log_in')
-@vendor_only
-@advanced_permission_required()
 @require_POST
-def edit_store_social(request):
+def edit_store_social(request, sid):
     """
     الدالة المسؤولة عن تعديل حسابات المتجر الاجتماعية  
     """
-    if request.method == "POST":
-        
-        store = request.user.vendor.store
-        form = StoreSocialForm(request.POST, instance=store)
-        if form.is_valid():
-            form.save()
+    user_type = get_user_type(request.user)    
+    # فحص الصلاحيات
+    if user_type == 'vendor':
+        # للبائع، التحقق من أنه مالك المتجر أو لديه صلاحيات متقدمة
+        if request.user.vendor.permission_level not in ["owner", "full"]:
             return JsonResponse({
-                "status": "success",
-                "message": "تم إجراء التعديل بنجاح",
-                "telegram": store.telegram,
-                "facebook": store.facebook,
-                "instagram": store.instagram,
-                "tiktok": store.tiktok
-            })
-        else:
-            return JsonResponse({"status": "error", "message": form.errors})
-        
+                "status": "error",
+                "message": "عذراً, لا تمتلك الصلاحية لتنفيذ هذا الإجراء"
+            }, status=403)
+
+    store = get_object_or_404(Store, id=sid)
+    form = StoreSocialForm(request.POST, instance=store)
+    if form.is_valid():
+        form.save()
+        return JsonResponse({
+            "status": "success",
+            "message": "تم إجراء التعديل بنجاح",
+            "telegram": store.telegram,
+            "facebook": store.facebook,
+            "instagram": store.instagram,
+            "tiktok": store.tiktok
+        })
     else:
-        return JsonResponse({"status": "error", "message": "طلب غير صالح"})
+        return JsonResponse({"status": "error", "message": form.errors})
 
 @login_required(login_url='accounts:log_in')
-@vendor_only
-@advanced_permission_required()
 @require_POST
-def edit_store_logo(request):
+def edit_store_logo(request, sid):
     """
     الدالة المسؤولة عن تعديل لوجو المتجر  
     """
-    if request.method == "POST":
-        store = request.user.vendor.store
-        form = StoreLogoForm(request.POST, request.FILES, instance=store)
-        if form.is_valid():
-            form.save()
+    user_type = get_user_type(request.user)    
+    # فحص الصلاحيات
+    if user_type == 'vendor':
+        # للبائع، التحقق من أنه مالك المتجر أو لديه صلاحيات متقدمة
+        if request.user.vendor.permission_level not in ["owner", "full"]:
             return JsonResponse({
-                "status": "success",
-                "message": "تم تحديث لوجو المتجر بنجاح",
-                "logo_url": store.logo.url
-            })
-        else:
-            return JsonResponse({"status": "error", "message": form.errors})
-        
-    else:
-        return JsonResponse({"status": "error", "message": "طلب غير صالح"})
+                "status": "error",
+                "message": "عذراً, لا تمتلك الصلاحية لتنفيذ هذا الإجراء"
+            }, status=403)
 
+    store = get_object_or_404(Store, id=sid)
+    form = StoreLogoForm(request.POST, request.FILES, instance=store)
+    if form.is_valid():
+        form.save()
+        return JsonResponse({
+            "status": "success",
+            "message": "تم تحديث لوجو المتجر بنجاح",
+            "logo_url": store.logo.url
+        })
+    else:
+        return JsonResponse({"status": "error", "message": form.errors})
+        
 @login_required(login_url='accounts:log_in')
 @vendor_only
 @require_POST

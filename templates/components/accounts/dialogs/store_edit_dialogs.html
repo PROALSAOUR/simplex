@@ -3,7 +3,7 @@
 <!-- نموذج تعديل البيانات الأساسية للمتجر -->
 <dialog id="basic_dialog">
     <h3>تعديل بيانات المتجر</h3>
-    <form id="basic_form" method="POST" action="{% url "accounts:edit_store_basic" %}">
+    <form id="basic_form" method="POST" action="{% url "accounts:edit_store_basic" store.id %}">
         {% csrf_token %}
         <div>
             <label for="{{ basic_form.name.id_for_label }}">اسم المتجر</label>
@@ -26,7 +26,7 @@
 <!-- نموذج تعديل حسابات تواصل للمتجر -->
 <dialog id="social_dialog">
     <h3>تعديل بيانات المتجر</h3>
-    <form id="social_form" method="POST" action="{% url "accounts:edit_store_social" %}">
+    <form id="social_form" method="POST" action="{% url "accounts:edit_store_social" store.id %}">
         {% csrf_token %}
         <div>
             <label for="{{ social_form.telegram.id_for_label }}">Telegram</label>
@@ -54,7 +54,7 @@
 <dialog id="logo_dialog">
     <h3>تعديل شعار المتجر</h3>
 
-    <form id="logo_form" enctype="multipart/form-data" action="{% url 'accounts:edit_store_logo' %}" method="POST">
+    <form id="logo_form" enctype="multipart/form-data" action="{% url 'accounts:edit_store_logo' store.id %}" method="POST">
         {% csrf_token %}
         <div style="display:flex; gap:20px; margin-bottom:15px;">
             <!-- الصورة الحالية -->

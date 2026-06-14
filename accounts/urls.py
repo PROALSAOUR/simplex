@@ -8,10 +8,10 @@ urlpatterns = [
     path('account_details/', account_details, name='account_details'), 
     path('edit/account-details/', edit_account_details, name='edit_account_details'), 
     
-    path('store-details/', store_details, name='store_details'), 
-    path('store/edit/basic/', edit_store_basic, name='edit_store_basic'), 
-    path('store/edit/social/', edit_store_social, name='edit_store_social'), 
-    path('store/edit/logo/', edit_store_logo, name='edit_store_logo'), 
+    path('store-details/<int:sid>/', store_details, name='store_details'), 
+    path('store/edit/basic/<int:sid>/', edit_store_basic, name='edit_store_basic'), 
+    path('store/edit/social/<int:sid>/', edit_store_social, name='edit_store_social'), 
+    path('store/edit/logo/<int:sid>/', edit_store_logo, name='edit_store_logo'), 
 
     path('store/add/employee/', add_employee, name='add_employee'), 
     path('store/remove/employee/', remove_employee, name='remove_employee'), 

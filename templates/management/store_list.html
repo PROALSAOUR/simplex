@@ -18,10 +18,10 @@
     <div class="container">
         <h1 >قائمة المتجر {{ store.name }} </h1>
 
-        {% comment %} صفحة بيانات المتجر {% endcomment %}
+        {% comment %} صفحة تفاصيل المتجر {% endcomment %}
         <div style="padding:20px; background-color:#f5f5dc; margin-bottom:20px;">
             <p style="color:red; display:inline-block;">تفاصيل المتجر</p>
-            <a href="{% url 'accounts:store_details' %}" style=" background-color:#4CAF50; color:white; padding:10px; text-decoration:none; border-radius:5px;">==></a>
+            <a href="{% url 'accounts:store_details' store.id %}" style=" background-color:#4CAF50; color:white; padding:10px; text-decoration:none; border-radius:5px;">==></a>
         </div>
         {% comment %} صفحة طلبات المتجر {% endcomment %}
         <div style="padding:20px; background-color:#f5f5dc; margin-bottom:20px;">
