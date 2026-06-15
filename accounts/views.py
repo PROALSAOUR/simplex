@@ -8,7 +8,7 @@ from django.views.decorators.http import require_POST
 from accounts.models import Vendor
 from accounts.forms import *
 from accounts.validators import validate_username, get_redirect_url_for_user,  get_user_type 
-from accounts.decorators import vendor_only , advanced_permission_required
+from accounts.decorators import vendor_only 
 
 @login_required(login_url='accounts:log_in') #تمنع الوصول تلقائيًا لأي مستخدم غير مسجل دخول، وتعيد توجيهه إلى صفحة التسجيل   
 @vendor_only
@@ -93,8 +93,14 @@ def store_details(request, sid):
     
     employees = store.vendors.all() 
     employee_form = EmployeeRegisterForm()
-    store_basic_form = StoreBasicForm(instance=store)
-    store_social_form = StoreSocialForm(instance=store)
+    
+    if user_type == "admin":
+        store_basic_form = StoreAdminBasicForm(instance=store)
+        store_social_form = StoreAdminSocialForm(instance=store)
+    else:
+        store_basic_form =  StoreBasicForm(instance=store)
+        store_social_form = StoreSocialForm(instance=store)
+        
     counts = employees.count()
     context = {
         'store': store,
@@ -124,7 +130,10 @@ def edit_store_basic(request, sid):
             }, status=403)
 
     store = get_object_or_404(Store, id=sid)
-    form = StoreBasicForm(request.POST, instance=store)
+    if user_type == "admin":
+        form = StoreAdminBasicForm(request.POST, instance=store)
+    else:
+        form =  StoreBasicForm(request.POST, instance=store)
     if form.is_valid():
         form.save()
         return JsonResponse({
@@ -132,10 +141,12 @@ def edit_store_basic(request, sid):
             "message": "تم إجراء التعديل بنجاح",
             "name": store.name,
             "location": store.location,
+            "store_status": store.get_status_display(),
             "check_orders": store.get_check_orders_display()
         })
     else:
-        return JsonResponse({"status": "error", "errors": form.errors})
+        errors = {field: [str(error) for error in error_list] for field, error_list in form.errors.items()}
+        return JsonResponse({"status": "error", "errors": errors})
         
 @login_required(login_url='accounts:log_in')
 @require_POST
@@ -154,19 +165,24 @@ def edit_store_social(request, sid):
             }, status=403)
 
     store = get_object_or_404(Store, id=sid)
-    form = StoreSocialForm(request.POST, instance=store)
+    if user_type == "admin":
+        form = StoreAdminSocialForm(request.POST, instance=store)
+    else:
+        form =  StoreSocialForm(request.POST, instance=store)
     if form.is_valid():
         form.save()
         return JsonResponse({
             "status": "success",
             "message": "تم إجراء التعديل بنجاح",
             "telegram": store.telegram,
+            "phone_number1": store.phone_number1,
             "facebook": store.facebook,
             "instagram": store.instagram,
             "tiktok": store.tiktok
         })
     else:
-        return JsonResponse({"status": "error", "message": form.errors})
+        errors = {field: [str(error) for error in error_list] for field, error_list in form.errors.items()}
+        return JsonResponse({"status": "error", "errors": errors})
 
 @login_required(login_url='accounts:log_in')
 @require_POST
@@ -194,7 +210,8 @@ def edit_store_logo(request, sid):
             "logo_url": store.logo.url
         })
     else:
-        return JsonResponse({"status": "error", "message": form.errors})
+        errors = {field: [str(error) for error in error_list] for field, error_list in form.errors.items()}
+        return JsonResponse({"status": "error", "errors": errors})
         
 @login_required(login_url='accounts:log_in')
 @vendor_only

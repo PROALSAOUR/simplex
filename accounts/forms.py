@@ -276,12 +276,43 @@ class StoreBasicForm(forms.ModelForm):
             raise ValidationError("موقع المتجر  يجب أن يكون 3 أحرف أو أكثر.")
 
         return location
+
+# نموذج تحديث بيانات المتجر الاساسية عن طريق الادارة
+class StoreAdminBasicForm(forms.ModelForm):
+    """فورم خاصة بالمسؤول يرث حقول المتجر من الفورم الاساسي و يحتوي ايضا على الحقول الإضافية الخاصة بحالة المتجر """
+    class Meta(StoreBasicForm.Meta):
+        fields = StoreBasicForm.Meta.fields + [
+            'status',
+        ]
         
 # نموذج تحديث حسابات المتجر الاجتماعية
 class StoreSocialForm(forms.ModelForm):
     class Meta:
         model = Store
-        fields = ['telegram', 'facebook', 'instagram', 'tiktok']
+        fields = ['facebook', 'instagram', 'tiktok']
+        
+# نموذج تحديث حسابات المتجر الاجتماعية عن طريق الادارة
+class StoreAdminSocialForm(forms.ModelForm):
+    """فورم خاصة بالمسؤول يرث حقول المتجر الاجتماعية من الفورم الاساسي و يحتوي ايضا على الحقول الإضافية الخاصة بتيليجرام ورقم المتجر """
+    class Meta(StoreSocialForm.Meta):
+        fields = StoreSocialForm.Meta.fields + [
+            'telegram', 'phone_number1',
+        ]
+        
+    def clean_phone_number1(self):
+        phone_number1 = self.cleaned_data.get('phone_number1')
+        if not phone_number1:
+            return phone_number1
+        
+        phone_number1 = validate_phone_number(phone_number1)
+        # التحقق مما إذا كان الرقم مسجلاً لأحد المتاجر مسبقًا (استثناء المتجر الحالي)
+        existing_stores = Store.objects.filter(phone_number1=phone_number1)
+        if self.instance.pk:  # إذا كان التعديل على متجر موجود
+            existing_stores = existing_stores.exclude(pk=self.instance.pk)
+        
+        if existing_stores.exists():
+            raise ValidationError("رقم الهاتف مستخدم بالفعل. يرجى التواصل مع الدعم الفني في حال كنت متأكداً انك لم تسجل به مسبقاً لحل المشكلة.")
+        return phone_number1
         
 # نموذج تحديث لوجو المتجر 
 class StoreLogoForm(forms.ModelForm):

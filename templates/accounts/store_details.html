@@ -41,6 +41,11 @@
                     <hr>
                 </div>    
                 <div>
+                    الحالة : 
+                    <p id="store_status"> {{ store.get_status_display }}</p>
+                    <hr>
+                </div>
+                <div>
                     العنوان:
                     <p id="store_location">{% if store.location %}{{ store.location }}{% else %}لم تتم الاضافة بعد{% endif %}</p>
                     <hr>
@@ -50,7 +55,7 @@
                     <p id="store_check_orders"> {{ store.get_check_orders_display }}</p>
                     <hr>
                 </div>
-                
+
                 {% if USER_TYPE == 'admin' or USER_TYPE == 'vendor' and USER_LEVEL in ADVANCED_PERMISSIONS  %}
                     <button onclick="basic_dialog.showModal()" ><i>تعديل</i></button>
                 {% endif %}
@@ -64,16 +69,17 @@
             {% endif %}
             <div style="background-color:#f5f5dc; margin-bottom:10px; padding:10px;">   
                 {% comment %} #change-later ضيف ايقونة جلب كل موقع تواصل ورابط يودي عند النقر عليه للموقع  وكمان عدل طريقة عرض الرابط بحيث يعرض طول معين مايتجاوزه {% endcomment %}
-                <p id="store_phone_number1">{{ store.phone_number1 }}</p>
+                {% comment %} #change-later ضيف شرح جنب التيليجرام ورقم الهاتف يخبر المستخدم بأنه لايستطيع تعديلهم الا بالتواصل مع الادارة {% endcomment %}
+                <div> رقم الهاتف: <p id="store_phone_number1">{{ store.phone_number1 }}</p></div>
                 <hr>
-                <p id="store_telegram">{% if store.telegram %}{{ store.telegram }}{% else %}لم تتم الاضافة بعد{% endif %}</p>
+                <div>  التليجرام: <p id="store_telegram">{% if store.telegram %}{{ store.telegram }}{% else %}تواصل مع الدعم لطلب تعديل{% endif %}</p></div>
                 <hr>
-                <p id="store_facebook">{% if store.facebook %}{{ store.facebook }}{% else %}لم تتم الاضافة بعد{% endif %}</p>
+                <div>  الفيسبوك: <p id="store_facebook">{% if store.facebook %}{{ store.facebook }}{% else %}لم تتم الاضافة بعد{% endif %}</p></div>
                 <hr>
-                <p id="store_instagram">{% if store.instagram %}{{ store.instagram }}{% else %}لم تتم الاضافة بعد{% endif %}</p>
+                <div>  الانستغرام: <p id="store_instagram">{% if store.instagram %}{{ store.instagram }}{% else %}لم تتم الاضافة بعد{% endif %}</p></div>
                 <hr>
-                <p id="store_tiktok">{% if store.tiktok %}{{ store.tiktok }}{% else %}لم تتم الاضافة بعد{% endif %}</p>
-                <hr>
+                <div>  التيك توك:  <p id="store_tiktok">{% if store.tiktok %}{{ store.tiktok }}{% else %}لم تتم الاضافة بعد{% endif %}</p></div>
+                
             </div>
         </div>
 

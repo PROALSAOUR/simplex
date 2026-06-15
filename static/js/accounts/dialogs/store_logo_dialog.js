@@ -108,6 +108,22 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("store_logo").src = data.logo_url;
             showToast("success-toast", "تم تحديث صورة المتجر بنجاح");
             logo_dialog.close();
+        } else {
+            let errorMessage = data.message || "حدث خطأ ما";
+            if (data.errors && typeof data.errors === 'object') {
+                // الحصول على أول خطأ من الأخطاء
+                const errorFields = Object.keys(data.errors);
+                if (errorFields.length > 0) {
+                    const firstErrorField = errorFields[0];
+                    const errorArray = data.errors[firstErrorField];
+                    if (Array.isArray(errorArray) && errorArray.length > 0) {
+                        errorMessage = errorArray[0];
+                    } else if (typeof errorArray === 'string') {
+                        errorMessage = errorArray;
+                    }
+                }
+            }
+            showToast("failed-toast", errorMessage);
         }
     };
 

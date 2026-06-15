@@ -33,10 +33,10 @@ def validate_phone_number(phone_number):
     if not phonenumbers.is_valid_number(parsed_phone):
         raise ValidationError("رقم الهاتف غير صالح.")
 
-    # إرجاع الرقم بصيغة دولية موحدة
+    # إرجاع الرقم بصيغة محلية موحدة
     return phonenumbers.format_number(
         parsed_phone,
-        phonenumbers.PhoneNumberFormat.E164
+        phonenumbers.PhoneNumberFormat.NATIONAL
     )
 
 def get_redirect_url_for_user(user):

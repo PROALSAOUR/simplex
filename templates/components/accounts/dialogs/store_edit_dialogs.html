@@ -9,6 +9,12 @@
             <label for="{{ basic_form.name.id_for_label }}">اسم المتجر</label>
             {{ basic_form.name }}
         </div>
+        {% if USER_TYPE == 'admin' %}
+            <div>
+                <label for="{{ basic_form.status.id_for_label }}">حالة المتجر</label>
+                {{ basic_form.status }}
+            </div>
+        {% endif %}
         <div>
             <label for="{{ basic_form.location.id_for_label }}">الموقع</label>
             {{ basic_form.location }}
@@ -28,10 +34,16 @@
     <h3>تعديل بيانات المتجر</h3>
     <form id="social_form" method="POST" action="{% url "accounts:edit_store_social" store.id %}">
         {% csrf_token %}
-        <div>
-            <label for="{{ social_form.telegram.id_for_label }}">Telegram</label>
-            {{ social_form.telegram }}
-        </div>
+        {% if USER_TYPE == "admin" %}
+            <div>
+                <label for="{{ social_form.phone_number1.id_for_label }}">رقم الهاتف</label>
+                {{ social_form.phone_number1 }}
+            </div>
+            <div>
+                <label for="{{ social_form.telegram.id_for_label }}">Telegram</label>
+                {{ social_form.telegram }}
+            </div>
+        {% endif %}
         <div>
             <label for="{{ social_form.facebook.id_for_label }}">Facebook</label>
             {{ social_form.facebook }}
