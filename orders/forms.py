@@ -172,5 +172,10 @@ class OrderEditForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["note"].required = False
     
-
+class OrderAdminEditForm(OrderEditForm):
+    """فورم خاصة بالمسؤول ترث حقول الطلب من الفورم الاساسي و تحتوي ايضا على الحقول الإضافية الخاصة بحالة التحقق من الطلب """
+    class Meta(OrderEditForm.Meta):
+        fields = OrderEditForm.Meta.fields + [
+            'verification_status',
+        ]
         

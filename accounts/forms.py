@@ -278,7 +278,7 @@ class StoreBasicForm(forms.ModelForm):
         return location
 
 # نموذج تحديث بيانات المتجر الاساسية عن طريق الادارة
-class StoreAdminBasicForm(forms.ModelForm):
+class StoreAdminBasicForm(StoreBasicForm):
     """فورم خاصة بالمسؤول يرث حقول المتجر من الفورم الاساسي و يحتوي ايضا على الحقول الإضافية الخاصة بحالة المتجر """
     class Meta(StoreBasicForm.Meta):
         fields = StoreBasicForm.Meta.fields + [
@@ -292,7 +292,7 @@ class StoreSocialForm(forms.ModelForm):
         fields = ['facebook', 'instagram', 'tiktok']
         
 # نموذج تحديث حسابات المتجر الاجتماعية عن طريق الادارة
-class StoreAdminSocialForm(forms.ModelForm):
+class StoreAdminSocialForm(StoreSocialForm):
     """فورم خاصة بالمسؤول يرث حقول المتجر الاجتماعية من الفورم الاساسي و يحتوي ايضا على الحقول الإضافية الخاصة بتيليجرام ورقم المتجر """
     class Meta(StoreSocialForm.Meta):
         fields = StoreSocialForm.Meta.fields + [

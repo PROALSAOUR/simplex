@@ -221,30 +221,46 @@ def add_order(request):
 @login_required(login_url='accounts:log_in')
 def edit_order(request, oid):
     """الدالة المسؤولة عن صفحة التعديل الخاصة بالطلب والتي تسمح للبائع بتعديل الطلبات التي في حالة  معالجة فقط"""
+    user_type = get_user_type(request.user)
     order = get_object_or_404(Order, id=oid)
     items = order.items.all()
         
     # تحقق ان المستخدم بائع وان المنتج الذي يريد تعديله تابع لمتجره
-    if  request.user.userprofile.user_type == 'vendor':
+    if  user_type == 'vendor':
         if request.user.vendor.store != order.store :
             raise Http404("الطلب غير موجود")
     
     if request.method == "POST":
-        if order.status != "processing":
+        if order.status != "processing" and  user_type == 'vendor': # لايمكن للبائعين تعديل الطلبات التي تم تسليمها او الغائها
             messages.error(request, "لايمكن تعديل الطلبات المستلمة او الملغية!")
             return redirect("orders:edit_order", oid=order.id)
+        
+        if user_type == "admin":    
+            form = OrderAdminEditForm(request.POST, instance=order)
+        else:
+            form = OrderEditForm(request.POST, instance=order)
             
-        form = OrderEditForm(request.POST, instance=order)
         if form.is_valid():
             form.save()
             messages.success(request, "تم تعديل الطلب بنجاح")
             return redirect("orders:edit_order", oid=order.id)
     else:
-        form = OrderEditForm(instance=order)
+        if user_type == "admin":
+            form = OrderAdminEditForm(instance=order)
+        else:
+            form = OrderEditForm(instance=order)
+            
+    can_edit = not (
+        # لو المنتج تم تسليمه او بعد التحقق طلع وهمي لاتعطي البائع صلاحية التعديل  
+        # لو المستخدم اداري مهما كانت حالة الطلب اسمح له دائما بالتعديل
+        user_type == "vendor"
+        and (order.status != "processing" or order.verification_status == "rejected")
+    )
         
     context = {
         "order": order,
         "edit_form": form,
+        "can_edit": can_edit,
         "items": items
     }
     return render(request, 'orders/edit_order.html', context)
