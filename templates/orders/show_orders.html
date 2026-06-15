@@ -529,6 +529,7 @@
                         <th>#</th>
                         <th style="padding:10px; border:1px solid #ccc;">الرقم التسلسلي</th>
                         <th style="padding:10px; border:1px solid #ccc;">اسم المستلم</th>
+                        <th style="padding:10px; border:1px solid #ccc;">القيمة</th>
                         <th style="padding:10px; border:1px solid #ccc;">الحالة</th>
                         <th style="padding:10px; border:1px solid #ccc;">التحقق</th>
                         <th style="padding:10px; border:1px solid #ccc;">الإجراءات</th>
@@ -540,6 +541,7 @@
                             <td style="padding:10px; border:1px solid #ccc; text-align:center;">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
                             <td style="padding:10px; border:1px solid #ccc;">{{ order.serial_number }}</td>
                             <td style="padding:10px; border:1px solid #ccc;">{{ order.customer_name }}</td>
+                            <td style="padding:10px; border:1px solid #ccc;">{{ order.total_selling_price }}</td>
                             <td style="padding:10px; border:1px solid #ccc;">{{ order.get_status_display }}</td>
                             <td style="padding:10px; border:1px solid #ccc;">{{ order.get_verification_status_display }}</td>
                             <td style="padding:10px; border:1px solid #ccc;">

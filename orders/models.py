@@ -1,6 +1,8 @@
 from django.db import models
 from django_ckeditor_5.fields import CKEditor5Field
-from store.models import Store, Product
+from store.models import Product
+from accounts.models import Store
+
 """
 يمكن تعديل الطلبات التي حالتها جاري التجهيز فقط ولايمكن تعديل الطلبات المستلمة او الملغية
 لايمكن تعديل عناصر الطلب حاليا لذا في حال اراد المستخدم التعديل عليها عليه الغاء الطلب واعادة انشاءه
@@ -51,6 +53,11 @@ class Order(models.Model):
     customer_location = models.CharField(max_length=100, verbose_name='عنوان الزبون', help_text='أدخل عنوان التوصيل ، مثل: بنغازي - السلماني .')
     note = CKEditor5Field('ملاحظة', config_name='default', null=True, blank=True, help_text='يمكنك إضافة ملاحظات خاصة بالطلب، مثل تعليمات التوصيل أو طلبات خاصة من الزبون.')
 
+    # حقول قيم الطلب
+    total_purchase_price = models.PositiveIntegerField(verbose_name='إجمالي سعر الشراء', default=0, help_text='إجمالي تكلفة المنتجات في الطلب، محسوبة بناءً على أسعار الشراء لكل منتج والكمية المطلوبة.')
+    total_selling_price = models.PositiveIntegerField(verbose_name='إجمالي سعر البيع', default=0, help_text='إجمالي سعر البيع للطلب، محسوبة بناءً على أسعار البيع لكل منتج والكمية المطلوبة.')
+    total_profit = models.IntegerField(verbose_name='الربح', default=0, help_text='الربح المحقق من الطلب، محسوبًا كفرق بين إجمالي سعر البيع وإجمالي سعر الشراء.')
+
     class Meta:
         verbose_name = 'طلب'
         verbose_name_plural = 'الطلبات'
@@ -65,7 +72,26 @@ class Order(models.Model):
             return last_order.serial_number + 1
         return 1
 
-class OredrItem(models.Model):
+    def calculate_totals(self):
+        """
+        حساب إجمالي الأسعار والأرباح من عناصر الطلب.
+        تحسب الإجماليات بناءً على:
+        - إجمالي سعر الشراء = مجموع (سعر الشراء × الكمية) لكل عنصر
+        - إجمالي سعر البيع = مجموع (سعر البيع × الكمية) لكل عنصر  
+        - الربح الإجمالي = إجمالي سعر البيع - إجمالي سعر الشراء
+        """
+        from django.db.models import F, Sum
+        
+        totals = self.items.aggregate(
+            total_purchase=Sum(F('purchase_price') * F('qty')),
+            total_selling=Sum(F('selling_price') * F('qty')),
+        )
+        
+        self.total_purchase_price = totals.get('total_purchase') or 0
+        self.total_selling_price = totals.get('total_selling') or 0
+        self.total_profit = self.total_selling_price - self.total_purchase_price
+
+class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items', verbose_name='الطلب')
     # حقول المنتج المطلوب
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, verbose_name='المنتج', null=True)

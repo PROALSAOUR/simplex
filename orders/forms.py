@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 from accounts.validators import validate_phone_number
-from orders.models import Order, OredrItem
+from orders.models import Order, OrderItem
 from store.models import Product, ProductColor, ProductSize
 
 
@@ -58,7 +58,7 @@ class OrderItemRegisterForm(forms.ModelForm):
     )
 
     class Meta:
-        model = OredrItem
+        model = OrderItem
         fields = ["product", "product_color", "product_size", "qty"]
 
     def __init__(self, *args, store=None, product=None, **kwargs):

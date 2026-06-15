@@ -12,7 +12,7 @@ from orders.models import *
 from orders.forms import *
 from accounts.decorators import vendor_only 
 from accounts.validators import get_user_type 
-from accounts.models import Vendor 
+from accounts.models import Vendor , Store
 
 @login_required(login_url='accounts:log_in')
 def show_orders(request, sid):

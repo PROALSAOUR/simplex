@@ -31,6 +31,9 @@
                     {{ order.order_date|date:"l Y/m/d" }}
                     الساعة {{ order.order_date|time:"g:iA" }}
                 </p> 
+                <p> إجمالي سعر شراء المنتجات =<span> {{ order.total_purchase_price }} </span>  </p>
+                <p> إجمالي سعر بيع المنتجات =<span> {{ order.total_selling_price }} </span>  </p>
+                <p>  إجمالي الربح =<span> {{ order.total_profit }} </span>  </p>
                 {% if order.delivery_date %}
                     <p>
                         تاريخ التسليم:

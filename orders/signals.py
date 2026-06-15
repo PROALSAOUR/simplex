@@ -1,4 +1,4 @@
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, post_save, post_delete
 from django.dispatch import receiver
 from django.utils import timezone
 
@@ -71,4 +71,27 @@ def handle_order_verification(sender, instance, **kwargs):
     # عند التحويل إلى طلب وهمي
     if old_order.verification_status != 'rejected' and instance.verification_status == 'rejected':
         instance.status = 'canceled'
-        
+
+@receiver(post_save, sender=OrderItem)
+def update_order_totals_on_item_save(sender, instance, **kwargs):
+    """
+    عند حفظ أو تعديل عنصر طلب:
+    - إعادة حساب إجمالي سعر الشراء
+    - إعادة حساب إجمالي سعر البيع
+    - إعادة حساب الربح الإجمالي
+    """
+    order = instance.order
+    order.calculate_totals()
+    order.save(update_fields=['total_purchase_price', 'total_selling_price', 'total_profit'])
+
+@receiver(post_delete, sender=OrderItem)
+def update_order_totals_on_item_delete(sender, instance, **kwargs):
+    """
+    عند حذف عنصر طلب:
+    - إعادة حساب إجمالي سعر الشراء
+    - إعادة حساب إجمالي سعر البيع
+    - إعادة حساب الربح الإجمالي
+    """
+    order = instance.order
+    order.calculate_totals()
+    order.save(update_fields=['total_purchase_price', 'total_selling_price', 'total_profit'])
