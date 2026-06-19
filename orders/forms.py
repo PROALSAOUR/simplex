@@ -84,6 +84,14 @@ class OrderItemRegisterForm(forms.ModelForm):
             sizes = sizes.filter(product_color__product__store=store)
         self.fields["product_size"].queryset = sizes
 
+    def clean_product(self):
+        product = self.cleaned_data["product"]
+        if product.status != "approved":
+            raise forms.ValidationError(
+                "هذا المنتج غير متاح للطلب حالياً."
+            )
+        return product
+
     def clean(self):
         cleaned_data = super().clean()
         product = cleaned_data.get("product")

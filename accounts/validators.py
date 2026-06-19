@@ -50,11 +50,12 @@ def get_redirect_url_for_user(user):
         return None
 
     if user_profile.user_type == 'vendor':
-        if hasattr(user, 'vendor'):
-            store = user.vendor.store
-            if store.status == 'pending':
-                return 'accounts:account_under_review'
-            return 'store:vendors_dashboard'
+        store = user.stores.first()
+        if not store:
+            return None
+        if store.status == 'pending':
+            return 'accounts:account_under_review'
+        return 'store:vendors_dashboard'
 
     elif user_profile.user_type == 'admin':
         return 'management:admins_dashboard'

@@ -370,7 +370,7 @@
         {% if can_view %}
             {% if is_product_owner %}
                 {% if  product.status == "checking" %}
-                    <h1 style="background-color:red;color:#ffffff; text-align:center; padding:10px;"> هذا المنتج قيد المراجعة ولن يظهر لزبائنك الى ان تتم الموافقة عليه</h1>
+                    <h1 style="background-color:red;color:#ffffff; text-align:center; padding:10px;"> هذا المنتج قيد المراجعة ولن يظهر لزبائنك الى ان تتم الموافقة عليه من قبل الادارة</h1>
                 {% elif product.status == "rejected" %}
                 <div style="background-color:#d9534f;color:#ffffff;text-align:center;padding:10px;">
                     <h1 >
@@ -479,8 +479,11 @@
                                     <button type="button" id="qty-plus" aria-label="زيادة الكمية">+</button>
                                 </div>
                             </div>
-
-                            <button class="button" type="submit">إضافة إلى السلة</button>
+                            {% if  product.status == "approved" %}
+                                <button class="button" type="submit">إضافة إلى السلة</button>
+                            {% else %}
+                                <button class="button" disabled>لايمكن الطلب الى حين قبول المنتج</button>
+                            {% endif %}
                         </form>
                     {% else %}
                         {% if  is_product_owner %}

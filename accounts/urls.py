@@ -13,9 +13,6 @@ urlpatterns = [
     path('store/edit/social/<int:sid>/', edit_store_social, name='edit_store_social'), 
     path('store/edit/logo/<int:sid>/', edit_store_logo, name='edit_store_logo'), 
 
-    path('store/add/employee/', add_employee, name='add_employee'), 
-    path('store/remove/employee/', remove_employee, name='remove_employee'), 
-    path('store/edit/employee/', edit_employee, name='edit_employee'), 
     path('log-in/', log_in, name='log_in'),
     path('sign-up/', sign_up, name='sign_up'),
     path('log-out/', log_out, name='log_out'),

@@ -23,7 +23,6 @@
             <h2>تفاصيل المتجر</h2>  
             {% if USER_TYPE == 'vendor' %}
                 <a href="{% url 'accounts:account_list' %}">العودة الى قائمة الحسابات</a>
-                <p style="background-color:#f1f1f1; margin-bottom:10px; padding:10px;">ملاحظة يمكن فقط لمالك المتجر والموظف ذو الصلاحية الكاملة تعديل بيانات المتجر</p>
             {% endif %}   
         </div>
         {% comment %} بيانات المتجر واللوجو {% endcomment %}
@@ -31,9 +30,7 @@
             <div style="background-color:#f5f5dc; margin-bottom:10px; padding:10px; position:relative;">
                 <div style="background-color: white;  position:absolute; top: 10px; left: 10px;"> 
                     <img id="store_logo" src="{{ store.logo.url }}" style="width: 100px; height: 100px; display:block;">
-                    {% if USER_TYPE == 'admin' or USER_TYPE == 'vendor' and USER_LEVEL in ADVANCED_PERMISSIONS  %}
-                        <button onclick="logo_dialog.showModal()" ><i>تعديل</i></button>
-                    {% endif %}
+                    <button onclick="logo_dialog.showModal()" ><i>تعديل</i></button>
                 </div>    
                 <div>
                     اسم المتجر:
@@ -56,17 +53,14 @@
                     <hr>
                 </div>
 
-                {% if USER_TYPE == 'admin' or USER_TYPE == 'vendor' and USER_LEVEL in ADVANCED_PERMISSIONS  %}
-                    <button onclick="basic_dialog.showModal()" ><i>تعديل</i></button>
-                {% endif %}
+                <button onclick="basic_dialog.showModal()" ><i>تعديل</i></button>
             </div>
         </div>
         {% comment %} حسابات المتجر الاجتماعية {% endcomment %}
         <div>
             <h3>حسابات المتجر الاجتماعية</h3>
-            {% if USER_TYPE == 'vendor' and USER_LEVEL in ADVANCED_PERMISSIONS or USER_TYPE == 'admin' %}
-                <button onclick="social_dialog.showModal()" ><i>تعديل</i></button>
-            {% endif %}
+        
+            <button onclick="social_dialog.showModal()" ><i>تعديل</i></button>
             <div style="background-color:#f5f5dc; margin-bottom:10px; padding:10px;">   
                 {% comment %} #change-later ضيف ايقونة جلب كل موقع تواصل ورابط يودي عند النقر عليه للموقع  وكمان عدل طريقة عرض الرابط بحيث يعرض طول معين مايتجاوزه {% endcomment %}
                 {% comment %} #change-later ضيف شرح جنب التيليجرام ورقم الهاتف يخبر المستخدم بأنه لايستطيع تعديلهم الا بالتواصل مع الادارة {% endcomment %}
@@ -84,36 +78,6 @@
         </div>
 
         {% include "components/accounts/dialogs/store_edit_dialogs.html" %}
-
-        {% comment %} الموظفين {% endcomment %}
-        <div> 
-            <h2>موظفين المتجر</h2>     
-            <p>{% lorem 90 w random %}</p> <!-- نبذة عن الموظفين وفائدتهم وصلاحياتهم -->
-            {% if USER_TYPE == 'vendor' and owner and counts < 5 %} <!-- اذا كان المستخدم مالك المتجر وعدد الموظفين اقل من او يساوي 5 اعرض زر اضافة موظف  -->
-                <button onclick="add_employee_dialog.showModal()" >اضافة موظف</button>
-            {% endif %}
-            {% if employees %}
-                <p>عدد الموظفين: {{ counts }}\5</p>
-                <ul style="list-style-type: none; padding: 0;">
-                    {% for employee in employees %}
-                        <li style="margin-bottom: 20px; border: 1px solid #ccc; padding: 5px; border-radius: 5px;">
-                            <p>اسم الموظف: <span>{{ employee.name }}</span></p>
-                            <p>المعرف: <span>{{ employee.user.username }}</span></p>
-                            <p>مستوى الصلاحيات: <span>{{ employee.get_permission_level_display }}</span></p>
-                            {% comment %} يجب ان يكون المستخدم مالكً وبنفس الوقت لايستطيع تعديل او حذف نفسه  {% endcomment %}
-                            {% if owner and request.user.id != employee.user.id  %}
-                                <button onclick="openEditEmployeeDialog(this)" data-id="{{ employee.id }}" data-name="{{ employee.name }}" >تعديل الصلاحيات </button>                                
-                                <button onclick="openDeleteEmployeeDialog(this)"  data-id="{{ employee.id }}" data-name="{{ employee.name }}" >حذف الموظف </button>                                
-                            {% endif %}
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>لا يوجد موظفين في المتجر بعد.</p>
-            {% endif %}
-        </div>
-
-        {% include "components/accounts/dialogs/employee_dialogs.html" %}
 
     </div>
 

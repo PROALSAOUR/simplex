@@ -1,8 +1,8 @@
 from django import forms
-from store.validators import validate_image_file
-from store.models import *
 from django.core.exceptions import ValidationError
+from Project.validators import validate_image_file
 from Project.utils import compress_image
+from store.models import *
 
 class ProductRegisterForm(forms.ModelForm):
     images_order = forms.CharField(required=False, widget=forms.HiddenInput())

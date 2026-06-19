@@ -1,3 +1,5 @@
+from urllib import request
+
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -12,20 +14,17 @@ from orders.models import *
 from orders.forms import *
 from accounts.decorators import vendor_only 
 from accounts.validators import get_user_type 
-from accounts.models import Vendor , Store
+from accounts.models import Store
 
 @login_required(login_url='accounts:log_in')
 def show_orders(request, sid):
     """دالة عرض جميع الطلبات الخاصة بالمستخدم كما تحتوي على ألية البحث والفلترة """
     store = get_object_or_404(Store, id=sid)
     
-    # تحقق من نوع المستخدم
     user_type = get_user_type(request.user)
-    if user_type == 'vendor':
-        # لو المستخدم بائع تحقق أن المتجر الذي يريد عرض طلباته هو متجره
-        vendor = request.user.vendor
-        if vendor.store != store:
-            raise Http404("المتجر غير موجود")    
+    # تحقق ان كان المستخدم بائع ان المتجر الذي يريد تعديله هو متجره
+    if user_type == 'vendor' and store.owner != request.user: # لو البائع يحاول الوصول لمتجر ليس له علاقة به
+        raise Http404("المتجر غير موجود") 
     
     orders =  store.orders.exclude(verification_status="checking") # جلب جميع الطلبات بإستثناء التي لم يتم التحقق منها بعد
 
@@ -87,7 +86,7 @@ def show_orders(request, sid):
 @vendor_only
 def add_order_manually(request):
     """صفحة إنشاء طلب يدوي عن طريق صاحب المتجر"""
-    store = request.user.vendor.store
+    store = request.user.userprofile.store
     
     order_form = OrderRegisterForm(store=store, is_vendor=True)
     item_form = OrderItemRegisterForm(store=store)
@@ -142,7 +141,8 @@ def add_order(request):
     # التحقق أن المستخدم بائع 
     is_vendor = (
         request.user.is_authenticated and
-        Vendor.objects.filter(user=request.user).exists()
+        hasattr(request.user, 'userprofile') and
+        request.user.userprofile.user_type == 'vendor'
     )
     order_form = OrderRegisterForm(customer_data, is_vendor=is_vendor)
     item_forms = []
@@ -190,7 +190,8 @@ def add_order(request):
             # التحقق أن المستخدم بائع في هذا المتجر تحديداً
             is_store_vendor = (
                 request.user.is_authenticated and
-                Vendor.objects.filter(user=request.user, store=store).exists()
+                hasattr(request.user, 'userprofile') and
+                request.user.userprofile.user_type == 'vendor'
             )
             if is_store_vendor: # اذا كان منشئ الطلب بائع بالمتجر الطلب حقيقي تلقائيا
                 order.verification_status = "approved"
@@ -226,9 +227,8 @@ def edit_order(request, oid):
     items = order.items.all()
         
     # تحقق ان المستخدم بائع وان المنتج الذي يريد تعديله تابع لمتجره
-    if  user_type == 'vendor':
-        if request.user.vendor.store != order.store :
-            raise Http404("الطلب غير موجود")
+    if  user_type == 'vendor' and request.user.userprofile.store != order.store :
+        raise Http404("الطلب غير موجود")
     
     if request.method == "POST":
         if order.status != "processing" and  user_type == 'vendor': # لايمكن للبائعين تعديل الطلبات التي تم تسليمها او الغائها

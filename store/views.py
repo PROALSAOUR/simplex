@@ -8,10 +8,9 @@ from django.core.paginator import Paginator
 import hashlib, json
 
 from Project.utils import compress_image
-from accounts.decorators import vendor_only , advanced_permission_required
-from store.validators import validate_image_file
+from accounts.decorators import vendor_only
+from Project.validators import validate_image_file
 from accounts.validators import get_user_type 
-from accounts.models import Vendor
 from store.models import *
 from store.forms import ProductAdminForm, ProductRegisterForm
 
@@ -28,11 +27,8 @@ def show_products(request, sid):
     
     # تحقق من نوع المستخدم
     user_type = get_user_type(request.user)
-    if user_type == 'vendor':
-        # لو المستخدم بائع تحقق أن المتجر الذي يريد عرض منتجاته هو متجره
-        vendor = request.user.vendor
-        if vendor.store != store:
-            raise Http404("المتجر غير موجود")  
+    if user_type == 'vendor' and store.owner != request.user: # لو المستخدم بائع تحقق أن المتجر الذي يريد عرض منتجاته هو متجره
+        raise Http404("المتجر غير موجود")  
     
     products = store.products.all()
 
@@ -134,7 +130,7 @@ def show_products(request, sid):
 @transaction.atomic # تجعل كل العمليات داخل الدالة تُنفَّذ كحزمة واحدة، إذا حدث خطأ في أي خطوة يتم التراجع عن كل العمليات السابقة
 def add_product(request):
     """الدالة المسؤولة عن صفحة اضافة منتج جديد """
-    store = request.user.vendor.store
+    store = request.user.userprofile.store
     if request.method == "POST":
         form = ProductRegisterForm(request.POST, request.FILES, store=store)
         if form.is_valid():
@@ -200,7 +196,7 @@ def add_product(request):
                             )
 
             messages.success(request, "تمت إضافة المنتج بنجاح")
-            return redirect('store:show_products')
+            return redirect('store:show_products' , sid=store.id)
         else:
             # إعادة عرض النموذج مع الأخطاء
             context = {"add_form": form}
@@ -214,7 +210,6 @@ def add_product(request):
 
 @login_required(login_url='accounts:log_in')
 @vendor_only
-@advanced_permission_required()
 @require_POST
 def delete_product(request):
     "الدالة المسؤولة عن حذف منتج من المتجر, لايمكن الا لمالك المتجر او التحكم الكامل"
@@ -226,7 +221,7 @@ def delete_product(request):
             product =get_object_or_404(
                 Product,
                 id=product_id,
-                store=request.user.vendor.store
+                store=request.user.userprofile.store
             )
                 
             product.delete()
@@ -250,7 +245,7 @@ def edit_product(request, pid):
     
     # تحقق ان المستخدم بائع وان المنتج الذي يريد تعديله تابع لمتجره
     if  user_type == 'vendor':
-        if request.user.vendor.store != product.store :
+        if request.user.userprofile.store != product.store :
             raise Http404("المنتج غير موجود")
         
     if request.method == "POST":
@@ -424,8 +419,8 @@ def view_product(request, pid):
     is_product_owner = False
     if request.user.is_authenticated:
         try:
-            is_product_owner = request.user.vendor.store == product.store
-        except Vendor.DoesNotExist:
+            is_product_owner = request.user.userprofile.store == product.store
+        except Store.DoesNotExist:
             pass
     # [يعرض المنتج دائما للبائع لكن مع الاخطاء الخاصة به] [لعرض المنتج: [للزبون يجب ان يكون موافق عليه من الادارة ومعروض من البائع 
     can_view = is_product_owner or (product.is_visible and product.status == "approved")

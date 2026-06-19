@@ -3,14 +3,12 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
 from Project.utils import compress_image
-from store.validators import validate_image_file
-from accounts.models import Vendor, Store, UserProfile
+from Project.validators import validate_image_file
+from accounts.models import Store, UserProfile
 from accounts.validators import validate_username, validate_phone_number
 
-
 # نموذج انشاء حساب
-class VendorRegisterForm(forms.ModelForm):
-    # Vendor fields
+class StoreRegisterForm(forms.ModelForm):
     username = forms.CharField(
         label='المعرف',
         help_text = 'المعرف هو اسم المستخدم الذي ستسجل به الدخول. يجب أن يتكون من أحرف إنجليزية وأرقام فقط، ولا يحتوي على فراغات.',
@@ -58,7 +56,7 @@ class VendorRegisterForm(forms.ModelForm):
         }
     )
     class Meta:
-        model = Vendor
+        model = UserProfile
         fields = ['name']
         error_messages = {
             'name': {
@@ -115,24 +113,18 @@ class VendorRegisterForm(forms.ModelForm):
 
         # 2️⃣ إنشاء Store
         store = Store.objects.create(
+            owner=user,
             name=self.cleaned_data['store_name'],
             phone_number1=self.cleaned_data['phone_number1']
-        )
-
-        # 3️⃣ إنشاء Vendor
-        vendor = Vendor.objects.create(
-            user=user,
-            store=store,
-            name=self.cleaned_data['name'],
-            permission_level='owner'  # أول بائع يحصل على ملكية للمتجر
         )
 
         # 4️⃣ تحديد نوع الحساب
         UserProfile.objects.create(
             user=user,
-            user_type='vendor'
+            user_type='vendor',
+            name=self.cleaned_data['name'],
         )
-        return vendor
+        return user
 
 # نموذج تسجيل الدخول
 class LoginForm(forms.Form):
@@ -150,104 +142,6 @@ class LoginForm(forms.Form):
             'required': 'كلمة المرور مطلوبة',
         }
     )
-    
-# نموذج انشاء موظف
-class EmployeeRegisterForm(forms.ModelForm):
-    # Vendor fields
-    username = forms.CharField(
-        error_messages={
-            'required': ' المعرف مطلوب',
-            'invalid': 'المعرف غير صالح',
-        }
-    )
-    password = forms.CharField(
-        label='كلمة السر',
-        widget=forms.PasswordInput,
-        error_messages={
-        'required': 'كلمة المرور مطلوبة',
-        'invalid': 'كلمة المرور غير صالحة',
-        }
-    )
-    confirm_password =forms.CharField(
-    label='تأكيد كلمة السر',
-    widget=forms.PasswordInput,
-        error_messages={
-        'required': 'تأكيد كلمة المرور مطلوب',
-        }
-    )
-    class Meta:
-        model = Vendor
-        fields = ['name', 'permission_level']
-        error_messages = {
-            'name': {
-                'required': 'الاسم مطلوب',
-            }
-        }
-        
-    def __init__(self, *args, **kwargs): # استقبال كائن المتجر عند استدعاء الفورم
-        # استقبل المتجر من الـ view
-        self.store = kwargs.pop('store', None)
-        super().__init__(*args, **kwargs)
-        excluded_choice = 'owner'  # استثناء خيار المالك من خيارات الصلاحية عند انشاء موظف
-        self.fields['permission_level'].choices = [
-            choice for choice in self.fields['permission_level'].choices
-            if choice[0] != excluded_choice
-        ]
-
-    def clean_name(self):
-        name = self.cleaned_data["name"].strip()
-
-        if name.isdigit():
-            raise ValidationError("اسم الموظف لا يجب أن يكون رقماً فقط.")
-
-        if len(name) < 3:
-            raise ValidationError("اسم الموظف  يجب أن يكون 3 أحرف أو أكثر.")
-
-        return name
-    
-
-    # password match
-    def clean(self):
-        cleaned_data = super().clean()
-
-        password = cleaned_data.get("password")
-        confirm_password = cleaned_data.get("confirm_password")
-
-        if password and confirm_password:
-            if password != confirm_password:
-                raise ValidationError("كلمتا المرور غير متطابقتين")
-        return cleaned_data
-    # username check
-    def clean_username(self):
-        # يتم التحقق بالقالب بشكل مباشر ايضا لكن يوجد تحقق هنا ايضا لضمان العمل بشكل سليم
-        username = self.cleaned_data.get('username')
-        validate_username(username)  # تحقق من صحة اليوزر نيم باستخدام الدالة في validators.py
-        return username
-    
-    
-        
-
-    def save(self, commit=True):
-        # 1️⃣ إنشاء User
-        user = User.objects.create_user(
-            username=self.cleaned_data['username'],
-            password=self.cleaned_data['password']
-        )
-
-        # 3️⃣ إنشاء Vendor
-        vendor = Vendor.objects.create(
-            user=user,
-            store=self.store, 
-            name=self.cleaned_data['name'],
-            permission_level=self.cleaned_data['permission_level']  
-        )
-
-        # 4️⃣ تحديد نوع الحساب
-        UserProfile.objects.create(
-            user=user,
-            user_type='vendor'
-        )
-        return vendor
 
 # نموذج تعديل بيانات المتجر الاساسية
 class StoreBasicForm(forms.ModelForm):

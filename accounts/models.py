@@ -15,13 +15,11 @@ from django.contrib.auth.models import User
 يمكن للاداري تعديل المتاجر ولكن لايمكنه حذفها كما لايمكنه تعديل حسابات الباعة او اضافة موظفين للمتاجر او ازالتهم لان هذه الصلاحيات خاصة بالمالك فقط
 بعد ان يقوم البائع بإنشاء حساب يقوم الاداري بالتحقق من صحة البيانات التي ادخلها البائع عن طريق التواصل معه على رقم الهاتف الذي ادخله في نموذج التسجيل وبعد ان يتحقق من صحة البيانات يقوم بإدراج حساب تيليجرام البائع ليصله اشعارات عليه ثم يقوم بتفعيل الحساب ليتمكن البائع من تسجيل الدخول الى حسابه
 ======== هيكلية نظام المستخدمين في المشروع ======== 
-User (Django)
- ├── UserProfile (admin / vendor)
- │
- ├── Vendor (if vendor)
- │     └── Store
- │
- └── Admin (no model needed)
+
+User
+└── UserProfile
+Store
+└── owner -> User
 """
 
 # ===== لاتنسى تساوي ========
@@ -35,15 +33,38 @@ class UserProfile(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     user_type = models.CharField(max_length=10, choices=USER_TYPES)
+    
+    name = models.CharField(
+        max_length=255,
+        verbose_name='الاسم الثنائي',
+        help_text='أدخل الاسم الأول والاسم الأخير',
+    )
 
     def __str__(self):
-        return f"{self.user.username} - {self.user_type}"
+        return self.name
+    
+    @property
+    def store(self):
+        """
+        يعيد المتجر المرتبط بالمستخدم الحالي.
+        حالياً يتم إرجاع أول متجر فقط (لأن كل مستخدم يملك متجر واحد).
+        سيتم تطويره لاحقاً لدعم اختيار المتجر النشط (Active Store).
+        """
+        return self.user.stores.first()
     
     class Meta:
         verbose_name = 'ملف شخصي'
         verbose_name_plural = 'الملفات الشخصية'
 
 class Store(models.Model):
+    
+    owner = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='stores',
+        verbose_name='مالك المتجر',
+    )
+    
     name = models.CharField(max_length=255 , verbose_name="اسم المتجر", help_text="قم بإدخال اسم المتجر")
     status = models.CharField(verbose_name='حالة المتجر', max_length=20, choices=[('pending', 'قيد  المراجعة'), ('active', 'مُفعل'), ('inactive', 'غير مُفعل')], default='pending')
     logo = models.ImageField(upload_to='vendors/Stores/logos' , verbose_name="صورة لوجو المتجر", default='default/default_store_logo.png') 
@@ -63,18 +84,3 @@ class Store(models.Model):
     class Meta:
         verbose_name = 'متجر'
         verbose_name_plural = 'المتاجر'
-
-class Vendor(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255, verbose_name='الاسم الثنائي', help_text='قم بإدخال اسمك الثنائي (الاسم الأول والاسم الأخير)')
-    permission_level = models.CharField(verbose_name='مستوى الصلاحيات', max_length=20, choices=[('edit', 'عرض وتعديل'), ('full', 'تحكم كامل (عرض + تعديل + حذف)'), ('owner', 'مالك المتجر')], default='edit', help_text='قم بتحديد مستوى الصلاحية الخاص بك \n عرض وتعديل: يمكنك عرض وتعديل المنتجات والطلبات ولكن لا يمكنك حذفها \n  تحكم كامل: يمكنك عرض وتعديل وحذف المنتجات والطلبات والأرباح \n مالك المتجر : بإمكانه التحكم بكل شيء')
-    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='vendors', verbose_name='المتجر')
-    created_at = models.DateTimeField(auto_now_add=True , verbose_name='تاريخ الإنشاء')
-    
-    def __str__(self):
-        return f"{self.store} - {self.name}"
-    
-    class Meta:
-        verbose_name = 'بائع'
-        verbose_name_plural = 'البائعين'
-    
