@@ -2,6 +2,7 @@ from django.db import models
 from django_ckeditor_5.fields import CKEditor5Field
 from store.models import Product
 from accounts.models import Store
+from management.models import Recipe
 
 """
 يمكن تعديل الطلبات التي حالتها جاري التجهيز فقط ولايمكن تعديل الطلبات المستلمة او الملغية
@@ -17,6 +18,14 @@ from accounts.models import Store
 
 class Order(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='orders', verbose_name='المتجر')
+
+    invoice = models.ForeignKey(
+        Recipe,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='orders'
+    )
 
     # حقول بيانات الطلب
     serial_number = models.PositiveIntegerField(default=1, verbose_name='الرقم التسلسلي')

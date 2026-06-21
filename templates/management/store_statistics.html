@@ -1,0 +1,26 @@
+{% comment %} صفحة الاحصائيات الرئيسية {% endcomment %} 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .container {
+            text-align: center;
+            direction: rtl;
+            padding: 50px;
+            height: 100vh;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h3>مرحبا بك في صفحة الاحصائيات الخاصة بمتجرك {{ store.name }}. هنا يمكنك متابعة أداء متجرك ومعرفة المبيعات والعمولة المستحقة لك هذا الشهر.</h3>
+        <p>إجمالي المبيعات هذا الشهر: {{ total_sales }}</p>
+        <p> العمولة المستحقة هذا الشهر: {{ commission }}</p>
+    </div>
+    
+</body>
+</html>

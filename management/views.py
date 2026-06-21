@@ -1,11 +1,13 @@
+from django.http import Http404
 from django.shortcuts import render, get_object_or_404
-from accounts.decorators import admin_only 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Q
-from django.db import models as db_models
-
+from django.db.models import Q, Sum
+from django.utils.timezone import now
 from accounts.models import Store
+from accounts.validators import get_user_type 
+from accounts.decorators import admin_only 
+from management.models import calculate_commission, Recipe
 from store.models import Product
 from orders.models import Order
 
@@ -87,7 +89,6 @@ def review_center(request):
     }
     return render(request, 'management/review_center.html', context)
 
-#change-later ضيف  صفحة عرض لكل متجر او طلب او منتج يجب مراجعته
 @login_required(login_url='accounts:log_in')
 @admin_only
 def stores_to_review(request):
@@ -216,3 +217,82 @@ def orders_to_review(request):
         'selected_sort':   selected_sort,
     }
     return render(request, 'management/orders_to_review.html', context)
+
+@login_required(login_url='accounts:log_in')
+@admin_only
+def invoices_to_review(request):
+    """عرض صفحة تحتوي على جميع الفواتير التي تنتظر الدفع"""
+    invoices = Recipe.objects.filter(status='pending').order_by('-created_at')
+    # ── فلترة ──────────────────────────────────────────
+
+    search = request.GET.get('search', '').strip()
+    if search:
+        filters = Q(invoice_number__contains=search)
+
+
+        invoices = invoices.filter(filters)
+
+    # ── ترتيب ──────────────────────────────────────────
+    VALID_SORTS = {
+        '-created_at': '-created_at',   # الأحدث أولاً
+        'created_at':  'created_at',    # الأقدم أولاً
+    }
+    selected_sort = request.GET.get('sort', '-created_at')
+    order_by = VALID_SORTS.get(selected_sort, '-created_at')
+    invoices = invoices.order_by(order_by)
+    # ── Pagination ──────────────────────────────────────
+    paginator = Paginator(invoices, 20)
+    page_number = request.GET.get('page')
+    try:
+        page_obj = paginator.page(page_number if page_number else 1)
+    except Exception:
+        page_obj = paginator.page(1)
+
+    # ── نبني query string بدون page لاستخدامه في روابط الباجنيتور ──
+    query_params = request.GET.copy()
+    query_params.pop('page', None)
+    query_string = query_params.urlencode()  
+
+    context = {
+        'page_obj': page_obj,
+        'query_string': query_string,
+        'search': search,
+        'selected_sort':   selected_sort,
+    }
+    return render(request, 'management/invoices_to_review.html', context)
+
+
+
+
+@login_required(login_url='accounts:log_in')
+def store_statistics(request, store_id):
+    """
+    عرض صفحة الاحصائيات الخاصة بالمتجر
+    بالإضافة الى عرض المبلغ المستحق هذا الشهر حتى الأن
+    
+    """
+    store = get_object_or_404(Store, id=store_id)
+    user_type = get_user_type(request.user)    
+    # تحقق ان كان المستخدم بائع ان المتجر الذي يريد عرض احصائياته هو متجره
+    if user_type == 'vendor' and store.owner != request.user: # لو البائع يحاول الوصول لمتجر ليس له علاقة به
+        raise Http404("المتجر غير موجود")
+    
+    total_sales = (
+        store.orders.filter(
+            status='delivered',
+            verification_status='approved',
+            delivery_date__year=now().year,
+            delivery_date__month=now().month
+        ).aggregate(
+            total=Sum('total_selling_price')
+        )['total'] or 0
+    )
+    commission = calculate_commission(total_sales)
+    
+    context = {
+        'store': store,
+        'total_sales': total_sales,
+        'commission': commission,
+    }
+    
+    return render(request, 'management/store_statistics.html', context)

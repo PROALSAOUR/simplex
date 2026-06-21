@@ -45,8 +45,8 @@ INSTALLED_APPS = [
     'accounts',
     'orders',
     
-    # RichTextField
     "django_ckeditor_5",
+    "django_celery_beat",
     
 ]
 
@@ -241,3 +241,33 @@ LOGGING = {
         },
     },
 }
+
+
+# ===================================================================
+
+# جدولة المهام
+from celery.schedules import crontab
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # قاعدة بيانات Redis رقم 0 للبروكر
+CELERY_TASK_IGNORE_RESULT = True
+
+# إعدادات Celery الأخرى
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = "Africa/Tripoli"
+CELERY_ENABLE_UTC = False
+
+CELERY_BEAT_SCHEDULE = {
+    'create-monthly-invoices': {
+        'task': 'management.tasks.create_monthly_invoices',
+        'schedule': crontab(
+            minute=5,
+            hour=0,
+            day_of_month='1',
+        ),  
+    },
+
+}
+# ====================================================================
+
+COMMISSION_RATE = 10.00  # نسبة العمولة الافتراضية من اجمالي مبيعات المتجر
