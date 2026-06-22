@@ -630,10 +630,12 @@
                             <td style="padding:10px; border:1px solid #ccc;">${{ product.get_price }}</td>
                             <td style="padding:10px; border:1px solid #ccc;">
                             <a href="{% url "store:edit_product" product.id %}">تعديل</a>
-                            <button type="button" onclick="openDeleteProductDialog(this)"
-                                data-id="{{ product.id }}" data-name="{{ product.name }}"
-                                data-redirect="{% url "store:show_products" sid %}">حذف
-                            </button>
+                            {% if USER_TYPE == "vendor" %}
+                                <button type="button" onclick="openDeleteProductDialog(this)"
+                                    data-id="{{ product.id }}" data-name="{{ product.name }}"
+                                    data-redirect="{% url "store:show_products" sid %}">حذف
+                                </button>
+                            {% endif %}
                             <a href="{% url "store:view_product" product.id %}">معاينة</a>
                             </td>
                         </tr>
