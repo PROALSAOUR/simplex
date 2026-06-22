@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .container {
+            text-align: center;
+            direction: rtl;
+            padding: 50px;
+            height: 100vh;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 >مرحبا</h1>
+        <p>هذه صفحة تفاصيل الفاتورة {{ invoice.invoice_number }} </p>
+        <div  style="background-color:#e1e2e3; padding:10px; margin:10px;">
+            {% if USER_TYPE == "admin" %}
+                <p> المتجر =<span> {{ invoice.store }} </span> </p>
+                <p> ملاحظات =<span>{% if invoice.notes %}  {{ invoice.notes }}  {% else %} لايوجد ملاحظات بعد {% endif %}</span> </p>
+            {% endif %}
+            <p> شهر =<span> {{ invoice.billing_year }}/{{ invoice.billing_month }} </span> </p>
+            <p> الحالة =<span> {{ invoice.get_status_display }} </span> </p>
+            <p> اجمالي المبيعات =<span> {{ invoice.total_sales }} د.ل </span> </p>
+            <p> نسبة العمولة =<span> {{ invoice.commission_rate }}% </span> </p>
+            <p> قيمة العمولة =<span> {{ invoice.commission_value }} د.ل </span> </p>
+            {% if invoice.discount  %}
+                <p> الخصم =<span> {{ invoice.discount }} </span> </p>
+                <p> القيمة بعد الخصم =<span> {{ invoice.final_value }} </span> </p>
+            {% endif %}
+            {% if invoice.status == paid %}
+                <p> تاريخ السداد =<span> {{ invoice.paid_at }} </span> </p>
+            {% endif %}
+            <p> تاريخ انشاء الفاتورة =<span> {{ invoice.created_at }} </span> </p>
+        </div>
+
+        <h4> الطلبات المشمولة بالفاتورة </h4> 
+        <table style="width:100%; border-collapse:collapse; margin:20px;">
+            <thead>
+            <tr style="background-color:#f9f9f9; border:1px solid #ccc;">
+                <th style="padding:10px; border:1px solid #ccc;">الرقم التسلسلي</th>
+                <th style="padding:10px; border:1px solid #ccc;">اسم المستلم</th>
+                <th style="padding:10px; border:1px solid #ccc;">القيمة</th>
+                <th style="padding:10px; border:1px solid #ccc;">تاريخ التسليم</th>
+                <th style="padding:10px; border:1px solid #ccc;">الإجراءات</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for order in orders %}
+                <tr style="border:1px solid #ccc; {% if order.verification_status == 'rejected' %}background-color: rgba(220, 53, 69, 0.35);{% endif %}">
+                    <td style="padding:10px; border:1px solid #ccc;">{{ order.serial_number }}</td>
+                    <td style="padding:10px; border:1px solid #ccc;">{{ order.customer_name }}</td>
+                    <td style="padding:10px; border:1px solid #ccc;">{{ order.total_selling_price }}</td>
+                    <td style="padding:10px; border:1px solid #ccc;">{{ order.delivery_date|date:" Y/m/d" }}</td>
+                    <td style="padding:10px; border:1px solid #ccc;">
+                        <a href="{% url "orders:edit_order" order.id %}">عرض</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        {% comment %} admins can edit notes + final_value + status {% endcomment %}
+    </div>
+    
+</body>
+</html>

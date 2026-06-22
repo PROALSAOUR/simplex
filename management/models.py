@@ -5,7 +5,7 @@ from decimal import Decimal
 
 class Recipe(models.Model):
     invoice_number = models.CharField(max_length=30, unique=True, verbose_name='رقم الفاتورة', null=True, blank=True)
-    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='recipes', verbose_name='المتجر')
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='invoices', verbose_name='المتجر')
     
     # معلومات الفترة
     billing_year = models.PositiveIntegerField(verbose_name='السنة')

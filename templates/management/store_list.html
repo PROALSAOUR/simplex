@@ -35,6 +35,12 @@
             <a href="{% url 'store:show_products' store.id %}" style=" background-color:#4CAF50; color:white; padding:10px; text-decoration:none; border-radius:5px;">==></a>
         </div>
 
+        {% comment %} صفحة فواتير المتجر {% endcomment %}
+        <div style="padding:20px; background-color:#f5f5dc; margin-bottom:20px;">
+            <p style="color:red; display:inline-block;">فواتير المتجر</p>
+            <a href="{% url 'management:store_billing' store.id %}" style=" background-color:#4CAF50; color:white; padding:10px; text-decoration:none; border-radius:5px;">==></a>
+        </div>
+        
         {% comment %} صفحة احصائيات المتجر {% endcomment %}
         <div style="padding:20px; background-color:#f5f5dc; margin-bottom:20px;">
             <p style="color:red; display:inline-block;">احصائيات المتجر</p>

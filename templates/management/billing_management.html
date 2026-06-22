@@ -17,8 +17,7 @@
 </head>
 <body>
     <div class="container">
-        <p> صفحة الفواتير التي بحاجة الى مراجعة </p>
-        
+        <p> صفحة جميع الفواتير  </p>        
         {% comment %} كود تنسيق خاص بتنسيق الجدول مبدئيا  {% endcomment %}
         <style>
             /* ═══════════════════════════════════════════
@@ -393,10 +392,21 @@
                         <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
                     </svg>
                     <input type="text" name="search" class="sp-search-input"
-                            placeholder="ابحث عن فاتورة عن طريق الرقم التسلسلي" value="{{ search }}"
+                            placeholder="ابحث عن فاتورة بواسطة اسم المتجر او الرقم التسلسلي..." value="{{ search }}"
                             oninput="updateBadge()">
                     <button type="submit" class="sp-search-submit">بحث</button>
                     </div>
+
+                    <!-- Filter toggle -->
+                    <button type="button" class="sp-icon-btn" id="sp-filter-btn" onclick="toggleFilter()">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18M7 12h10M11 18h2"/>
+                    </svg>
+                    فلترة
+                    <span class="sp-filter-badge {% if selected_status  or final_value_min or final_value_max %}show{% endif %}" id="sp-badge">
+                        ✓
+                    </span>
+                    </button>
 
                     <!-- Sort dropdown -->
                     <div class="sp-sort-wrap">
@@ -421,7 +431,27 @@
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
                         الأقدم أولاً
                         </button>
-                    
+                        <button type="button" class="sp-sort-item {% if selected_sort == '-paid_at' %}selected{% endif %}"
+                                onclick="applySort('-paid_at')">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+                        الأحدث دفعاً أولاً 
+                        </button>
+                        <button type="button" class="sp-sort-item {% if selected_sort == 'paid_at' %}selected{% endif %}"
+                                onclick="applySort('paid_at')">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+                        الأقدم دفعاً أولاً 
+                        </button>
+                        
+                        <button type="button" class="sp-sort-item {% if selected_sort == 'final_value' %}selected{% endif %}"
+                                onclick="applySort('final_value')">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                        القيمة: الأرخص أولاً
+                        </button>
+                        <button type="button" class="sp-sort-item {% if selected_sort == '-final_value' %}selected{% endif %}"
+                                onclick="applySort('-final_value')">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                        القيمة: الأغلى أولاً
+                        </button>
                         {% endwith %}
                     </div>
                     <!-- hidden sort input -->
@@ -430,6 +460,42 @@
 
                 </div><!-- /topbar -->
 
+                <!-- ══ FILTER PANEL ═════════════════════════════════════ -->
+                <div class="sp-filter-panel {% if selected_status  or final_value_min or final_value_max %}open{% endif %}"
+                    id="sp-filter-panel">
+                    <div class="sp-filter-grid">
+
+                    <div class="sp-field">
+                        <label>الحالة</label>
+                        <select name="status" class="sp-select">
+                        <option value="">الكل</option>
+                        <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>بانتظار الدفع</option>
+                        <option value="paid" {% if selected_status == 'paid' %}selected{% endif %}>مدفوع</option>
+                        <option value="cancelled" {% if selected_status == 'cancelled' %}selected{% endif %}>ملغية</option>
+                        </select>
+                    </div>
+
+                    <div class="sp-field">
+                        <label>نطاق القيمة</label>
+                        <div class="sp-price-row">
+                        <input type="number" name="final_value_min" class="sp-number"
+                                placeholder="من" min="0" value="{{ final_value_min }}">
+                        <span class="sp-price-sep">—</span>
+                        <input type="number" name="final_value_max" class="sp-number"
+                                placeholder="إلى" min="0" value="{{ final_value_max }}">
+                        </div>
+                    </div>
+
+                    </div>
+
+                    <div class="sp-filter-actions">
+                    <a href="{% url 'management:billing_management' %}" class="sp-btn sp-btn-ghost">مسح الكل</a>
+                    <button type="submit" class="sp-btn sp-btn-primary">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L19 7"/></svg>
+                        تطبيق
+                    </button>
+                    </div>
+                </div>
 
             </form><!-- /form -->
 
@@ -441,7 +507,18 @@
                 </span>
 
                 <!-- Active filter chips -->
-                
+                {% if selected_status %}
+                    <span class="sp-chip">
+                    <button class="sp-chip-close" onclick="clearParam('status')">×</button>
+                    الحالة: {{ selected_status }}
+                    </span>
+                {% endif %}
+                {% if final_value_min or final_value_max %}
+                    <span class="sp-chip">
+                    <button class="sp-chip-close" onclick="clearParam('final_value_min');clearParam('final_value_max')">×</button>
+                    القيمة: {{ final_value_min|default:"0" }} — {{ final_value_max|default:"∞" }}
+                    </span>
+                {% endif %}
                 {% if search %}
                     <span class="sp-chip">
                     <button class="sp-chip-close" onclick="clearParam('search')">×</button>
@@ -451,7 +528,7 @@
             </div>
 
             <!-- ══ TABLE ═════════════════════════════════════════════ -->
-            {% if  page_obj.object_list %}
+            {% if page_obj.object_list %}
                 <div class="sp-table-wrap">
                 <table style="width:100%; border-collapse:collapse; margin:20px;">
                     <thead>
@@ -459,18 +536,22 @@
                         <th>#</th>
                         <th style="padding:10px; border:1px solid #ccc;">الرقم التسلسلي</th>
                         <th style="padding:10px; border:1px solid #ccc;">المتجر </th>
-                        <th style="padding:10px; border:1px solid #ccc;">التاريخ </th>
+                        <th style="padding:10px; border:1px solid #ccc;">فاتورة شهر </th>
+                        <th style="padding:10px; border:1px solid #ccc;">الحالة </th>
                         <th style="padding:10px; border:1px solid #ccc;">القيمة </th>
                         <th style="padding:10px; border:1px solid #ccc;">الإجراءات </th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for invoice in page_obj %}
-                        <tr style="border:1px solid #ccc; ">
+                        <tr style="border:1px solid #ccc;">
                             <td style="padding:10px; border:1px solid #ccc; text-align:center;">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
                             <td style="padding:10px; border:1px solid #ccc;">{{ invoice.invoice_number }}</td>
-                            <td style="padding:10px; border:1px solid #ccc;">{{ invoice.store }}</td>
+                            <td style="padding:10px; border:1px solid #ccc;">
+                                <a href="{% url 'management:store_list' sid=invoice.store.id %}">{{ invoice.store }}</a>
+                            </td>
                             <td style="padding:10px; border:1px solid #ccc;">{{ invoice.billing_year }}/{{  invoice.billing_month }}</td>
+                            <td style="padding:10px; border:1px solid #ccc;">{{ invoice.get_status_display }}</td>
                             <td style="padding:10px; border:1px solid #ccc;">{{ invoice.final_value }}</td>
                             <td style="padding:10px; border:1px solid #ccc;">
                                 <a href="{% url "management:invoice_details" invoice.id %}">عرض</a>
@@ -612,6 +693,7 @@
             {% endif %}
         {% endfor %}
     {% endif %}
+    {% include "components/store/dialogs/delete_product_dialog.html" %}
 
 </body>
 </html>

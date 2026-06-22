@@ -46,7 +46,6 @@
             {% if not can_edit %}
                 <h3> ملاحظة: لايمكن تعديل الطلبات المستلمة او الملغية!</h3>
                 <div style="background-color:#e1e2e3; padding:10px; margin:10px;">
-                    <h2>الحقول الي بتتعدل </h2>
                     <p> حالة الطلب =<span> {{ order.get_status_display }} </span>  </p>
                     <p> حالة التحقق =<span> {{ order.get_verification_status_display }} </span></p>
                     <p>  التوصيل  =<span> {{ order.get_free_delivery_display }} </span>  </p>
@@ -79,6 +78,11 @@
                     <button type="submit"> حفظ </button>
 
                 </form>
+            {% endif %}
+            {% if order.invoice and USER_TYPE == 'admin' %}
+                <div style="background-color:#e1e2e3; padding:10px; margin:10px;">
+                    <a href="{% url "management:invoice_details" order.invoice.id %}" >الفاتورة التي يتبع لها الطلب  </a>
+                </div>
             {% endif %}
             <h1> عناصر الطلب </h1>
             {% for item in items %}

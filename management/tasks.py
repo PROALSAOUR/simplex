@@ -43,12 +43,25 @@ def create_monthly_invoices():
     - تعمل داخل معاملة (Transaction) لكل متجر لضمان سلامة البيانات
     في حال حدوث أي خطأ أثناء إنشاء الفاتورة.
     """
+    now = timezone.now()
     
     stores = Store.objects.filter(
-        created_at__lte=timezone.now() - timedelta(days=30) # اجلب جميع المتاجر التي مضى على إنشائها 30 يوماً أو أكثر.
+        created_at__lte= now - timedelta(days=30) # اجلب جميع المتاجر التي مضى على إنشائها 30 يوماً أو أكثر.
     )
-    year = timezone.now().year
-    month = timezone.now().month
+    
+    # تعمل المهمة في اليوم الأول من كل شهر، لذا نطرح يوماً واحداً
+    # للحصول على السنة والشهر الخاصين بالشهر السابق (فترة الفوترة).
+    # لانستعمل طريقة الطرح العادية لأنها ستسبب خطأ بشهر 1 (يناير)
+    first_day_current_month = now.replace(
+        day=1,
+        hour=0,
+        minute=0,
+        second=0,
+        microsecond=0,
+    )
+    last_day_previous_month = first_day_current_month - timedelta(days=1)
+    year = last_day_previous_month.year
+    month = last_day_previous_month.month
     
     for store in stores :
         try:
