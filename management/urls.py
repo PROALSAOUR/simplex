@@ -14,6 +14,7 @@ urlpatterns = [
     path('review/orders/', orders_to_review, name='orders_to_review'),
     path('review/invoices/', invoices_to_review, name='invoices_to_review'),
     path('review/invoice/<int:rid>/', invoice_details, name='invoice_details'),
+    path('edit/invoice/<int:rid>/', edit_invoice, name='edit_invoice'),
     
     path('stores/<int:store_id>/billing/', store_billing, name='store_billing'),
     path('stores/billing-management/', billing_management, name='billing_management'),

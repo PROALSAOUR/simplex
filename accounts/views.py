@@ -44,35 +44,32 @@ def edit_account_details(request):
     يمكن فقط للبائعين الدخول اليها 
     """
     
-    if request.method == "POST":
-        username = request.POST.get('username')
-        name = request.POST.get('name')
-        
-        user = request.user
-        current_user_id = request.user.pk if request.user.is_authenticated else None
-        try:
-            validate_username(username, current_user_id)
-        except ValidationError as e:
-            return JsonResponse({
-                "status": "error",
-                "message": str(e)
-            })
-
-        user.username = username
-        userprofile = request.user.userprofile
-        userprofile.name = name
-        
-        user.save()
-        userprofile.save()
+    username = request.POST.get('username')
+    name = request.POST.get('name')
+    
+    user = request.user
+    current_user_id = request.user.pk if request.user.is_authenticated else None
+    try:
+        validate_username(username, current_user_id)
+    except ValidationError as e:
         return JsonResponse({
-            "status": "success",
-            "message": "تم التعديل بنجاح",
-            "name": userprofile.name,
-            "username": user.username
+            "status": "error",
+            "message": str(e)
         })
-        
-    return JsonResponse({"status": "error", "message": "طلب غير صالح"})
 
+    user.username = username
+    userprofile = request.user.userprofile
+    userprofile.name = name
+    
+    user.save()
+    userprofile.save()
+    return JsonResponse({
+        "status": "success",
+        "message": "تم التعديل بنجاح",
+        "name": userprofile.name,
+        "username": user.username
+    })
+        
 @login_required(login_url='accounts:log_in')
 def store_details(request, sid):
     """

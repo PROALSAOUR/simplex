@@ -30,7 +30,8 @@ def show_orders(request, sid):
 
     # ── فلترة ──────────────────────────────────────────
     status = request.GET.get('status')
-    if status in ['processing', 'delivered', 'canceled']:
+    valid_statuses = [choice[0] for choice in Order.STATUS_CHOICES]
+    if status in valid_statuses:
         orders = orders.filter(status=status)
         
         

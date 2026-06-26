@@ -34,15 +34,18 @@ def show_products(request, sid):
 
     # ── فلترة ──────────────────────────────────────────
     status = request.GET.get('status')
-    if status in ['checking', 'approved', 'rejected']:
+    valid_statuses = [choice[0] for choice in Product.STATUS_CHOICES]
+    if status in valid_statuses:
         products = products.filter(status=status)
 
     product_type = request.GET.get('type')
-    if product_type in ['clothes', 'watches', 'Accessories']:
+    valid_types = [choice[0] for choice in Product.TYPE_CHOICES]
+    if product_type in valid_types:
         products = products.filter(type=product_type)
 
     gender = request.GET.get('gender')
-    if gender in ['male', 'female', 'unisex']:
+    valid_genders =  [choice[0] for choice in Product.GENDER_CHOICES]
+    if gender in valid_genders:
         products = products.filter(gender=gender)
 
     is_visible = request.GET.get('is_visible')

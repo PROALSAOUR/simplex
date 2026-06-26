@@ -56,17 +56,22 @@ class UserProfile(models.Model):
         verbose_name = 'ملف شخصي'
         verbose_name_plural = 'الملفات الشخصية'
 
-class Store(models.Model):
-    
+class Store(models.Model):    
     owner = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='stores',
         verbose_name='مالك المتجر',
     )
-    
     name = models.CharField(max_length=255 , verbose_name="اسم المتجر", help_text="قم بإدخال اسم المتجر")
-    status = models.CharField(verbose_name='حالة المتجر', max_length=20, choices=[('pending', 'قيد  المراجعة'), ('active', 'مُفعل'), ('inactive', 'غير مُفعل')], default='pending')
+    
+    STATUS_CHOICES = [
+        ('pending', 'قيد  المراجعة'), 
+        ('active', 'مُفعل'), 
+        ('inactive', 'غير مُفعل')
+    ]
+    
+    status = models.CharField(verbose_name='حالة المتجر', max_length=20, choices=STATUS_CHOICES, default='pending')
     logo = models.ImageField(upload_to='vendors/Stores/logos' , verbose_name="صورة لوجو المتجر", default='default/default_store_logo.png') 
     location = models.CharField(max_length=255 , verbose_name="الموقع", blank=True, help_text="قم بإدخال موقع المتجر الخاص بك \n يمكنك كتابة اسم المدينة فقط أو العنوان الكامل حسب رغبتك")
     check_orders = models.BooleanField(default=True, choices=[(False, 'غير مُفعل'), (True, 'مُفعل'),], verbose_name="تحقق من الطلبات " , help_text="في حال التفعيل سيقوم احد الموظفين لدينا من الاتصال بالزبون والتأكد من الطلب قبل ارسال اشعار اليك مما يقلل من الطلبات الوهمية")

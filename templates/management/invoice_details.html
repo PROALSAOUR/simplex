@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,17 +21,20 @@
         <p>هذه صفحة تفاصيل الفاتورة {{ invoice.invoice_number }} </p>
         <div  style="background-color:#e1e2e3; padding:10px; margin:10px;">
             {% if USER_TYPE == "admin" %}
-                <p> المتجر =<span> {{ invoice.store }} </span> </p>
-                <p> ملاحظات =<span>{% if invoice.notes %}  {{ invoice.notes }}  {% else %} لايوجد ملاحظات بعد {% endif %}</span> </p>
+                <button onclick="edit_invoice.showModal()" > 
+                    تعديل
+                </button>
+                <p> المتجر =<span> <a href="{% url "management:store_list" sid=invoice.store.id %}" > {{ invoice.store }}</a></span> </p>
+                <p> ملاحظات =<span id="invoice_notes">{% if invoice.notes %}  {{ invoice.notes }}  {% else %} لايوجد ملاحظات بعد {% endif %}</span> </p>
             {% endif %}
             <p> شهر =<span> {{ invoice.billing_year }}/{{ invoice.billing_month }} </span> </p>
-            <p> الحالة =<span> {{ invoice.get_status_display }} </span> </p>
+            <p> الحالة =<span  id="invoice_status"> {{ invoice.get_status_display }} </span> </p>
             <p> اجمالي المبيعات =<span> {{ invoice.total_sales }} د.ل </span> </p>
-            <p> نسبة العمولة =<span> {{ invoice.commission_rate }}% </span> </p>
-            <p> قيمة العمولة =<span> {{ invoice.commission_value }} د.ل </span> </p>
+            <p> نسبة العمولة =<span> {{ invoice.commission_rate }}</span>%</p>
+            <p > قيمة العمولة =<span  id="invoice_commission_value"> {{ invoice.commission_value }} </span>د.ل  </p>
             {% if invoice.discount  %}
-                <p> الخصم =<span> {{ invoice.discount }} </span> </p>
-                <p> القيمة بعد الخصم =<span> {{ invoice.final_value }} </span> </p>
+                <p > الخصم =<span id="invoice_discount"> {{ invoice.discount }}</span>د.ل </p>
+                <p > القيمة بعد الخصم =<span id="invoice_final_value"> {{ invoice.final_value }} </span>  د.ل </p>
             {% endif %}
             {% if invoice.status == paid %}
                 <p> تاريخ السداد =<span> {{ invoice.paid_at }} </span> </p>
@@ -64,8 +68,22 @@
             </tbody>
         </table>
 
-        {% comment %} admins can edit notes + final_value + status {% endcomment %}
     </div>
-    
+    {% include "components/management/invoice_edit_dialog.html" %}
+    {% include "common/toast.html" %}
+    <script src="{% static 'js/main.js' %}"></script>
+    {% if messages %}
+        {% for message in messages %}
+            {% if "success" in message.tags %}
+                <script>
+                    showToast('success-toast', "{{ message|escapejs }}");
+                </script>
+            {% elif "error" in message.tags %}
+                <script>
+                    showToast('failed-toast', "{{ message|escapejs }}");
+                </script>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
 </body>
 </html>

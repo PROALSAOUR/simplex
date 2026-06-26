@@ -29,28 +29,35 @@ class Order(models.Model):
 
     # حقول بيانات الطلب
     serial_number = models.PositiveIntegerField(default=1, verbose_name='الرقم التسلسلي')
+    
+    VERIFICATION_STATUS_CHOICES = [
+        ('checking', 'جاري التحقق'),
+        ('approved', 'طلب حقيقي'),
+        ('rejected', 'طلب وهمي'),
+    ]
+    
     verification_status = models.CharField(
         verbose_name='حالة التحقق',
         max_length=20,
-        choices=[
-            ('checking', 'جاري التحقق'),
-            ('approved', 'طلب حقيقي'),
-            ('rejected', 'طلب وهمي'),
-        ],
+        choices=VERIFICATION_STATUS_CHOICES,
         default='checking',
         help_text='حالة التحقق من الطلب: جاري التحقق: الطلب لم يتم التحقق منه بعد | طلب حقيقي: تم التحقق من صحة الطلب | طلب وهمي: تم رفض الطلب لعدم صحته',
     )
+    
+    STATUS_CHOICES = [
+        ('processing', 'جاري التجهيز'),
+        ('delivered', 'تم التسليم'),
+        ('canceled', 'ملغي'),
+    ]
+    
     status = models.CharField(
         verbose_name='حالة الطلب',
         max_length=20,
-        choices=[
-            ('processing', 'جاري التجهيز'),
-            ('delivered', 'تم التسليم'),
-            ('canceled', 'ملغي'),
-        ],
+        choices=STATUS_CHOICES,
         default='processing',
         help_text='حالة الطلب: جاري التجهيز:الطلب قيد المراجعة و التجهيز | تم التسليم: تم تسليم الطلب للزبون | ملغي: تم إلغاء الطلب من قبل الزبون أو المتجر',
     )
+    
     free_delivery = models.BooleanField(default=False, verbose_name="قيمة التوصيل" , choices=[(True, "مجاني"), (False, "غير مجاني")], help_text="حدد ما إذا كان هذا الطلب مشمولًا بالتوصيل المجاني أم لا.")
     order_date = models.DateTimeField(auto_now_add=True, verbose_name='تاريخ الطلب')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='تاريخ آخر تحديث')

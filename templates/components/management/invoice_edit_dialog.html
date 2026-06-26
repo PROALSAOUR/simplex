@@ -1,0 +1,59 @@
+{% load static %}
+{% load l10n %}
+<dialog id="edit_invoice">
+    <h3> تعديل الفاتورة</h3>
+    <form id="edit_invoice_form" method="POST" action="{% url 'management:edit_invoice' rid=invoice.id %}"  style="direction:rtl;">
+        {% csrf_token %}
+        <div id="errors" style="color:red; display:none;"> سيتم عرض الاخطاء هنا </div>
+
+            {% if invoice.status == "pending" %}
+                <!-- الحالة -->
+                <div class="form-group">
+                    <label for="status">الحالة</label>
+                    <select name="status" id="status" >
+                        {% for value, label in invoice.STATUS_CHOICES %}
+                            <option value="{{ value }}"
+                                {% if invoice.status == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <p> بمجرد تغيير الحالة لن تتمكن من تعديلها مجددا </p>
+                </div>
+                
+                <!-- العمولة والخصم -->
+                <div class="form-group">
+                    <label for="have_discount" >خصم</label>
+                    <input id="have_discount" name="have_discount" type="checkbox">
+                    <div id="discount_fields" style="background-color:gray; padding:5px; margin:5px; display: none;">
+                        <p>قيمة العمولة =<span id="commission_value" data-value="{{ invoice.commission_value|unlocalize }}"> {{ invoice.commission_value }} د.ل </span> </p>
+                        <label for="discount">الخصم</label>
+                        <input type="number"
+                            name="discount"
+                            id="discount"
+                            value="{{ invoice.discount|unlocalize }}"
+                            min="0"
+                            max="{{ invoice.commission_value|unlocalize }}"
+                            step="any"
+                            oninput="updateFinalValue()"
+                        >
+                        <p> القيمة بعد الخصم =<span id="final_value"> {{ invoice.final_value }} </span>د.ل</p>
+                    </div>
+                </div>
+
+            {% endif %}
+            <!-- الملاحظات -->
+            <div class="form-group">
+                <label for="notes">ملاحظات</label>
+                <textarea name="notes"
+                        id="notes"
+                        rows="4">{{ invoice.notes }}</textarea>
+            </div>
+
+
+        <button type="submit" >حفظ</button>
+        <button type="button" onclick="edit_invoice.close()" >تراجع</button>
+    </form>
+</dialog>
+
+<script src="{% static 'js/management/invoice_edit.js' %}"></script>
