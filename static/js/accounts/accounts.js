@@ -37,3 +37,36 @@ async function validateUsername(inputElement, feedback, url, currentUserId = nul
     });
 }
 //  ==========================================================
+// ============ دالة التحقق من صلاحية رقم الهاتف أثناء الكتابة ============
+let phonenumberTimeout = null;
+async function validatePhoneNumber(inputElement, feedback, url,) {
+    clearTimeout(phonenumberTimeout);
+    const phone_number = inputElement.value;
+
+    feedback.innerText = "جاري التحقق...";
+    feedback.style.color = "gray";
+
+    return new Promise((resolve) => {
+        phonenumberTimeout = setTimeout(() => {
+            let requestUrl = `${url}?phone_number=${encodeURIComponent(phone_number)}`;
+            fetch(requestUrl)
+                .then(response => response.json())
+                .then(data => {
+                    feedback.innerText = data.message;
+
+                    if (data.status === 'success') {
+                        feedback.style.color = 'green';
+                        resolve(true);
+                    } else {
+                        feedback.style.color = 'red';
+                        resolve(false);
+                    }
+                })
+                .catch(() => {
+                    feedback.innerText = "حدث خطأ";
+                    feedback.style.color = "red";
+                    resolve(false);
+                });
+        }, 500);
+    });
+}

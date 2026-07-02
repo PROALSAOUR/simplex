@@ -228,6 +228,28 @@ def check_username(request):
         "message": "متاح"
     })
 
+def check_phone_number(request):
+    """
+    دالة التحقق من رقم الهاتف بشكل مباشر
+    يتم استدعائها من خلال جافاسكربت عند انشاء حساب جديد اوانشاء طلب سواء كان طلب يدوي او من خلال زبون
+    """
+    
+    phone_number = request.GET.get('phone_number')
+
+    try:
+        validate_phone_number(phone_number)
+        
+    except Exception as e:
+        return JsonResponse({
+            "status": "error",
+            "message": str(e)
+        })
+
+    return JsonResponse({
+        "status": "success",
+        "message": "رقم الهاتف صالح"
+    })
+
 def log_in(request): 
     """الدالة المسؤولة عن صفحة تسجيل الدخول لكل من الادارة و اللبائعين"""
 

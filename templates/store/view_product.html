@@ -501,7 +501,7 @@
             <section class="cart" id="cart">
                 <h2>السلة</h2>
                 <div class="cart-layout">
-                    <form id="order-form" action="{% url 'orders:add_order' %}">
+                    <form id="order-form" action="{% url 'orders:add_order' %}" data-check-phone-url="{% url 'accounts:check_phone_number' %}">
                         {% csrf_token %}
                         <div class="field">
                             <label for="customer-name">الاسم</label>
@@ -510,6 +510,7 @@
                         </div>
                         <div class="field">
                             <label for="customer-phone">رقم الهاتف</label>
+                            <div id="customer-phone-feedback" style="font-size:14px; background-color:#f5f5dc; "></div>
                             <input id="customer-phone" type="tel" name="customer_phone" placeholder="أدخل رقم الهاتف مثل 0912345678" required>
                             <small class="form-error" id="error-customer_phone"></small>
                         </div>
@@ -536,6 +537,33 @@
         {% endif %}
     </main>
 
+    <script>
+        const form = document.getElementById("order-form");
+        const phoneNumberInput = document.getElementById("customer-phone");
+        const phoneNumberFeedback = document.getElementById("customer-phone-feedback");
+        const checkPhoneNumberUrl =  form.dataset.checkPhoneUrl;
+        let isValidPhoneNumber = false;
+
+        // التحقق من صلاحية رقم الهاتف أثناء الكتابة
+        phoneNumberInput.addEventListener("keyup", async function () {
+            isValidPhoneNumber = await validatePhoneNumber(this, phoneNumberFeedback, checkPhoneNumberUrl);
+        });
+
+        // اعادة التحقق من صلاحية رقم الهاتف عند تقديم النموذج
+        form.addEventListener("submit", async function (event) {
+            const isValidPhoneNumber = await validatePhoneNumber(
+                phoneNumberInput,
+                phoneNumberFeedback,
+                checkPhoneNumberUrl
+            );
+            if (!isValidPhoneNumber) {
+                event.preventDefault();
+                phoneNumberFeedback.innerText = "الرجاء اختيار رقم هاتف صالح اولاً .";
+                phoneNumberFeedback.style.color = "red";
+            }
+        });
+    </script>
+    <script src="{% static 'js/accounts/accounts.js' %}"></script>
     <script src="{% static 'js/store/product_cart.js' %}"></script>
 </body>
 </html>

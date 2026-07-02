@@ -23,6 +23,21 @@ def validate_username(username, current_user_id=None):
 def validate_phone_number(phone_number):
     """هذه الدالة تتحقق من صحة رقم الهاتف بحيث يكون رقم ليبي صالح ويتم تحويله لصيغة دولية موحدة"""
 
+    # ازالة أي مسافات زائدة من الرقم قبل بدء التحقق 
+    phone_number = (phone_number or "").strip()
+    
+    # التحقق اولا من صحة الرقم قبل محاولة تحويله
+    if phone_number is None:
+        raise ValidationError("يرجى إدخال رقم هاتف.")
+    elif not phone_number.startswith('09') and not phone_number.startswith('+218'):
+        raise ValidationError("رقم الهاتف يجب أن يبدأ بـ 09 أو +218")
+    elif not re.fullmatch(r"[0-9+-]+", phone_number):
+        raise ValidationError( "رقم الهاتف يجب أن يحتوي على أرقام فقط، ويمكن أن يتضمن + أو -")
+    elif len(phone_number) < 10:
+        raise ValidationError("رقم الهاتف قصير جداً")
+    elif len(phone_number) > 15:
+        raise ValidationError("رقم الهاتف طويل جداً")
+
     try:
         parsed_phone = phonenumbers.parse(phone_number, "LY")
 

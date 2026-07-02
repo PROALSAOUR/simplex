@@ -18,7 +18,7 @@
 <body>
     <div class="container">
         <p>هذه صفحة انشاء حساب </p>
-        <form method="POST" id="signup-form" data-check-url="{% url 'accounts:check_username' %}" >
+        <form method="POST" id="signup-form" data-check-username-url="{% url 'accounts:check_username' %}" data-check-phone-url="{% url 'accounts:check_phone_number' %}">
             {% csrf_token %}
 
             {% if form.non_field_errors %}
@@ -84,7 +84,8 @@
                 <!-- رقم الهاتف -->
                 <div  style="margin-bottom: 15px; background-color:green;">
                     <label for="{{ form.phone_number1.id_for_label }}"> {{form.phone_number1.label}}</label>
-                    {{form.phone_number1}}
+                    <input type="text" id="phone_number1" name="phone_number1" placeholder="{{form.phone_number1.field.widget.attrs.placeholder}}" required>
+                    <div id="phone_number1-feedback" style="font-size:14px; background-color:#f5f5dc; "></div>
                     <br>
                     <p style="padding:5px; display:inline-block; font-size:14px; color:black; background-color:#f5f5dc; ">{{ form.phone_number1.field.help_text }}</p>
                     {% if form.phone_number1.errors %}
@@ -101,25 +102,45 @@
     <script>
         const form = document.getElementById("signup-form");
         const usernameInput = document.getElementById("username");
-        const feedback = document.getElementById("username-feedback");
-        const checkUsernameUrl =  form.dataset.checkUrl;
+        const phoneNumberInput = document.getElementById("phone_number1");
+        const usernameFeedback = document.getElementById("username-feedback");
+        const phoneNumberFeedback = document.getElementById("phone_number1-feedback");
+        const checkUsernameUrl =  form.dataset.checkUsernameUrl;
+        const checkPhoneNumberUrl =  form.dataset.checkPhoneUrl;
         let isValidUsername = false;
+        let isValidPhoneNumber = false;
 
         // التحقق من صلاحية المعرف أثناء الكتابة
         usernameInput.addEventListener("keyup", async function () {
-            isValidUsername = await validateUsername(this, feedback, checkUsernameUrl);
+            isValidUsername = await validateUsername(this, usernameFeedback, checkUsernameUrl);
         });
 
+        // التحقق من صلاحية رقم الهاتف أثناء الكتابة
+        phoneNumberInput.addEventListener("keyup", async function () {
+            isValidPhoneNumber = await validatePhoneNumber(this, phoneNumberFeedback, checkPhoneNumberUrl);
+        });
+
+        // اعادة التحقق من صلاحية المعرف ورقم الهاتف عند تقديم النموذج
         form.addEventListener("submit", async function (event) {
-            const isValid = await validateUsername(
+            const isValidUsername = await validateUsername(
                 usernameInput,
-                feedback,
+                usernameFeedback,
                 checkUsernameUrl
             );
-            if (!isValid) {
+            const isValidPhoneNumber = await validatePhoneNumber(
+                phoneNumberInput,
+                phoneNumberFeedback,
+                checkPhoneNumberUrl
+            );
+            if (!isValidUsername) {
                 event.preventDefault();
-                feedback.innerText = "الرجاء اختيار معَرف صالح اولاً .";
-                feedback.style.color = "red";
+                usernameFeedback.innerText = "الرجاء اختيار معَرف صالح اولاً .";
+                usernameFeedback.style.color = "red";
+            }
+            if (!isValidPhoneNumber) {
+                event.preventDefault();
+                phoneNumberFeedback.innerText = "الرجاء اختيار رقم هاتف صالح اولاً .";
+                phoneNumberFeedback.style.color = "red";
             }
         });
     </script>
