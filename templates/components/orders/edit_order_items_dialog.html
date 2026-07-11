@@ -1,0 +1,26 @@
+{% load static %}
+<dialog id="add_order_items">
+    <h3> اضافة منتج للطلب</h3>
+    <input  type="search" id="product-search" placeholder="ابحث عن منتج...">
+
+    <button type="button"onclick="add_order_items.close()">إغلاق</button>
+
+</dialog>
+
+
+<dialog id="delete_order_items">
+    <h3>حذف منتج من الطلب</h3>
+    <p id="delete_item_message"></p>
+    <p> بمجرد الضغط على زر "حذف"، سيتم إزالة هذا المنتج من الطلب نهائيًا، ولن تتمكن من التراجع عن هذه العملية</p>
+
+    <form id="delete_order_items_form" method="POST" data-url="{% url 'orders:delete_order_item' 0 %}">
+        {% csrf_token %}
+
+        <button type="submit">حذف</button>
+        <button type="button" onclick="delete_order_items.close()">
+            تراجع
+        </button>
+    </form>
+</dialog>
+
+<script src="{% static 'js/orders/edit_order_items_dialog.js' %}"></script>

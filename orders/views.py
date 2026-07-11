@@ -265,3 +265,59 @@ def edit_order(request, oid):
         "items": items
     }
     return render(request, 'orders/edit_order.html', context)
+
+@login_required(login_url='accounts:log_in')
+@require_POST
+def add_order_item(request, oid):
+    """ الدالة المسؤولة عن اضافة عنصر جديد للطلب  من داخل صفحة تعديل الطلب مع تحديث قيم الطلب بعد الاضافة """
+    order = get_object_or_404(Order, id=oid)
+    user_type = get_user_type(request.user)
+    
+    # تحقق ان المستخدم بائع وان المنتج الذي يريد تعديله تابع لمتجره
+    if  user_type == 'vendor' and request.user.userprofile.store != order.store :
+        raise Http404("الطلب غير موجود")
+    
+    # اكتب منطق اضافة المنتج للطلب هنا #change-later 
+    pass
+
+@login_required(login_url='accounts:log_in')
+@require_POST
+def delete_order_item(request, item_id):
+    """ 
+    الدالة المسؤولة عن حذف عنصر من عناصر الطلب مع تحديث قيم الطلب بعد الحذف
+    تعيد جيسون ريسبونس بالنجاح او الفشل 
+    """
+
+    item = get_object_or_404(OrderItem, id=item_id)
+    order = item.order
+    
+    user_type = get_user_type(request.user)
+    # تحقق ان المستخدم بائع وان المنتج الذي يريد تعديله تابع لمتجره
+    if  user_type == 'vendor' and request.user.userprofile.store != order.store :
+        raise Http404("الطلب غير موجود")
+    
+    if order.items.count() == 1:
+        # منع حذف آخر منتج
+        return JsonResponse({
+            "success": False,
+            "message": "لا يمكن حذف آخر منتج من الطلب. ",
+        })
+    
+    item.delete()
+
+    order.calculate_totals()
+
+    order.save(update_fields=[
+        "total_purchase_price",
+        "total_selling_price",
+        "total_profit",
+    ])
+
+    return JsonResponse({
+        "success": True,
+        "message": "تم حذف المنتج بنجاح.",
+        "item_id": item_id,
+        "order_total_selling_price": order.total_selling_price,
+        "order_total_profit": order.total_profit,
+        "order_total_purchase_price": order.total_purchase_price,
+    })

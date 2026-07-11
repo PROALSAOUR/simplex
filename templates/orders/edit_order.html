@@ -24,16 +24,15 @@
             <h1> هذا الطلب لايزال قيد المراجعة لذا لن تتمكن من رؤية بيانته الى حين التحقق منه </h1>
         {% else %}
             <div style="background-color:#e1e2e3; padding:10px; margin:10px;">
-                <h2>الحقول الي ما بتتعدل </h2>
                 <p> الرقم التسلسلي للطلب =<span> {{ order.serial_number }} </span>  </p>
                 <p>
                     تاريخ الطلب:
                     {{ order.order_date|date:"l Y/m/d" }}
                     الساعة {{ order.order_date|time:"g:iA" }}
                 </p> 
-                <p> إجمالي سعر شراء المنتجات =<span> {{ order.total_purchase_price }} </span>  </p>
-                <p> إجمالي سعر بيع المنتجات =<span> {{ order.total_selling_price }} </span>  </p>
-                <p>  إجمالي الربح =<span> {{ order.total_profit }} </span>  </p>
+                <p> إجمالي سعر شراء المنتجات =<span id="order_total_purchase_price"> {{ order.total_purchase_price }} </span>  </p>
+                <p> إجمالي سعر بيع المنتجات =<span id="order_total_selling_price"> {{ order.total_selling_price }} </span>  </p>
+                <p>  إجمالي الربح =<span id="order_total_profit"> {{ order.total_profit }} </span></p>
                 {% if order.delivery_date %}
                     <p>
                         تاريخ التسليم:
@@ -84,25 +83,70 @@
                     <a href="{% url "management:invoice_details" order.invoice.id %}" >الفاتورة التي يتبع لها الطلب  </a>
                 </div>
             {% endif %}
-            <h1> عناصر الطلب </h1>
-            {% for item in items %}
-                <div style="background-color:#f3f3f3; padding:10px; margin:10px;">
-                    <p> المنتج = <span> {{ item.product }} </span> </p>
-                    {% if item.image %}
-                        <img src="{{ item.image.url }}" width="100">
-                    {% else %}
-                        <p>لا توجد صورة لهذا العنصر</p>
-                    {% endif %}
-                    <p> اللون = <span> {{ item.color }} </span> </p>
-                    {% if  item.size %}
-                        <p> المقاس = <span> {{ item.size }} </span> </p>
-                    {% endif %}
-                    <p> الكمية = <span>{{ item.qty }} </span> </p>
-                </div>
-            {% endfor %}
+            <h1> منتجات الطلب </h1>
+            {% if can_edit %} 
+                <button onclick="add_order_items.showModal()"> اضافة </button>
+            {% endif %}
+            <table id="item-table" style="width:100%; border-collapse:collapse; margin:20px; margin-bottom:50px; ">
+                <thead>
+                    <tr style="background-color:#f9f9f9; border:1px solid #ccc;">
+                        <th style="padding:10px; border:1px solid #ccc;">الصورة</th>
+                        <th style="padding:10px; border:1px solid #ccc;">الاسم</th>
+                        <th style="padding:10px; border:1px solid #ccc;">اللون</th>
+                        <th style="padding:10px; border:1px solid #ccc;">المقاس</th>
+                        <th style="padding:10px; border:1px solid #ccc;">الكمية</th>
+                        <th style="padding:10px; border:1px solid #ccc;">السعر</th>
+                        <th style="padding:10px; border:1px solid #ccc;">الاجمالي</th>
+                        {% if can_edit %}
+                            <th style="padding:10px; border:1px solid #ccc;">الإجراءات</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                        <tr  id="item-row-{{ item.id }}" style="border:1px solid #ccc;">
+                            <td style="padding:10px; border:1px solid #ccc; text-align:center;">
+                                <img src="{{ item.product.thumbnail_img.url }}" alt="{{ item.product.name }}" style="max-width:100px; height:auto;">
+                            </td>
+                            <td style="padding:10px; border:1px solid #ccc;">{{ item.product.name }}</td>
+                            <td style="padding:10px; border:1px solid #ccc;">{{ item.color }}</td>
+                            <td style="padding:10px; border:1px solid #ccc;">{{ item.size }}</td>
+                            <td class="item-qty" data-value="{{ item.qty }}" style="padding:10px; border:1px solid #ccc;">{{ item.qty }}</td>
+                            <td style="padding:10px; border:1px solid #ccc;">${{ item.selling_price }}</td>
+                            <td class="item-total" data-value="{{ item.get_total_price }}" style="padding:10px; border:1px solid #ccc;">${{ item.get_total_price }}</td>
+                            {% if can_edit %}
+                                <td style="padding:10px; border:1px solid #ccc;">
+                                    <button
+                                        type="button"
+                                        class="delete-item-btn"
+                                        data-item-id="{{ item.id }}"
+                                        data-product-name="{{ item.product.name|escapejs }}"
+                                        data-color="{{ item.color|escapejs }}"
+                                        data-size="{{ item.size|default:''|escapejs }}">
+                                        حذف
+                                    </button>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    <tr id="totals-row" style="font-weight:bold; background:#f8f8f8;">
+                        <td colspan="4" style="text-align:right; padding:10px;">
+                            الإجمالي
+                        </td>
+                        <td id="total-qty" style="padding:10px;">0</td>
+                        <td></td>
+                        <td id="total-price" style="padding:10px;">$0</td>
+                        {% if can_edit %}
+                            <td></td>
+                        {% endif %}
+                    </tr>
+                </tbody>
+            </table>
+            <p>---</p>
         {% endif %}
     </div>
 
+    {% include "components/orders/edit_order_items_dialog.html" %}
     {% include "common/toast.html" %}
     <script src="{% static 'js/main.js' %}"></script>
     {% if messages %}

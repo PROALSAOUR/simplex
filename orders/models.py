@@ -124,3 +124,7 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return self.product.name if self.product else "منتج محذوف"
+    
+    def get_total_price(self):
+        """حساب السعر الإجمالي للعنصر بناءً على الكمية وسعر البيع."""
+        return self.selling_price * self.qty
