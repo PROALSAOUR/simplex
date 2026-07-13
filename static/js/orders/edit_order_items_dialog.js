@@ -4,11 +4,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const delete_form = document.getElementById("delete_order_items_form");
     const delete_message = document.getElementById("delete_item_message");
 
-
     const add_dialog = document.getElementById("add_order_items");
 
     
-
     // الاكواد التاليه للتعامل مع حذف المنتجات من الطلب
 
     document.addEventListener("click", function (e) {
@@ -64,9 +62,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById(`item-row-${itemId}`)?.remove();
                 updateTableTotals();
                 updateOrderTotals( {
-                    selling: data.order_total_selling_price,
-                    profit: data.order_total_profit,
-                    purchase: data.order_total_purchase_price
+                    selling: data.order_totals.selling,
+                    profit: data.order_totals.profit,
+                    purchase: data.order_totals.purchase
                 });
                 showToast("success-toast", "تم حذف المنتج من الطلب بنجاح");
 
@@ -83,6 +81,64 @@ document.addEventListener("DOMContentLoaded", () => {
 
     });
 
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    const searchInput = document.getElementById("product-search");
+    const searchUrl = searchInput.dataset.searchUrl;
+    const resultsContainer = document.getElementById("search-results");
+    let searchTimer;
+    searchInput.addEventListener("input", function(){
+        const query = this.value.trim();
+        clearTimeout(searchTimer);
+        // إذا كان فارغاً أخفِ النتائج
+        if(query.length < 2){
+            resultsContainer.innerHTML = "";
+            return;
+        }
+        // انتظار 300ms بعد توقف الكتابة
+        searchTimer = setTimeout(() => {
+            searchProducts(query);
+        }, 300);
+
+    });
+
+    async function searchProducts(query){
+
+        try {
+
+            const response = await fetch(
+                `${searchUrl}?q=${encodeURIComponent(query)}`
+            );
+
+            const data = await response.json();
+            resultsContainer.innerHTML = "";
+
+            if(data.products.length === 0){
+
+                resultsContainer.innerHTML =
+                "<p>لا توجد منتجات مطابقة</p>";
+                return;
+            }
+
+            data.products.forEach(product => {
+                resultsContainer.innerHTML += `
+
+                <div class="search-product-card" data-id="${product.id}">
+                    <img src="${product.image}" width="70">
+                    <span>
+                        ${product.name}
+                    </span>
+                </div>
+                `;
+            });
+
+
+
+        } catch(error){
+            console.error(error);
+        }
+    }
 });
 
 function updateTableTotals() {
@@ -129,4 +185,62 @@ function updateOrderTotals(totals) {
     if (profitElement) {
         profitElement.textContent =  totals.profit;
     }
+}
+
+function updateTableRows(item) {
+    const table  = document.getElementById("item-table");
+    const tbody  = table.tBodies[0];
+    const productUrlTemplate = table.dataset.productUrlTemplate;
+    const  productUrl = productUrlTemplate.replace("0", item.product_id);
+
+    const row = document.createElement("tr");
+    row.id = `item-row-${item.id}`;
+    row.style.border = "1px solid #ccc";
+
+    row.innerHTML = `
+        <td style="padding:10px; border:1px solid #ccc; text-align:center;">
+            <img src="${item.image}" alt="${item.product}" style="max-width:100px; height:auto;">
+        </td>
+
+        <td style="padding:10px; border:1px solid #ccc;">${item.product}</td>
+
+        <td style="padding:10px; border:1px solid #ccc;">${item.color}</td>
+
+        <td style="padding:10px; border:1px solid #ccc;">${item.size || ""}</td>
+
+        <td class="item-qty"
+            data-value="${item.qty}"
+            style="padding:10px; border:1px solid #ccc;">
+            ${item.qty}
+        </td>
+
+        <td style="padding:10px; border:1px solid #ccc;">
+            $${item.price}
+        </td>
+
+        <td class="item-total"
+            data-value="${item.total}"
+            style="padding:10px; border:1px solid #ccc;">
+            $${item.total}
+        </td>
+
+        <td style="padding:10px; border:1px solid #ccc;">
+            <button
+                type="button"
+                class="delete-item-btn"
+                data-item-id="${item.id}"
+                data-product-name="${item.product}"
+                data-color="${item.color}"
+                data-size="${item.size}">
+                حذف
+            </button>
+
+            <a href="${productUrl}" class="btn btn-primary">
+                عرض المنتج
+            </a>
+        </td>
+    `;
+
+    tbody.insertBefore(row, tbody.firstElementChild);
+
 }

@@ -437,3 +437,40 @@ def view_product(request, pid):
         'product_price': str(product.get_price()),
     }
     return render(request, 'store/view_product.html', context)
+
+def search_products(request, sid):
+
+    """دالة البحث عن منتجات يتم استعمالها اثناء البحث عن منتج للإضافته للطلب بصفحة تعديل الطلب"""
+
+    query = request.GET.get("q", "").strip()
+    
+    store = get_object_or_404(Store, id=sid)
+    
+
+    products = Product.objects.filter(
+        name__icontains=query,
+        is_visible=True,
+        store = store
+    ).prefetch_related(
+        "colors"
+    )[:10]
+
+    result = []
+
+    for product in products:
+
+        result.append({
+
+            "id": product.id,
+
+            "name": product.name,
+
+            "image": product.thumbnail_img.url,
+
+        })
+        
+    return JsonResponse({
+
+        "products": result
+
+    })

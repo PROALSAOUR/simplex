@@ -17,10 +17,7 @@
 </head>
 <body>
     <div class="container">
-        <p> صفحة المنتجات الرئيسية </p>
-        {% if USER_TYPE == 'vendor' %}
-            <a href="{% url 'store:add_product' %}"> اضافة منتج جديد </a>
-        {% endif %}
+        <p> صفحة المنتجات التي تنتظر المراجعة </p>
         
         {% comment %} كود تنسيق خاص بتنسيق الجدول مبدئيا  {% endcomment %}
         <style>
@@ -481,11 +478,7 @@
                             <td style="padding:10px; border:1px solid #ccc;">{{ product.name }}</td>
                             <td style="padding:10px; border:1px solid #ccc;">{{ product.store.name }}</td>
                             <td style="padding:10px; border:1px solid #ccc;">
-                            <a href="{% url "store:edit_product" product.id %}">تعديل</a>
-                            <button type="button" onclick="openDeleteProductDialog(this)"
-                                data-id="{{ product.id }}" data-name="{{ product.name }}"
-                                data-redirect="{% url "store:show_products" sid %}">حذف
-                            </button>
+                            <a href="{% url "store:edit_product" product.id %}">تعديل</a>            
                             <a href="{% url "store:view_product" product.id %}">معاينة</a>
                             </td>
                         </tr>

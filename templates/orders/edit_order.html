@@ -14,6 +14,7 @@
             font-size: 24px;
         }
     </style> 
+    
 </head>
 <body>
     <div class="container">
@@ -85,9 +86,9 @@
             {% endif %}
             <h1> منتجات الطلب </h1>
             {% if can_edit %} 
-                <button onclick="add_order_items.showModal()"> اضافة </button>
+                <button onclick="add_order_items_dialog.showModal()"> اضافة </button>
             {% endif %}
-            <table id="item-table" style="width:100%; border-collapse:collapse; margin:20px; margin-bottom:50px; ">
+            <table id="item-table" style="width:100%; border-collapse:collapse; margin:20px; margin-bottom:50px;" data-product-url-template="{% url 'store:view_product' 0 %}">
                 <thead>
                     <tr style="background-color:#f9f9f9; border:1px solid #ccc;">
                         <th style="padding:10px; border:1px solid #ccc;">الصورة</th>
@@ -125,6 +126,7 @@
                                         data-size="{{ item.size|default:''|escapejs }}">
                                         حذف
                                     </button>
+                                    <a href="{% url 'store:view_product' item.product.id %}" class="btn btn-primary">عرض المنتج</a>
                                 </td>
                             {% endif %}
                         </tr>

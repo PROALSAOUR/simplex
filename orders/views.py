@@ -257,28 +257,98 @@ def edit_order(request, oid):
         user_type == "vendor"
         and (order.status != "processing" or order.verification_status == "rejected")
     )
+     
+    products = order.store.products.filter(
+        status="approved", 
+        is_visible=True
+    ).prefetch_related("colors__sizes")
+    for product in products:
+        product.available_colors = [
+            color for color in product.colors.all()
+            if color.available
+        ]
         
     context = {
         "order": order,
         "edit_form": form,
         "can_edit": can_edit,
-        "items": items
+        "items": items,
+        "products": products
     }
     return render(request, 'orders/edit_order.html', context)
 
 @login_required(login_url='accounts:log_in')
 @require_POST
 def add_order_item(request, oid):
-    """ الدالة المسؤولة عن اضافة عنصر جديد للطلب  من داخل صفحة تعديل الطلب مع تحديث قيم الطلب بعد الاضافة """
+    """إضافة عنصر جديد للطلب من داخل صفحة التعديل وتحديث إجماليات الطلب بدون إعادة تحميل الصفحة."""
     order = get_object_or_404(Order, id=oid)
     user_type = get_user_type(request.user)
-    
-    # تحقق ان المستخدم بائع وان المنتج الذي يريد تعديله تابع لمتجره
-    if  user_type == 'vendor' and request.user.userprofile.store != order.store :
+
+    if user_type == 'vendor' and request.user.userprofile.store != order.store:
         raise Http404("الطلب غير موجود")
+
+    if user_type == 'vendor' and (order.status != 'processing' or order.verification_status == 'rejected'):
+        return JsonResponse({
+            "success": False,
+            "status": "failed",
+            "message": "لايمكن تعديل الطلبات المستلمة او الملغية!",    
+        })
+                
+    form_data = {
+        "product": request.POST.get("product_id"),
+        "product_color": request.POST.get("color_id"),
+        "product_size": request.POST.get("size_id"),
+        "qty": request.POST.get("quantity"),
+    }
+
+    form = OrderItemRegisterForm(
+        form_data,
+        store=order.store,
+    )
     
-    # اكتب منطق اضافة المنتج للطلب هنا #change-later 
-    pass
+    if not form.is_valid():
+        return JsonResponse({
+            "success": False,
+            "status": "force",
+            "message": "يرجى تصحيح البيانات.",
+            "errors": {
+                field: [str(error) for error in errors]
+                for field, errors in form.errors.items()
+            },
+        })
+
+    with transaction.atomic():
+        order_item = form.save(order=order)
+        order.calculate_totals()
+        order.save(update_fields=[
+            "total_purchase_price",
+            "total_selling_price",
+            "total_profit",
+        ])
+
+    return JsonResponse({
+        "success": True,
+        "status": "success",
+        "message": "تمت إضافة المنتج إلى الطلب بنجاح.",
+
+        "item": {
+            "id": order_item.id,
+            "product": order_item.product.name,
+            "product_id": order_item.product.id,
+            "color": order_item.color,
+            "size": order_item.size,
+            "qty": order_item.qty,
+            "price": str(order_item.selling_price),
+            "total": str(order_item.get_total_price()),
+            "image": order_item.image.url if order_item.image else "",
+        },
+        "order_totals": {
+            "selling": order.total_selling_price,
+            "profit": order.total_profit,
+            "purchase": order.total_purchase_price
+        }
+    })
+
 
 @login_required(login_url='accounts:log_in')
 @require_POST
@@ -317,7 +387,11 @@ def delete_order_item(request, item_id):
         "success": True,
         "message": "تم حذف المنتج بنجاح.",
         "item_id": item_id,
-        "order_total_selling_price": order.total_selling_price,
-        "order_total_profit": order.total_profit,
-        "order_total_purchase_price": order.total_purchase_price,
+        "order_totals": {
+            "selling": order.total_selling_price,
+            "profit": order.total_profit,
+            "purchase": order.total_purchase_price
+        }
     })
+    
+    

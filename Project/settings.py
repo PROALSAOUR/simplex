@@ -62,7 +62,7 @@ MIDDLEWARE = [
 
 DEBUG = True  
 
-if DEBUG:
+if DEBUG and not os.environ.get('PYTEST_CURRENT_TEST'):
     INSTALLED_APPS += ['debug_toolbar', ]
     MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
 
@@ -70,6 +70,7 @@ if DEBUG:
         # بعد انشاء مستخدم ذو صلاحيات بدل القيمة 
         # 'SHOW_TOOLBAR_CALLBACK':  lambda request: request.user.is_superuser,
         'SHOW_TOOLBAR_CALLBACK':  lambda request: True,
+        'IS_RUNNING_TESTS': False,
     }
 else:
     DEBUG_TOOLBAR_CONFIG = {

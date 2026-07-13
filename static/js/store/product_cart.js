@@ -1,10 +1,11 @@
-// يتم استعمال هذه الدوال في الملفين التاليين
-// orders/add_order_manually.html & store/view_product.html
+// يتم استعمال هذه الدوال في الملفات التالية
+// orders/add_order_manually.html & store/view_product.html & orders/edit_order_items_dialog.js
 
 (function () {
-    const form = document.getElementById("product-form");
-    const orderForm = document.getElementById("order-form");
-    if (!form && !orderForm) return;
+    const form = document.getElementById("product-form"); // موجود في صفحة الزبون فقط
+    const orderForm = document.getElementById("order-form"); // موجود في صفحة البائع 
+    const editOrderForm = document.getElementById("add_order_items_form"); // موجود في صفحة تعديل الطلبات
+    if (!form && !orderForm && !editOrderForm) return;
 
     // ========== تحديد وضع الصفحة ==========
     // صفحة البائع: تحتوي على .product-container
@@ -276,7 +277,8 @@
             const qtyInput  = container.querySelector(".qty-input");
             const qtyMinusBtn = container.querySelector(".qty-minus");
             const qtyPlusBtn  = container.querySelector(".qty-plus");
-            const addBtn    = container.querySelector(".add-cart-btn");
+            const addToCartBtn    = container.querySelector(".add-cart-btn"); // موجود في صفحة انشاء الطلب يدويا
+            const addToOrderBtn    = container.querySelector(".add-to-order-btn"); // موجود في صفحة تعديل الطلبات
 
             // -- accordion إظهار/إخفاء خيارات المنتج --
             if (productDetails && productColors) {
@@ -332,9 +334,9 @@
             if (qtyPlusBtn)  qtyPlusBtn.addEventListener("click",  (e) => { e.stopPropagation(); updateQty(+1); });
             if (qtyInput)    qtyInput.addEventListener("change", () => updateQty(0));
 
-            // -- إضافة إلى السلة --
-            if (addBtn) {
-                addBtn.addEventListener("click", () => {
+            // -- إضافة إلى السلة  ( خاص بصفحة إنشاء الطلب يدويا )--
+            if (addToCartBtn) {
+                addToCartBtn.addEventListener("click", () => {
                     const colorInput = container.querySelector('input[name^="color_"]:checked');
                     if (!colorInput) return;
 
@@ -358,14 +360,99 @@
                     renderCart();
 
                     // تأكيد بصري
-                    const originalText = addBtn.textContent;
-                    addBtn.textContent = "✓ تمت الإضافة";
-                    addBtn.style.background = "#27ae60";
+                    const originalText = addToCartBtn.textContent;
+                    addToCartBtn.textContent = "✓ تمت الإضافة";
+                    addToCartBtn.style.background = "#27ae60";
                     setTimeout(() => {
-                        addBtn.textContent = originalText;
-                        addBtn.style.background = "";
+                        addToCartBtn.textContent = originalText;
+                        addToCartBtn.style.background = "";
                     }, 1200);
                 });
+            }
+            // -- إضافة إلى الطلب ( خاص بصفحة تعديل الطلبات )--
+            if (addToOrderBtn) {
+                const editOrderDialog = document.getElementById("add_order_items_dialog");
+                const url = editOrderForm.dataset.url;
+                const errorsBox = document.getElementById("errors");
+
+
+                addToOrderBtn.addEventListener("click", async () => {
+
+                    const colorInput = container.querySelector('input[name^="color_"]:checked');
+                    if (!colorInput) return;
+
+                    const activeSizeGroup = container.querySelector(
+                        `.size-group[data-color-id="${colorInput.value}"].active`
+                    );
+
+                    const sizeInput = activeSizeGroup
+                        ? activeSizeGroup.querySelector("input:checked")
+                        : null;
+
+                    const qty = Math.max(1, Number(qtyInput.value));
+
+                    const formData = new FormData();
+
+                    formData.append("csrfmiddlewaretoken", editOrderForm.querySelector("[name=csrfmiddlewaretoken]").value);
+                    formData.append("product_id", container.dataset.productId);
+                    formData.append("color_id", colorInput.value);
+                    formData.append("size_id", sizeInput ? sizeInput.value : "");
+                    formData.append("quantity", qty);
+
+                    try {
+
+                        const response = await fetch(url, {
+                            method: "POST",
+                            body: formData,
+                            headers: {
+                                "X-Requested-With": "XMLHttpRequest",
+                            },
+                        });
+
+                        const data = await response.json();
+
+                        errorsBox.style.display = "none";
+                        errorsBox.innerHTML = "";
+
+                        if (data.status === "success") {
+                            // هذه الدوال موجودة في ملف edit_order_items_dialog.js
+                            updateTableRows(data.item);
+                            updateTableTotals();
+                            updateOrderTotals( {
+                                selling: data.order_totals.selling,
+                                profit: data.order_totals.profit,
+                                purchase: data.order_totals.purchase
+                            });
+                            editOrderDialog.close();
+                            showToast("success-toast", data.message);
+
+                        } else {
+                            errorsBox.innerHTML = data.message;
+                            errorsBox.style.display = "block";
+                        }
+
+                    }
+                    catch (err) {            
+                        errorsBox.innerHTML = "حدث خطأ أثناء الاتصال بالخادم.";
+                        errorsBox.style.display = "block";
+                    }
+
+                });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             }
         });
     }

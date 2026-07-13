@@ -16,10 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from debug_toolbar.toolbar import debug_toolbar_urls
+from django.conf import settings
 from django.conf.urls.static import static
 from .settings import MEDIA_ROOT, MEDIA_URL, STATIC_ROOT, STATIC_URL
 from .views import landing_page
+
+if settings.DEBUG:
+    from debug_toolbar.toolbar import debug_toolbar_urls
 
 urlpatterns = [
     path('', landing_page, name='landing_page'), 
@@ -29,7 +32,10 @@ urlpatterns = [
     path('account/', include('accounts.urls')),
     path('management/', include('management.urls')),
     path('ckeditor5/', include('django_ckeditor_5.urls')),
-] + debug_toolbar_urls()
+]
+
+if settings.DEBUG:
+    urlpatterns += debug_toolbar_urls()
 
 urlpatterns += static(STATIC_URL, document_root=STATIC_ROOT)
 urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
