@@ -444,33 +444,35 @@ def search_products(request, sid):
 
     query = request.GET.get("q", "").strip()
     
+    # تحديد نوع الزر الذي سيتم عرضه في نتائج البحث، يمكن أن يكون "add-to-order" أو "add-to-cart"
+    button_type = request.GET.get(
+        "button_type",
+        "add-to-order"
+    )
+    
     store = get_object_or_404(Store, id=sid)
     
 
     products = Product.objects.filter(
         name__icontains=query,
         is_visible=True,
+        status="approved", 
         store = store
     ).prefetch_related(
-        "colors"
+        "colors__sizes"
     )[:10]
-
-    result = []
-
+    
     for product in products:
-
-        result.append({
-
-            "id": product.id,
-
-            "name": product.name,
-
-            "image": product.thumbnail_img.url,
-
-        })
+        product.available_colors = [
+            color for color in product.colors.all()
+            if color.available
+        ]
         
-    return JsonResponse({
-
-        "products": result
-
-    })
+    return render(
+        request,
+        "partials/store/product_cards.html",
+        {
+            "products": products,
+            "button_type": button_type
+        }
+    )

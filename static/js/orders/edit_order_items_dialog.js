@@ -83,64 +83,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-    const searchInput = document.getElementById("product-search");
-    const searchUrl = searchInput.dataset.searchUrl;
-    const resultsContainer = document.getElementById("search-results");
-    let searchTimer;
-    searchInput.addEventListener("input", function(){
-        const query = this.value.trim();
-        clearTimeout(searchTimer);
-        // إذا كان فارغاً أخفِ النتائج
-        if(query.length < 2){
-            resultsContainer.innerHTML = "";
-            return;
-        }
-        // انتظار 300ms بعد توقف الكتابة
-        searchTimer = setTimeout(() => {
-            searchProducts(query);
-        }, 300);
-
-    });
-
-    async function searchProducts(query){
-
-        try {
-
-            const response = await fetch(
-                `${searchUrl}?q=${encodeURIComponent(query)}`
-            );
-
-            const data = await response.json();
-            resultsContainer.innerHTML = "";
-
-            if(data.products.length === 0){
-
-                resultsContainer.innerHTML =
-                "<p>لا توجد منتجات مطابقة</p>";
-                return;
-            }
-
-            data.products.forEach(product => {
-                resultsContainer.innerHTML += `
-
-                <div class="search-product-card" data-id="${product.id}">
-                    <img src="${product.image}" width="70">
-                    <span>
-                        ${product.name}
-                    </span>
-                </div>
-                `;
-            });
-
-
-
-        } catch(error){
-            console.error(error);
-        }
-    }
-});
-
 function updateTableTotals() {
     // دالة لتحديث إجمالي الكمية والسعر الإجمالي للمنتجات في الطلب داخل الجدول
     // يتم استدعائها بمجرد تحميل الصفحة وايضا عند حذف او اضافة أي منتج من الطلب لتحديث القيم المعروضة

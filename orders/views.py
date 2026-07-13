@@ -113,6 +113,7 @@ def add_order_manually(request):
         ]
 
     context = {
+        "store": store,
         "order_form": order_form,
         "item_form": item_form,
         "products": products,
@@ -257,23 +258,12 @@ def edit_order(request, oid):
         user_type == "vendor"
         and (order.status != "processing" or order.verification_status == "rejected")
     )
-     
-    products = order.store.products.filter(
-        status="approved", 
-        is_visible=True
-    ).prefetch_related("colors__sizes")
-    for product in products:
-        product.available_colors = [
-            color for color in product.colors.all()
-            if color.available
-        ]
-        
+                 
     context = {
         "order": order,
         "edit_form": form,
         "can_edit": can_edit,
         "items": items,
-        "products": products
     }
     return render(request, 'orders/edit_order.html', context)
 
