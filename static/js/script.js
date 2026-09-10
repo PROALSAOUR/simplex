@@ -219,4 +219,24 @@ document.addEventListener("DOMContentLoaded",() => {
 
 });
 // ==========================================================
+// دالة تقوم بتفعيل الرابط الفعال بالقائمة الجانبية بناءً على الموقع  الحالي
+function setActiveMenu() {
+    // تحديد الصفحة الحالية وإضافة كلاس اكتف للرابط المطابق
+    const currentPath = window.location.pathname;
+    const menuLinks = document.querySelectorAll(".menu-link");
 
+    if (!menuLinks.length) {
+        return;
+    }
+
+    menuLinks.forEach(function (link) {
+        const linkPath = new URL(link.href).pathname;
+
+        if (linkPath === currentPath) {
+            link.classList.add("active");
+        }
+    });
+}
+
+setActiveMenu();
+// ==========================================================

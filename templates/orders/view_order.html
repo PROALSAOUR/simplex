@@ -292,8 +292,8 @@
                         إجمالي سعر تكلفة المنتجات
                     </div>
 
-                    <div class="details-value">
-                        {{order.total_purchase_price}}
+                    <div class="details-value" >
+                        <span id="total_purchase_price">{{order.total_purchase_price}}</span>
                         <span class="currency" >د.ل</span>
                     </div>
                 </li>
@@ -306,8 +306,8 @@
                         إجمالي سعر بيع المنتجات
                     </div>
 
-                    <div class="details-value">
-                        {{order.total_selling_price}}
+                    <div class="details-value" >
+                        <span id="total_selling_price">{{order.total_selling_price}}</span>
                         <span class="currency" >د.ل</span> 
                     </div>
                 </li>
@@ -321,7 +321,7 @@
                     </div>
 
                     <div class="details-value complete">
-                        {{order.total_profit}}
+                        <span id="total_profit">{{order.total_profit}}</span>
                         <span class="currency" >د.ل</span>
                     </div>
                 </li>
@@ -499,7 +499,7 @@
             {% comment %} #change-later  التعامل مع حالة حذف واضافة منتج الى الطلب {% endcomment %}
             <h4> <i class="fa-solid fa-box-open primary-cl"></i>  منتجات الطلب</h4>
             <div class="table-wrap">
-                <table>
+                <table id="item-table">
                     <thead>
                         <tr>
                             <th>الصورة</th>
@@ -514,22 +514,39 @@
                     </thead>
                     <tbody>
                         {% for item in order.items.all %}
-                            <tr>
-                                <!-- كلاسات الحالات ( complete - pending - cancel ) -->
+                            <tr id="item-row-{{ item.id }}" {% if item.product %} data-view-url="{% url "store:edit_product" item.product.id %}" {% endif %}  >
+                                
                                 <td>
-                                    <img src="{{ item.product.thumbnail_img.url }}" width="80" height="80" alt="{{ item.product.name }}">
+                                    <img src="{% if item.product %}{{ item.product.thumbnail_img.url }}{% else %} {% static "images/default.jpg" %} {% endif %}" width="80" height="80" alt="{{ item.product.name }}">
                                 </td>
-                                <td>{{ item.product.name }}</td>
+                                <td>{% if item.product %} {{ item.product.name }} {% else %} المنتج محذوف {% endif %}</td>
                                 <td>{{ item.color }}</td>
-                                <td>{{ item.size }}</td>
-                                <td>{{ item.qty }}</td>
+                                <td>{% if item.size %}{{ item.size }}{% else %} --- {% endif %}</td>
+                                <td class="item-qty" data-value="{{ item.qty }}">{{ item.qty }}</td>
                                 <td>{{ item.selling_price }}<span class="currency">د.ل</span></td>
-                                <td>{{ item.get_total_price }}<span class="currency">د.ل</span></td>
+                                <td class="item-total" data-value="{{ item.get_total_price }}" >{{ item.get_total_price }}<span class="currency">د.ل</span></td>
                                 <td>
-                                    <a href="{% url "store:edit_product" item.product.id %}" class="view-btn" aria-label="عرض">
-                                        عرض
-                                        <i class="fa-solid fa-eye"></i> 
-                                    </a>
+                                    {% if can_edit %}
+                                        <button
+                                            type="button"
+                                            class="td-actions"
+                                            aria-label="الإجراءات"
+                                            data-id="{{ item.id }}"
+                                            data-name="{{ item.product.name }}"
+                                            {% if item.product %} data-view-url="{% url "store:edit_product" item.product.id %}" {% endif %}
+                                        >
+                                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                                        </button>
+                                    {% else %}
+                                        {% if item.product %}
+                                            <a href="{% url "store:edit_product" item.product.id %}" class="view-btn" aria-label="عرض">
+                                                عرض
+                                                <i class="fa-solid fa-eye"></i> 
+                                            </a>
+                                        {% else %}
+                                            <i class="fa-solid fa-ban"></i>
+                                        {% endif %}
+                                    {% endif %}
                                 </td>
                             </tr>
                         {% endfor %}
@@ -542,10 +559,13 @@
                             <td></td>
                             <td></td>
 
-                            <td>{{ order.get_total_qty}}</td>
+                            <td id="total-qty">{{ order.get_total_qty}}</td>
 
                             <td></td>
-                            <td>{{ order.total_selling_price }}<span class="currency">د.ل</span></td>
+                            <td>
+                                <span id="total-price">{{ order.total_selling_price }}</span>
+                                <span class="currency">د.ل</span>
+                            </td>
                             <td></td>
                         </tr>
                     </tfoot>
@@ -559,10 +579,32 @@
 
 {% endblock content %}
 
+{% block out_container %}
+
+    {% include "orders/dialogs/delete_order_item.html" %}
+
+    <!-- Start Action Menu -->
+    <div class="action-menu small-menu" id="action-menu">
+        <a id="view-btn" class="menu-link">
+            <i class="fa-regular fa-eye"></i>
+            <span>عرض المنتج</span>
+        </a>
+                
+        <button id="delete-btn" type="button" class="menu-link cancel" onclick="openDeleteItemDialog(this)" data-id="" data-name="" data-redirect="{% url 'orders:view_order' order.id %}">
+            <i class="fa-regular fa-trash-can"></i>
+            <span>إزالة المنتج</span>
+        </button>
+
+    </div>
+    <!-- End Action Menu -->
+
+{% endblock out_container %}
+
 {% comment %} Page Scripts {% endcomment %}
 {% block page_scripts %}
+
+    <script src="{% static "js/tables.js" %}"></script>
     <script src="{% static "js/fields.js" %}"></script>
     <script src="{% static "js/details.js" %}"></script>
     <script src="{% static "js/orders/edit_order.js" %}"></script>
-
 {% endblock %}

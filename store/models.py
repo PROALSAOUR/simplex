@@ -23,7 +23,7 @@ class Product(models.Model):
     STATUS_CHOICES = [('checking', 'جاري المراجعة'), ('approved', 'مقبول'), ('rejected', 'مرفوض')]
     status = models.CharField(verbose_name='حالة المنتج', max_length=20, choices=STATUS_CHOICES, default='checking', help_text="جاري المراجعة: تم رفع المنتج وسيتم مراجعته من قبل الإدارة خلال 24 ساعة | مقبول: تم قبول المنتج وهو ظاهر للزبائن | مرفوض: تم رفض المنتج لعدم مطابقته لمعايير الجودة أو لأي سبب آخر،")
 
-    TYPE_CHOICES = [('clothes','ملابس'),('watches','ساعات'), ('Accessories','اكسسوارات')]
+    TYPE_CHOICES = [('clothes','ملابس'),('watches','ساعات'), ('accessories','اكسسوارات') , ('other','اخرى')]
     type = models.CharField(verbose_name='نوع المنتج', choices=TYPE_CHOICES, default='clothes', help_text="قم بإختيار نوع المنتج الخاص بك")
     
     GENDER_CHOICES = [('male', 'رجالي'), ('female', 'نسائي'), ('unisex', 'كلا الجنسين')]

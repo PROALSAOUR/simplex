@@ -52,10 +52,9 @@
     <!-- Start Footer -->
     {% include "partials/footer.html" %}
     <!-- End Footer -->
-
-    <script src="{% static "js/script.js" %}"></script>
-    {% block page_scripts %}{% endblock %}
-
+    
+    {% block out_container %}{% endblock out_container %}
+    
     {% if messages %}
         {% for message in messages %}
             {% if "success" in message.tags %}
@@ -69,6 +68,10 @@
             {% endif %}
         {% endfor %}
     {% endif %}
+
+
+    <script src="{% static "js/script.js" %}"></script>
+    {% block page_scripts %}{% endblock %}
 
 </body>
 </html>

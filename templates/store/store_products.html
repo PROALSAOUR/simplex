@@ -6,10 +6,8 @@
     <link rel="stylesheet" href="{% static "css/tables.css" %} ">                            
 {% endblock page_head %}
 
-
 {% comment %} Page Content {% endcomment %}
 {% block content %}
-
 <section class="">
     <!-- رأس القسم -->
     <div class="section-header">
@@ -125,9 +123,8 @@
                                 <option value="">الكل</option>
                                 <option value="clothes"     {% if selected_type == 'clothes' %}selected{% endif %}>ملابس</option>
                                 <option value="watches"     {% if selected_type == 'watches' %}selected{% endif %}>ساعات</option>
-                                <option value="Accessories" {% if selected_type == 'Accessories' %}selected{% endif %}>اكسسوارات</option>
-                                {% comment %} #chanege-later ضيف نوع اخرى {% endcomment %}
-                                <option value="Accessories" >أخرى</option>
+                                <option value="accessories" {% if selected_type == 'accessories' %}selected{% endif %}>اكسسوارات</option>
+                                <option value="other" {% if selected_type == 'other' %}selected{% endif %}>أخرى</option>
                             </select>
                         </div>
 
@@ -425,9 +422,7 @@
 </section>
 {% endblock content %}
 
-{% comment %} Page Scripts {% endcomment %}
-{% block page_scripts %}
-
+{% block out_container %}
     {% include "store/dialogs/delete_product.html" %}
 
     <!-- Start Action Menu -->
@@ -449,5 +444,9 @@
     </div>
     <!-- End Action Menu -->
 
+{% endblock out_container %}
+
+{% comment %} Page Scripts {% endcomment %}
+{% block page_scripts %}
     <script src="{% static "js/tables.js" %}"></script>
 {% endblock %}

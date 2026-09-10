@@ -443,7 +443,6 @@ def add_order_item(request, oid):
         }
     })
 
-
 @login_required(login_url='accounts:log_in')
 @require_POST
 def delete_order_item(request, item_id):
@@ -487,5 +486,4 @@ def delete_order_item(request, item_id):
             "purchase": order.total_purchase_price
         }
     })
-    
     
