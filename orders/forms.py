@@ -146,11 +146,11 @@ class OrderItemRegisterForm(forms.ModelForm):
             order_item.save()
         return order_item
 
-class OrderEditForm(forms.ModelForm):
+class OrderEditCustomerForm(forms.ModelForm):
     class Meta:
         model = Order
-        fields = ["status", "free_delivery", "customer_name", "customer_phone", "customer_location", "note"]
-        
+        fields = [ "customer_name", "customer_phone", "customer_location", "note"]
+            
     def clean_customer_phone(self):
         return validate_phone_number(self.cleaned_data["customer_phone"])
     
@@ -177,13 +177,18 @@ class OrderEditForm(forms.ModelForm):
         return customer_location
     
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["note"].required = False
-    
-class OrderAdminEditForm(OrderEditForm):
+            super().__init__(*args, **kwargs)
+            self.fields["note"].required = False
+
+class OrderEditStatusForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ["status",]
+        
+class OrderAdminEditStatusForm(OrderEditStatusForm):
     """فورم خاصة بالمسؤول ترث حقول الطلب من الفورم الاساسي و تحتوي ايضا على الحقول الإضافية الخاصة بحالة التحقق من الطلب """
-    class Meta(OrderEditForm.Meta):
-        fields = OrderEditForm.Meta.fields + [
+    class Meta(OrderEditStatusForm.Meta):
+        fields = OrderEditStatusForm.Meta.fields + [
             'verification_status',
         ]
         

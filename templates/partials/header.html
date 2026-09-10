@@ -1,0 +1,103 @@
+{% load static %}
+
+<header>
+        
+    <div class="sidemenu-wrapper">
+
+        <button
+            type="button"
+            class="sidemenu-button"
+            aria-label="فتح القائمة"
+            aria-controls="side-menu"
+            aria-expanded="false"
+        >
+            <i class="fa-solid fa-bars" aria-hidden="true"></i>
+        </button>
+        <div class="menu-overlay"></div>
+        <div id="side-menu" class="side-menu">
+            <div class="upper-part">
+                <div class="logo-image">
+                    <img src="{% static "images/d-long-logo.png" %}" alt="logo" width="120" height="40"  draggable="false">
+                </div>
+                <button type="button" class="close-button" aria-label="إغلاق القائمة">
+                    <i class="fa-solid fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            {% if  USER_TYPE == "vendor" %}
+                <a class="store-part">
+                    <div class="store-logo">
+                        <img src="{% static "images/store-logo.png" %}" alt="Store Logo" width="40" height="40"  draggable="false">
+                    </div>
+                    <span>اسم المتجر</span>
+                </a>
+            {% endif %}
+            
+            <ul>
+                <li>
+                    <a href="#" class="theme-toggle" aria-label="تفعيل الوضع الغامق" aria-pressed="false">
+                        <span class="theme-icon-wrapper">
+                            <span class="theme-icon sun-icon" aria-hidden="true">🔆</span>
+                            <span class="theme-icon moon-icon" aria-hidden="true">🌙</span>
+                        </span>
+                        <p>تغيير الثيم</p>
+                    </a>
+                </li>
+                    
+                {% if  USER_TYPE == "vendor" %}
+                    {% comment %} #change-later وضع كلاس اكتف للصفحة الحالية  {% endcomment %}
+                    <li><a class="menu-link active  link-btn" href="{% url 'store:vendors_dashboard' %}"><i class="fa-solid fa-home"></i><p> الرئيسية </p></a></li>
+                    <li><a class="menu-link link-btn" href="{% url "orders:store_orders" STORE_ID %}"><i class="fa-solid fa-cart-shopping"></i><p> الطلبات </p> </a></li>
+                    <li><a class="menu-link link-btn" href="{% url "store:store_products" STORE_ID %}"><i class="fa-solid fa-box-open"></i><p> المنتجات </p> </a></li>
+                    <li><a class="menu-link link-btn" href=""><i class="fa-solid fa-chart-line"></i><p> الإحصائيات </p> </a></li>
+                    <li><a class="menu-link link-btn" href=""><i class="fa-solid fa-wallet"></i><p> المالية </p> </a></li>
+                {% else %}
+                    <li><a class="menu-link active  link-btn" href="{% url 'management:admins_dashboard' %}"><i class="fa-solid fa-home"></i><p> الرئيسية </p></a></li>
+
+                {% endif %}
+            </ul>
+            
+        </div>
+    </div>
+
+    <div class="logo-image">
+        <img src="{% static "images/d-long-logo.png" %}" alt="logo" width="60" height="40"  draggable="false">
+    </div>
+    
+    <div class="account-wrapper">
+
+        <button
+            type="button"
+            class="account-button"
+            aria-label="فتح قائمة الحساب"
+            aria-controls="account-menu"
+            aria-expanded="false"
+        >
+            <i class="fa-regular fa-user" aria-hidden="true"></i>
+        </button>
+
+        <div id="account-menu"   class="account-menu small-menu">
+            <a href="#" class="menu-link">
+                إعدادات الحساب
+            <i class="fa-solid fa-user-pen"></i>
+            </a>
+
+            <a href="/accounts/store-details.html" class="menu-link">
+                إعدادات المتجر
+                <i class="fa-solid fa-shop"></i>
+            </a>
+
+            <button
+                type="button"
+                class="menu-link logout-button"
+                onclick="logout.showModal()"
+            >
+                تسجيل الخروج
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </button>
+            
+        </div>
+
+    </div>
+    
+</header>

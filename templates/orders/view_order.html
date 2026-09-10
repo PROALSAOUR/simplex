@@ -1,0 +1,568 @@
+{% extends "partials/base.html" %}
+{% load static %}
+
+{% comment %} Page Head {% endcomment %}
+{% block page_head %}
+    <link rel="stylesheet" href="{% static "css/tables.css" %} ">   
+    <link rel="stylesheet" href="{% static "css/fields.css" %} ">         
+    <link rel="stylesheet" href="{% static "css/details.css" %} ">
+    <link rel="stylesheet" href="{% static "css/transactions.css" %} ">
+{% endblock page_head %}
+
+{% comment %} Page Content {% endcomment %}
+{% block content %}
+
+    {% if USER_TYPE == "vendor" and  order.store.status == 'inactive' %}
+        <div class="message-container">
+            <div class="message">
+                <div class="message-image">
+                    <img src="{% static "images/locked.png" %}" alt="" width="100" height="80" >
+                </div>
+                <h2 class="message-title" > الطلبات محجوبة </h2>
+                <p class="message-content">
+                    تم إلغاء تفعيل المتجر بسبب عدم دفع الرسوم.
+                </p>
+
+                <div class="message-alert">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <p>
+                        لقد تم ايقاف تفعيل متجرك و حجب جميع الطلبات، 
+                        <br>
+                        يرجى التواصل مع الدعم الفني لإعادة تفعيل المتجر ومتابعة نشاطك.
+                    </p>
+                </div>
+
+                <a class="message-btn primary-btn link-btn"> تواصل مع الدعم لإعادة التفعيل <i class="fa-solid fa-headset"></i></a>
+
+                <span class="message-note"> <i class="fa-solid fa-shield-halved"></i>  فريق الدعم جاهز دائماً لمساعدتك  </span>                    
+
+            </div>
+        </div>
+    {% else %}
+
+        <div class="section-header">
+            <div class="section-content">
+                <div class="section-icon">
+                    <i class="fa-solid fa-clipboard-list primary-cl"></i>
+                </div>
+                <div class="section-details">
+                    <h1> الطلب <span class="sn">#{{ order.serial_number }}</span></h1>
+                    <p class="{% if order.verification_status == 'approved' %}complete{% elif order.verification_status == 'rejected' %}cancel{% else %}pending{% endif %}">
+                        ● {{order.get_verification_status_display}}
+                    </p>
+                </div>
+            </div>
+            <button class="back-btn" id="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i> </button>
+        </div>
+
+        {% if order.verification_status == 'rejected' %}
+            <div class="notice rejected">
+                <div class="notice-icon">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div class="notice-content">
+                    <strong class="notice-title" >طلب وهمي!</strong>
+                    <p class="notice-text">
+                        قام موظفونا بالتحقق من الطلب وتبين انه طلب وهمي
+                    </p>
+                </div>
+            </div>     
+        {% elif order.verification_status == 'pending' %}   
+            <div class="notice ">
+                <div class="notice-icon">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                </div>
+                <div class="notice-content">
+                    <strong class="notice-title" >  الطلب قيد التحقق!</strong>
+                    <p class="notice-text">
+                        يقوم موظفونا بالتحقق من الطلب وسيتم اعلامك بنتيجة التحقق في اقرب وقت ممكن
+                    </p>
+                </div>
+            </div>     
+        {% endif %}
+
+        <details class="details" open>
+            <summary class="details-header">
+                <h4 class="details-title" >معلومات الطلب</h4>
+                <span class="toggle"> <i class="fa-solid fa-chevron-up"></i> </span>
+            </summary>
+
+            <ul class="details-list">
+
+                <!-- الرقم التسلسلي -->
+                <li class="details-item">
+                    <div class="details-icon blue"><i class="fa-solid fa-hashtag"></i></div>
+
+                    <div class="details-label">
+                        الرقم التسلسلي للطلب
+                    </div>
+
+                    <div class="details-value">
+                        #{{ order.serial_number }}
+                    </div>
+                </li>
+
+                {% if USER_TYPE  == "admin" %}
+                    <a class="details-item" href="#change-later">
+                        <div class="details-icon red"><i class="fa-solid fa-shop"></i></div>
+                        
+                        <div class="details-label">
+                            المتجر
+                        </div>
+                        
+                        <div class="details-value">
+                            {{ order.store }}
+                        </div>
+                    </a>
+
+                    <!-- الفاتورة (خاص بالادارة فقط) -->
+                    <a class="details-item" href="#change-later">
+                        <div class="details-icon yellow"><i class="fa-solid fa-receipt"></i></div>
+                        
+                        <div class="details-label">
+                            رقم الفاتورة
+                        </div>
+                        
+                        <div class="details-value">
+                            #{{ order.invoice_number }}
+                        </div>
+                    </a>
+                {% endif %}
+
+                <!-- تاريخ الطلب -->
+                <li class="details-item">
+                    <div class="details-icon purple"><i class="fa-regular fa-calendar-days"></i></div>
+
+                    <div class="details-label">
+                        تاريخ الطلب
+                    </div>
+
+                    <div class="details-value date">
+                        {{ order.order_date|date:"j F Y - l g:iA" }}
+                    </div>
+                </li>
+
+                <!-- تاريخ التسليم -->
+                {% if order.status == "delivered" %}
+                    <li class="details-item">
+                        <div class="details-icon green"><i class="fa-solid fa-truck-fast"></i></div>
+
+                        <div class="details-label">
+                            تاريخ التسليم
+                        </div>
+
+                        <div class="details-value date">
+                            {{ order.delivery_date|date:"j F Y - l g:iA" }}
+                        </div>
+                    </li>
+                {% endif %}
+
+            </ul>
+
+        </details>
+
+        <details class="details" open>
+            <summary class="details-header">
+                <h4 class="details-title" >حالة الطلب</h4>
+                <span class="toggle"> <i class="fa-solid fa-chevron-up"></i> </span>
+            </summary>
+
+            <ul class="details-list {% if status_form.errors %} has-errors{% endif %}">
+
+                <!-- يمكن تعديل الحالة -->
+                {% if can_edit %}
+                
+                    <div class="notice"> 
+                        <div class="notice-icon">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <div class="notice-content">
+                            <strong class="notice-title" > تحذير!</strong>
+                            <p class="notice-text">
+                                تغيير الحالة إلى تم التسليم أو تم الإلغاء عملية غير عكسية ولا يمكن بعد ذلك إعادتها إلى قيد المعالجة.
+                            </p>
+                        </div>
+                    </div>
+
+                    <li class="details-item">
+                        
+                        <form method="post" action="" class="details-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="form_type" value="status">
+
+                            {% if status_form.errors %}
+                                <div class="field-errors">
+                                    يرجى تصحيح الأخطاء قبل اعادة حفظ حفظ التعديلات.
+                                </div>
+                            {% endif %}
+
+                            <div class="fields-container">
+                                {% if USER_TYPE == "admin" %}
+                                    <div class="field">
+                                        <div class="select-control">
+                                            <label for="v-status">حالة التحقق</label>
+                                            
+                                            <div class="js-custom-select">
+                                                <select id="v-status" name="v-status">
+                                                    <option value="checking">جاري التحقق</option>
+                                                    <option value="approved">طلب حقيقي</option>
+                                                    <option value="rejected">طلب وهمي</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <span class="help-text">
+                                            {{ status_form.verification_status.help_text }}
+                                        </span>
+                                    </div>
+                                {% endif %}
+                                <div class="field">
+                                    <div class="select-control">
+                                        <label for="status">حالة الطلب</label>
+                                        
+                                        <div class="js-custom-select">
+                                            <select id="status" name="status" required>
+                                                <option value="processing">قيد المعالجة</option>
+                                                <option value="delivered">تم التسليم</option>
+                                                <option value="canceled">تم الإلغاء</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <span class="help-text">
+                                        {{ status_form.status.help_text }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="form-btns">
+                                <button type="reset" class="btn reset-btn">اعادة تعيين</button>
+                                <button type="submit" class="btn save-btn">حفظ</button>
+                            </div>
+
+                        </form>
+                    </li>
+                {% else %}
+                        
+                    <!-- الحالة ( لايمكن التعديل ) -->
+                    <li class="details-item">
+                        <div class="details-icon purple"><i class="fa-solid fa-calendar-check"></i></div>
+
+                        <div class="details-label">
+                            حالة الطلب
+                        </div>
+
+                        <div class="details-value">
+                            <span class="status-value {% if order.status == "delivered" %}green {% elif order.status == "canceled" %}red {% else %} yellow {% endif %} " >
+                                {{order.get_status_display}}
+                            </span>
+                        </div>
+                    </li> 
+                {% endif %}
+
+            </ul>
+
+        </details>
+
+        <details class="details" open>
+
+            <summary class="details-header">
+                <h4 class="details-title" >قيمة الطلب</h4>
+                <span class="toggle"> <i class="fa-solid fa-chevron-up"></i> </span>
+            </summary>
+
+            <ul class="details-list">
+
+                <!-- سعر التوصيل -->
+                <li class="details-item">
+                    <div class="details-icon blue"><i class="fa-solid fa-dolly"></i></div>
+
+                    <div class="details-label">
+                        سعر التوصيل
+                    </div>
+
+                    <div class="details-value {% if order.free_delivery %}complete {% else %}cancel{% endif %} ">
+                        {{ order.get_free_delivery_display }}
+                    </div>
+                </li>
+
+                <!-- سعر الشراء -->
+                <li class="details-item">
+                    <div class="details-icon purple"><i class="fa-solid fa-wallet"></i></div>
+
+                    <div class="details-label">
+                        إجمالي سعر تكلفة المنتجات
+                    </div>
+
+                    <div class="details-value">
+                        {{order.total_purchase_price}}
+                        <span class="currency" >د.ل</span>
+                    </div>
+                </li>
+
+                <!-- سعر البيع -->
+                <li class="details-item">
+                    <div class="details-icon green"><i class="fa-solid fa-arrow-trend-up"></i></div>
+
+                    <div class="details-label">
+                        إجمالي سعر بيع المنتجات
+                    </div>
+
+                    <div class="details-value">
+                        {{order.total_selling_price}}
+                        <span class="currency" >د.ل</span> 
+                    </div>
+                </li>
+
+                <!-- الربح -->
+                <li class="details-item">
+                    <div class="details-icon yellow"><i class="fa-solid fa-coins"></i></div>
+
+                    <div class="details-label">
+                        إجمالي الربح
+                    </div>
+
+                    <div class="details-value complete">
+                        {{order.total_profit}}
+                        <span class="currency" >د.ل</span>
+                    </div>
+                </li>
+
+            </ul>
+        </details>
+
+        <details class="details" open>
+            <summary class="details-header" >
+                <h4 class="details-title" >بيانات الزبون</h4>
+                <span class="toggle"> <i class="fa-solid fa-chevron-up"></i> </span>
+            </summary>
+
+            <!-- عند النقر على زر التعديل اظهر قائمة التعديل واخفي قائمة العرض -->
+            <ul id="customer-list" class="details-list">
+
+                <!-- تعديل بيانات الزبون -->
+                <li class="details-item">
+
+                    <div class="details-label">
+                        تعديل بيانات الزبون 
+                    </div>
+                    <button class="edit-btn"> تعديل </button>
+                </li>
+                
+                <!-- اسم الزبون -->
+                <li class="details-item">
+                    <div class="details-icon purple"><i class="fa-solid fa-user"></i></div>
+
+                    <div class="details-label">
+                        اسم الزبون 
+                    </div>
+
+                    <div class="details-value">
+                        {{order.customer_name}}
+                    </div>
+                </li>
+
+                <!-- رقم الزبون -->
+                <li class="details-item">
+                    <div class="details-icon blue"><i class="fa-solid fa-phone"></i></div>
+
+                    <div class="details-label">
+                        رقم الزبون 
+                    </div>
+
+                    <div class="details-value">
+                        {{order.customer_phone}}
+                    </div>
+                </li>
+
+                <!-- عنوان الزبون -->
+                <li class="details-item ">
+                    <div class="details-icon yellow"><i class="fa-solid fa-location-dot"></i></div>
+
+                    <div class="details-label">
+                        عنوان الزبون 
+                    </div>
+
+                    <div class="details-value long-value">
+                        {{order.customer_location}}
+                    </div>
+                </li>
+
+                <!-- ملاحظة -->
+                <li class="details-item ">
+                    <div class="details-icon green"><i class="fa-regular fa-note-sticky"></i></div>
+
+                    <div class="details-label">
+                        ملاحظة
+                    </div>
+
+                    <div class="details-value long-value">
+                        {% if order.note %}{{order.note}}{% else %}لاتوجد ملاحظة اضافية{% endif %}
+                    </div>
+                </li>
+
+            </ul>
+
+            
+            <!--  فورم تعديل بيانات الزبون -->
+            <ul id="customer-form"  class="details-list {% if customer_form.errors %}has-errors{% endif %}" >
+
+                <li class="details-item">
+
+                    <div class="details-label">
+                        تعديل بيانات الزبون 
+                    </div>
+                    <button class="edit-btn"> إلغاء </button>
+                </li>
+        
+                <li class="details-item">
+                    
+                    <form method="post" action="" class="details-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="customer">
+
+                        <div class="fields-container">
+
+                            {% if customer_form.errors %}
+                                <div class="field-errors">
+                                    يرجى تصحيح الأخطاء قبل اعادة حفظ حفظ التعديلات.
+                                </div>
+                            {% endif %}
+
+                            <div class="field">
+                                <label for="customer-name">اسم الزبون</label>
+                                <div class="input">
+                                    <input id="customer-name" name="customer_name" type="text" placeholder="ادخل اسم الزبون الخاص بك ..."   value="{{ customer_form.customer_name.value|default:order.customer_name }}">
+                                    <i class="fa-solid fa-user"></i>
+                                </div>
+                                {% if customer_form.customer_name.errors %}
+                                    <span class="help-text error"> {{ customer_form.customer_name.errors.0 }} </span>
+                                {% else %}
+                                    <span class="help-text ">{{ customer_form.customer_name.help_text }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="field">
+                                <label for="customer-phone">رقم الهاتف</label>
+                                <div class="input">
+                                    <input id="customer-phone"  name="customer_phone" type="text" placeholder="ادخل رقم هاتفك  ..."   value="{{ customer_form.customer_phone.value|default:order.customer_phone }}">
+                                    <i class="fa-solid fa-phone-volume"></i>
+                                </div>
+                                {% if customer_form.customer_phone.errors %}
+                                    <span class="help-text error"> {{ customer_form.customer_phone.errors.0 }} </span>
+                                {% else %}
+                                    <span class="help-text ">{{ customer_form.customer_phone.help_text }}</span>
+                                {% endif %}
+                            
+                            </div>
+
+                            <div class="field">
+                                <label for="customer-location">عنوان الزبون</label>
+                                <div class="input">
+                                    <input id="customer-location" name="customer_location" type="text" placeholder="ادخل موقع الزبون الخاص بك ..."   value="{{ customer_form.customer_location.value|default:order.customer_location }}">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                </div>
+                                {% if customer_form.customer_location.errors %}
+                                    <span class="help-text error"> {{ customer_form.customer_location.errors.0 }} </span>
+                                {% else %}
+                                    <span class="help-text ">{{ customer_form.customer_location.help_text }}</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="field">
+                                <label for="customer-notes">ملاحظة اضافية </label>
+                                <div class="input">
+                                    <span class="counter" >  <!-- ضيف كلاس كانسل او كومبليت حسب العدد -->
+                                        <span class="current-c">0</span> / <span class="max-c"></span>
+                                    </span>
+                                    <textarea id="customer-notes" name="note" placeholder="ادخل وصف المنتج ..." rows="5" cols="40"  maxlength="100" >{{ customer_form.note.value|default:order.note }}</textarea>
+                                    <i class="fa-regular fa-note-sticky"></i>
+                                </div>
+                                <span class="help-text">{{ customer_form.note.help_text }}</span>
+                            </div>
+                            
+                        </div>
+
+                        
+                        <div class="form-btns">
+                            <button type="reset"  class="btn reset-btn">اعادة تعيين</button>
+                            <button type="submit" class="btn save-btn">حفظ</button>
+                        </div>
+
+                    </form>
+                </li>
+
+
+            </ul>
+            
+        </details>
+
+        <div class="details-table">
+            {% comment %} #change-later  التعامل مع حالة حذف واضافة منتج الى الطلب {% endcomment %}
+            <h4> <i class="fa-solid fa-box-open primary-cl"></i>  منتجات الطلب</h4>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الصورة</th>
+                            <th>الاسم</th>
+                            <th>اللون</th>
+                            <th>المقاس</th>
+                            <th>الكمية</th>
+                            <th>السعر</th>
+                            <th>الإجمالي</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.items.all %}
+                            <tr>
+                                <!-- كلاسات الحالات ( complete - pending - cancel ) -->
+                                <td>
+                                    <img src="{{ item.product.thumbnail_img.url }}" width="80" height="80" alt="{{ item.product.name }}">
+                                </td>
+                                <td>{{ item.product.name }}</td>
+                                <td>{{ item.color }}</td>
+                                <td>{{ item.size }}</td>
+                                <td>{{ item.qty }}</td>
+                                <td>{{ item.selling_price }}<span class="currency">د.ل</span></td>
+                                <td>{{ item.get_total_price }}<span class="currency">د.ل</span></td>
+                                <td>
+                                    <a href="{% url "store:edit_product" item.product.id %}" class="view-btn" aria-label="عرض">
+                                        عرض
+                                        <i class="fa-solid fa-eye"></i> 
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td>الإجمالي</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+
+                            <td>{{ order.get_total_qty}}</td>
+
+                            <td></td>
+                            <td>{{ order.total_selling_price }}<span class="currency">د.ل</span></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+        </div>
+
+        <a href="{% url 'orders:store_orders' order.store.id %}" class="redirect-btn"> العودة الى قائمة الطلبات <i class="fa-solid fa-arrow-left-long"></i> </a>
+    {% endif %}
+
+{% endblock content %}
+
+{% comment %} Page Scripts {% endcomment %}
+{% block page_scripts %}
+    <script src="{% static "js/fields.js" %}"></script>
+    <script src="{% static "js/details.js" %}"></script>
+    <script src="{% static "js/orders/edit_order.js" %}"></script>
+
+{% endblock %}

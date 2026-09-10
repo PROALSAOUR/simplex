@@ -1,30 +1,179 @@
-{% comment %} صفحة المتجر الرئيسية {% endcomment %} 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <style>
-        .container {
-            text-align: center;
-            direction: rtl;
-            padding: 50px;
-            height: 100vh;
-            font-size: 24px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1 >مرحبا</h1>
-        <p>هذه صفحة المتجر الرئيسية </p>
-        <a href="{% url 'accounts:account_list' %}">ادارة حسابي</a>
-        <a href="{% url 'store:show_products' STORE_ID %}">عرض المنتجات</a>
-        <a href="{% url 'orders:show_orders' STORE_ID %}">عرض الطلبات</a>
-        <a href="{% url 'management:store_billing' STORE_ID %}">فواتير المتجر</a>
-        <a href="{% url 'management:store_statistics' STORE_ID %}">عرض الاحصائيات</a>
-    </div>
-    
-</body>
-</html>
+{% extends "partials/base.html" %}
+{% load static %}
+
+{% comment %} Page Head {% endcomment %}
+{% block page_head %}
+    <link rel="stylesheet" href="{% static "css/tables.css" %} ">                            
+    <link rel="stylesheet" href="{% static "css/dashboard.css" %}"> 
+{% endblock page_head %}
+
+{% comment %} Page Content {% endcomment %}
+{% block content %}
+
+    <section class="dashboard-overview">
+
+        <!-- رأس القسم -->
+        <div class="section-header">
+            <div class="section-content">
+                
+                <div class="section-details">
+                    <h1>مرحبا {{ user_name }} 👋</h1>
+                    <p> نظرة عامة على متجرك اليوم.</p>
+                </div>
+            </div>
+
+
+            <div class="section-procedure date-select">
+                <span class="date-icon">
+                    <i class="fa-regular fa-calendar-days"></i>
+                </span>
+                <select id="date-range" name="date_range">
+                    <option value="today">اليوم</option>
+                    <option value="this_week">هذا الاسبوع</option>
+                    <option value="this_month">هذا الشهر</option>
+                    <option value="this_year">هذا العام</option>
+                    <option value="all">منذ الافتتاح</option>
+                </select>
+                <span class="date-icon">
+                    <i class="fa-solid fa-chevron-down"></i>
+                </span>
+            </div>
+
+        </div>
+
+        <!-- بطاقات الإحصائيات -->
+        <div class="stats-grid">
+
+            <!-- إجمالي المبيعات -->
+            <a href="" class="stat-card">
+                <div class="card-content">
+                    <div class="card-details">
+                        <span class="card-title"> المبيعات</span>
+                        <strong class="card-value">12,540 <span class="currency" >د.ل</span></strong>
+                    </div>
+                    <div class="card-icon sales">
+                        <i class="fa-solid fa-arrow-trend-up"></i>
+                    </div>
+                </div>
+                <span class="stat-change complete">
+                    ▲ 12% عن أمس
+                </span>
+            </a>
+
+            <!-- الطلبات -->
+            <a href="{% url "orders:store_orders" STORE_ID %}" class="stat-card">
+                <div class="card-content">
+                    <div class="card-details">
+                        <span class="card-title">الطلبات</span>
+                        <strong class="card-value">245</strong>
+                    </div>
+                    <div class="card-icon orders">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                    </div>
+                </div>
+                <span class="stat-change complete">
+                    ▲ 8% عن أمس
+                </span>
+            </a>
+            
+            <!-- المنتجات -->
+            <a href="{% url 'store:store_products' STORE_ID %}" class="stat-card">
+                <div class="card-content">
+                    <div class="card-details">
+                        <span class="card-title">المنتجات</span>
+                        <strong class="card-value">320</strong>
+                    </div>
+                    <div class="card-icon products">
+                        <i class="fa-solid fa-box-open"></i>
+                    </div>
+                </div>
+                <span class="stat-change neutral">
+                    — لا تغيير —
+                </span>
+            </a>
+
+            <!-- المشاهدات -->
+            <a class="stat-card">
+                <div class="card-content">
+                    <div class="card-details">
+                        <span class="card-title">المشاهدات</span>
+                        <strong class="card-value">1,280</strong>
+                    </div>
+                    <div class="card-icon views">
+                        <i class="fa-regular fa-eye"></i>
+                    </div>
+                </div>
+                <span class="stat-change cancel">
+                    ▼ 15% عن أمس
+                </span>
+            </a>
+
+        </div>
+
+        <div class="dashboard-content">
+            <!-- قسم أخر الطلبات -->
+            <div class="last-orders">
+                <div class="content-header">
+                    <h4>أخر الطلبات</h4>
+                    <a href="/orders/all-orders.html">عرض الكل</a>
+                </div>
+                <div class="table-wrap">
+                    <table>                    
+                        <tbody>
+                            <tr>
+                                <td>100012</td>
+                                <td >عبدالله سعد</td>
+                                <td>منذ 4 ساعات</td>
+                                <td ><span class="cl-span complete">تم التسليم</span></td>
+                            </tr>
+                            <tr>
+                                <td>2022</td>
+                                <td >عبد الرحمن مصلح العمامي</td>
+                                <td>منذ 6 ساعات</td>
+                                <td ><span class="cl-span cancel">تم الإلغاء</span></td>
+                            </tr>
+                            <tr>
+                                <td>100014</td>
+                                <td >احمد خالد</td>
+                                <td>منذ 4 ايام</td>
+                                <td ><span class="cl-span pending">جاري المعالجة</span></td>
+                            </tr>
+                            <tr>
+                                <td>100014</td>
+                                <td >احمد خالد</td>
+                                <td>منذ 2 اسبوع</td>
+                                <td ><span class="cl-span cancel">تم الإلغاء</span></td>
+                            </tr>
+                            <tr>
+                                <td>113010</td>
+                                <td >سارة خالد</td>
+                                <td>منذ 1 اشهر</td>
+                                <td ><span class="cl-span complete">تم التسليم</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- قسم منحنى المبيعات -->
+            <div class="sales-chart">
+                <div class="content-header">
+                    <h4>نظرة عامة على المبيعات</h4>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="salesChart"></canvas>
+                </div>
+
+            </div>
+        </div>
+
+    </section>
+
+{% endblock content %}
+
+{% comment %} Page Scripts {% endcomment %}
+{% block page_scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static "js/dashboard.js" %}"></script>
+{% endblock %}

@@ -1,0 +1,97 @@
+/* ═══════════════════════════════════════════
+    Menu List Section
+═══════════════════════════════════════════ */
+.menu-list {
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+.menu-list .menu-item {
+    display:flex;
+    align-items:center;
+    gap:15px;
+    font-size: 16px;
+    background:var(--secondary-background);
+    padding:15px;
+    text-decoration:none;
+    border:1px solid var(--seprator-color);
+    border-radius:10px;
+    -webkit-border-radius:10px;
+    -moz-border-radius:10px;
+    -ms-border-radius:10px;
+    -o-border-radius:10px;
+    transition:.15s ease ;
+    -webkit-transition:.15s ease ;
+    -moz-transition:.15s ease ;
+    -ms-transition:.15s ease ;
+    -o-transition:.15s ease ;
+}
+.menu-list .menu-item  .menu-icon {
+    padding: 10px 5px;
+    font-size: calc(1em + 4px);
+    flex:none;
+    min-width:48px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+.menu-list .menu-item:hover .menu-icon {
+    background-color: var(--secondary-background);
+}
+.menu-icon.green {
+    color: var(--green-color) ;
+    background-color: var(--green-background);
+}
+.menu-icon.red {
+    color: var(--red-color) ;
+    background-color: var(--red-background);
+}
+.menu-icon.purple {
+    color: var(--purple-color) ;
+    background-color: var(--purple-background);
+}
+.menu-icon.blue {
+    color: var(--blue-color) ;
+    background-color: var(--blue-background);
+}
+.menu-icon.yellow {
+    color: var(--yellow-color) ;
+    background-color: var(--yellow-background);
+}
+.menu-list .menu-item  .menu-body {
+    flex:1; 
+    min-width:0; 
+}
+.menu-list .menu-item  .menu-body h2 {
+    font-size: calc(1em + 2px);
+    font-weight:700;
+    margin-bottom:3px;
+}
+.menu-list .menu-item  .menu-body p {
+    font-size: calc(1em - 2px);
+    color:var(--gray-color);
+    line-height:1.5;
+}
+
+.menu-list .menu-item  .menu-arrow {
+    font-size: calc(1em + 2px);
+    color:var(--gray-color);
+    display:flex;
+    align-items:center; 
+    justify-content:center;
+    flex:none;
+}
+@media (min-width:500px) {
+    .menu-list .menu-item {
+        font-size: 18px;
+    }
+    
+}
+/* ═══════════════════════════════════════════
+    ...
+═══════════════════════════════════════════ */

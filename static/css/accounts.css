@@ -1,0 +1,370 @@
+/* ═══════════════════════════════════════════
+    Notice Section 
+═══════════════════════════════════════════ */
+.settings-panel .panel-content .notice {
+    font-size: 14px;
+}
+@media (min-width:500px) {
+    .settings-panel .panel-content .notice {
+        font-size: 18px;
+    }
+
+}
+/* ═══════════════════════════════════════════
+    Store Status Section 
+═══════════════════════════════════════════ */
+.store-status {
+    font-size: 15px;
+    padding: 15px;
+    margin-top: 10px;
+    background-color: var(--secondary-background);
+    border: 1px solid var(--seprator-color);
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+.store-status h3 {
+    display: inline-block;
+    font-size: 1em;
+    margin-left: 5px;
+}
+.store-status h3 i {
+    margin-left: 3px;
+    font-size: calc(1em + 3px);
+}
+.store-status span {
+    background-color:  var(--yellow-background);  /* لون خلفية افتراضي */
+    font-size: calc(1em - 1px);
+    padding: 5px 7px;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+.store-status span.complete {
+    background-color:  var(--green-background);
+}
+.store-status span.cancel {
+    background-color:  var(--red-background);
+}
+@media (min-width:500px) {
+    .store-status {
+        font-size: 16px;
+        padding: 15px 30px;
+    }
+}
+/* ═══════════════════════════════════════════
+    Settings Panel Section 
+═══════════════════════════════════════════ */
+section {
+    max-width: 700px;
+    margin: 0 auto;
+}
+.settings-panel {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: var(--secondary-background);
+    border: 1px solid var(--seprator-color);
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+@media (min-width:500px) {
+    .settings-panel {
+        padding:20px;
+    }
+}
+.settings-panel .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    margin-bottom: 10px;
+    user-select: none;
+}
+@media (max-width:340px) {
+    .settings-panel .panel-header {
+        font-size: 14px;
+    }
+}
+@media (min-width:500px) {
+    .settings-panel .panel-header {
+        font-size: 18px;
+    }
+}
+.settings-panel .panel-header .panel-heading {
+    display: flex;
+    align-items: center;
+}
+.settings-panel .panel-header .panel-heading .panel-icon {
+    text-align: center;
+    font-size: calc(1em + 4px );
+    padding: 5px;
+    margin-left: 10px;
+    color: var(--primary-color);
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+.settings-panel .panel-header .panel-heading .panel-title h2 {
+    font-size: calc(1em + 2px );
+    margin-bottom: 2px;
+}
+.settings-panel .panel-header .panel-heading .panel-title p {
+    font-size: calc(1em - 4px );
+    color: var(--gray-color);
+}
+.settings-panel .panel-content {
+    font-size: 12px;
+}
+.settings-panel .panel-content .field {
+    margin: 10px;
+}
+@media (min-width:500px) {
+    .settings-panel .panel-content {
+        font-size: 14px;
+    }    
+}
+@media (min-width:700px) {
+    .settings-panel .panel-content.grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }    
+    .details .details-body.grid .field {
+        max-width: 500px;
+        margin: 10px;
+    }
+}
+.settings-panel .image-field input[type=file] {
+    visibility: hidden;
+    position: absolute;
+    top: -1000000px;
+}
+.image-field .preview_box .image-preview {
+    width: 80px;
+}
+@media (max-width:400px) {
+    .panel-content .image-field .image-details {
+        flex-direction: column;
+    }
+    .image-field .preview_box .image-preview {
+        width: 60%;
+    }
+}
+
+/* ═══════════════════════════════════════════
+    Social List Section 
+═══════════════════════════════════════════ */
+
+.panel-content.social .field  {
+    max-width: unset;
+}
+.panel-content.social .field label i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+    font-size: calc(1em + 3px);
+    width: 25px;
+    height: 25px;
+    color: #fff;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+.panel-content.social .field label i.facebook {
+    background-color: #1877F2;
+}
+.panel-content.social .field label i.instagram {
+    background-color: #E1306C;
+}
+.panel-content.social .field label i.tiktok {
+    background-color: #000000;
+}
+.panel-content.social .field label i.phone-call {
+    font-size: 1em; /* لانو حجم الايقونة هي اكبر من البقية */
+    background-color: #F97316;
+}
+.panel-content.social .field label i.whatsapp {
+    background-color: #25D366;
+}
+
+/* ═══════════════════════════════════════════
+    Sign Page Section 
+═══════════════════════════════════════════ */
+.sign-page {
+    background-image: url("/images/back.png");
+    background-size: cover;
+}
+.sign-page .container {
+    padding-top: 20px;
+    margin-bottom: 0;
+}
+.sign-page .content {
+    font-size: 16px;
+}
+@media (min-width:500px) {
+    .sign-page .content {
+        font-size: 18px;
+    }
+}
+.sign-page .content .card-title {
+    text-align: center;
+    margin: 20px 0;
+}
+.sign-page .content .card-title h1 {
+    font-size: calc(1em + 4px);
+    margin: 5px;
+}
+
+.sign-page .content .card-title p {
+    color: var(--gray-color);
+    font-size: calc(1em - 4px);
+}
+.sign-page .content .sign-card {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    height: fit-content;
+    padding: 10px 20px;
+    margin: 0 auto 80px;
+    background-color: var(--secondary-background);
+    box-shadow: var(--main-shadow);
+    border: 1px solid var(--seprator-color);
+    border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
+}
+.sign-page .content .sign-card .logo {
+    width: 120px;
+    margin: 0 auto;
+}
+.sign-page .content .sign-card .card-title {
+    margin-top: 0;
+}
+.sign-page .content .sign-card .logo img {
+    aspect-ratio: 3/1;
+    width: 100%;
+    height: 100%;
+}
+.sign-page .content .sign-card .card-fields .field {
+    font-size: calc(1em - 2px);
+}
+.sign-page .content .sign-card .card-fields button {
+    font-size: calc(1em - 2px);
+    display: block;
+    padding: 10px;
+    margin: 10px auto;
+    border-radius:5px;
+    -webkit-border-radius:5px;
+    -moz-border-radius:5px;
+    -ms-border-radius:5px;
+    -o-border-radius:5px;
+}
+.sign-page .content .sign-card .card-redirect , .sign-page .content .sign-card .card-note {
+    margin: 20px 0 10px;
+    display: block;
+    text-align: center;
+    font-size: calc(1em - 4px);
+}
+.sign-page .content .sign-card .card-note {
+    position: absolute;
+    left: 50%;
+    bottom: -40px;
+    color: var(--gray-color);
+    transform: translateX(-50%);
+    -webkit-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+}
+.sign-page .content .features-card {
+    display: none;
+    max-width: 400px;
+    margin: 0 auto 80px;
+    padding: 20px 0;
+}
+.sign-page .content .features-card .image {
+    margin: 0 auto ;
+    width: 100%;
+    max-width: 300px;
+}
+.sign-page .content .features-card .image img {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 4/3;
+}
+.sign-page .content .features-card .card-icons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.sign-page .content .features-card .card-icons .icon {
+    text-align: center;
+    margin: 5px;
+}
+.sign-page .content .features-card .card-icons .icon i {
+    font-size: calc(1em + 4px);
+    display: block;
+    margin-bottom: 5px;
+}
+.sign-page .content .features-card .card-icons .icon span {
+    font-size: calc(1em - 4px);
+}
+
+@media (min-width:700px) {
+    .sign-page .content {
+        display: grid;
+        grid-template-columns: 3fr 2fr;
+        grid-template-areas: "sign features";
+        gap: 20px;
+    }
+    .sign-page .content .sign-card {
+        grid-area: sign;
+    }
+    .sign-page .content .features-card {
+        display: block;
+        grid-area: features;
+    }
+}
+.sign-page footer {
+    background-color: transparent;
+    padding: 10px 0 0;
+}
+.sign-page footer .links {
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+@media (min-width:500px) {
+    .sign-page footer .links {
+        font-size: 14px;
+    }
+}
+.sign-page footer .links a {
+    padding: 5px;
+    margin: 5px;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+.sign-page footer .footer-copyright {
+    border-top: none;
+    margin-top: 0;
+    padding-bottom: 0;
+}

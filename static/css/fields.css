@@ -1,0 +1,404 @@
+/* ═══════════════════════════════════════════
+    مربع اخطاء الحقول
+═══════════════════════════════════════════ */
+.field-errors {
+    background-color: #a81414;
+    color: #fff;
+    padding: 5px;
+    border: 1px solid var(--seprator-color);
+    border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -ms-border-radius: 3px;
+    -o-border-radius: 3px;
+}
+/* ═══════════════════════════════════════════
+    تنسيقات الحقول  
+═══════════════════════════════════════════ */
+.field {
+    /* اعط الحقل (الاب) حجم خط كي تطبق التغيرات بالنسبة المناسبة على جميع الابناء */
+    margin: 10px auto;
+    padding: 5px 5px 10px;
+    max-width: 320px;
+}
+
+.field label {
+    color: var(--main-text-color);
+    font-size: 1em;
+}
+/* ═══════════════════════════════════════════
+    الحقول النصية 
+═══════════════════════════════════════════ */
+.field .input {
+    font-size: 1em ;
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0 5px;
+    padding: 10px;
+    background-color: var(--gray-background);
+    border: 1px solid var(--seprator-color);
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+.field .input:focus-within {
+    border-color: var(--primary-color);
+}
+.input textarea {
+    resize: none;
+}
+.field .input input , .field .input textarea {
+    font-size: calc(1em - 1px);
+    width: 100%;
+    caret-color: var(--primary-color);
+}
+.field .input i {
+    width: fit-content;
+    color: var(--primary-color);
+}
+.field .help-text {
+    display: block;
+    font-size: calc(1em - 2px);
+    color: var(--gray-color);
+    line-height: 1.5;
+}
+.field .help-text.error {
+    color: var(--red-color);
+    font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════
+    عداد حروف التيكست اريا
+═══════════════════════════════════════════ */
+.field .input:has(.counter) {
+    position: relative;
+}
+.field .input .counter {
+    font-size: calc(1em - 4px);
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    color: var(--gray-color);
+}
+
+/* ═══════════════════════════════════════════
+    حقول الاختيار 
+═══════════════════════════════════════════ */
+.checkbox-field .checkbox-control , .field .select-control {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    margin: 10px 0 5px;
+}
+
+.checkbox-field .checkbox-control label , .field .select-control label {
+    width: fit-content;
+    margin: 0;
+    cursor: pointer;
+}
+.checkbox-field .checkbox-control input[type="checkbox"] {
+    position: relative;
+    width: 32px;
+    height: 16px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background-color: #252b38;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    -webkit-transition: background-color 0.2s ease;
+    -moz-transition: background-color 0.2s ease;
+    -ms-transition: background-color 0.2s ease;
+    -o-transition: background-color 0.2s ease;
+}
+.checkbox-field .checkbox-control input[type="checkbox"]:checked {
+    background-color: var(--primary-color);
+}
+/* الدائرة */
+.checkbox-field .checkbox-control input[type="checkbox"]::before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
+    background-color: #fff;
+    box-shadow: 0 1px 4px rgb(0 0 0 / 20%);
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+    transition:transform 0.2s ease;
+    -webkit-transition:transform 0.2s ease;
+    -moz-transition:transform 0.2s ease;
+    -ms-transition:transform 0.2s ease;
+    -o-transition:transform 0.2s ease;
+}
+.checkbox-field .checkbox-control input[type="checkbox"]:checked::before {
+    transform: translateX(-16px);
+    -webkit-transform: translateX(-16px);
+    -moz-transform: translateX(-16px);
+    -ms-transform: translateX(-16px);
+    -o-transform: translateX(-16px);
+}
+/* ═══════════════════════════════════════════
+    حقول القائمة المنسدلة 
+═══════════════════════════════════════════ */
+.custom-select{
+    position:relative;
+    width:100%;
+    background-color: var(--gray-background);
+    color:var(--gray-color);
+    font-size:calc(1em - 2px);
+    border:1px solid var(--seprator-color);
+    border-radius:5px;
+    user-select:none;
+}
+.custom-select:focus-within {
+    border-color: var(--primary-color) ;
+}
+.custom-select.has-value .select-trigger{
+    color:var(--main-text-color);
+}
+.custom-select.disabled{
+    opacity:.6;
+    pointer-events:none;
+}
+.select-trigger{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:7px 20px;
+    cursor:pointer;
+}
+.select-trigger i{
+    color:var(--gray-color);
+    font-size:.85em;
+    transition:transform .2s ease;
+    -webkit-transition:transform .2s ease;
+    -moz-transition:transform .2s ease;
+    -ms-transition:transform .2s ease;
+    -o-transition:transform .2s ease;
+}
+.custom-select.open .select-trigger i{
+    transform:rotate(180deg);
+}
+.custom-select.open .select-trigger{
+    border-bottom:1px solid var(--seprator-color);
+}
+.select-panel{
+    position:absolute;
+    top:calc(100% + 6px);
+    right:0;
+    left:0;
+    background-color: var(--gray-background);
+    box-shadow:0 10px 30px rgba(20,20,30,.12);
+    overflow:hidden;
+    z-index:20;
+    max-height:0;
+    opacity:0;
+    pointer-events:none;
+    border:1px solid var(--seprator-color);
+    border-radius:5px;
+    -webkit-border-radius:5px;
+    -moz-border-radius:5px;
+    -ms-border-radius:5px;
+    -o-border-radius:5px;
+    transition:max-height .18s ease, opacity .15s ease, transform .15s ease;
+    -webkit-transition:max-height .18s ease, opacity .15s ease, transform .15s ease;
+    -moz-transition:max-height .18s ease, opacity .15s ease, transform .15s ease;
+    -ms-transition:max-height .18s ease, opacity .15s ease, transform .15s ease;
+    -o-transition:max-height .18s ease, opacity .15s ease, transform .15s ease;
+    transform:translateY(-6px);
+    -webkit-transform:translateY(-6px);
+    -moz-transform:translateY(-6px);
+    -ms-transform:translateY(-6px);
+    -o-transform:translateY(-6px);
+}
+.custom-select.open .select-panel{
+    max-height:260px;
+    opacity:1;
+    pointer-events:auto;
+    overflow-y:auto;
+    transform:translateY(0);
+    -webkit-transform:translateY(0);
+    -moz-transform:translateY(0);
+    -ms-transform:translateY(0);
+    -o-transform:translateY(0);
+}
+.select-option{
+    padding:10px 15px;
+    color:var(--main-text-color);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    transition:background-color .12s ease;
+    -webkit-transition:background-color .12s ease;
+    -moz-transition:background-color .12s ease;
+    -ms-transition:background-color .12s ease;
+    -o-transition:background-color .12s ease;
+}
+.select-option:hover,
+.select-option.active{
+    background-color:var(--primary-background);
+}
+.select-option.selected{
+    color:var(--primary-color);
+    font-weight:900;
+    background-color:var(--primary-background);
+}
+/* يوجد عنصر آخر عليه hover */
+.select-panel:has(.select-option:not(.selected):hover) .select-option.selected {
+    background-color: transparent !important;
+    color: var(--main-text-color);
+    font-weight: unset;
+}
+.select-option.placeholder{
+    color:var(--gray-color);
+    font-weight:300;
+}
+.select-option[aria-disabled="true"]{
+    opacity:.5;
+    cursor:not-allowed;
+}
+/* ═══════════════════════════════════════════
+    حقل رفع الصور
+═══════════════════════════════════════════ */
+.image-field {
+    max-width: 90% !important;
+}
+.image-field .field-title {
+    margin-bottom: 5px;
+}
+.upload-box {
+    display: block;
+    text-align: center;
+    padding: 20px 10px;
+    margin: 10px auto;
+    max-width: 700px;
+    background-color: var(--gray-background);
+    font-size: 14px;
+    cursor: pointer;
+    border: 2px dashed var(--seprator-color);
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+    transition: .2s ease;
+    -webkit-transition: .2s ease;
+    -moz-transition: .2s ease;
+    -ms-transition: .2s ease;
+    -o-transition: .2s ease;
+}
+.upload-box:hover {
+    border-color: var(--primary-color);
+}
+.upload-box > i {
+    font-size: 2em;
+}
+.upload-box h5 {
+    color: var(--gray-color);
+    font-size: 1em;
+    margin: 5px 0;
+}
+.upload-box p {
+    margin-bottom: 2px;
+    font-size: .8em;
+    color: var(--gray-color);
+}
+.image-field input[type="file"] {
+    visibility: hidden;
+}
+@media (min-width:500px) {
+    .upload-box {
+        font-size: 16px;
+    
+    }
+}
+/* ═══════════════════════════════════════════
+    معاينة الصور المرفوعة
+═══════════════════════════════════════════ */
+.image-field .preview_box {
+    max-width: 700px;
+}
+.image-field .preview_box .image-item {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 10px auto;
+    padding: 10px;
+    font-size: 14px;
+    background-color: var(--gray-background);
+    border: 1px solid var(--seprator-color);
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+.image-field .preview_box .image-details {
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--gray-color);
+}
+.image-field .preview_box .drag-handle {
+    font-size: calc(1em + 2px);
+}
+.image-field .preview_box .image-number {
+    margin: 0 5px;
+}
+.image-field .preview_box .image-preview {
+    height: unset;
+    border: 1px solid var(--seprator-color);
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+    aspect-ratio: 1;
+    object-fit: contain;
+    background-color: var(--gray-background);
+}
+.image-field .preview_box .image-btn {
+    overflow:hidden;
+    align-self: flex-end;
+    padding: 5px 10px;
+    color: #fff;
+    font-size: calc(1em );
+    border-radius: 2px;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    -ms-border-radius: 2px;
+    -o-border-radius: 2px;
+}
+@media (max-width:350px) {
+    .image-field .preview_box .images-list .image-info {
+        font-size: calc(1em - 2px);
+    }
+}
+@media (min-width:500px) {
+    .image-field .preview_box .image-item {
+        padding: 10px 15px;
+        font-size: 16px;
+    }
+    .image-field .preview_box .image-preview.main-image {
+        width: 80px;
+    }
+    .image-field .preview_box .images-list .image-preview {
+        width: 60px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+    ....
+═══════════════════════════════════════════ */

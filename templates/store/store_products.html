@@ -1,0 +1,453 @@
+{% extends "partials/base.html" %}
+{% load static %}
+
+{% comment %} Page Head {% endcomment %}
+{% block page_head %}
+    <link rel="stylesheet" href="{% static "css/tables.css" %} ">                            
+{% endblock page_head %}
+
+
+{% comment %} Page Content {% endcomment %}
+{% block content %}
+
+<section class="">
+    <!-- رأس القسم -->
+    <div class="section-header">
+        <div class="section-content">
+            <div class="section-icon product">
+                <i class="fa-solid fa-box-open"></i>
+            </div>
+            <div class="section-details">
+                <h1>جميع المنتجات</h1>
+                <p> عرض وإدارة جميع المنتجات في متجرك.</p>
+            </div>
+        </div>
+
+        <a href="{% url "store:add_product" %}" class="add-button link-btn section-procedure primary-btn">إنشاء  منتج <i class="fa-solid fa-plus"></i> </a>
+    </div>
+
+    {% if has_products %}
+        <div class="data-content">
+
+            <form method="GET" autocomplete="off" id="search-form">
+
+                <!-- ══ TOP BAR ══════════════════════════════════════════ -->
+                <div class="toolbar">
+
+                    <!-- Search -->
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" name="search" class="search-input" value="{{ search }}" 
+                            placeholder="ابحث عن طريق اسم المنتج" 
+                        >
+                        <button type="submit">بحث</button>
+                    </div>
+
+                    <div class="search-btns">
+                        
+                        <!-- Filter toggle -->
+                        <button type="button" class="filter-btn toolbar-btn ">
+                            <i class="fa-solid fa-sliders"></i>
+                        </button>
+                        
+                        <!-- Sort dropdown -->
+                        <div class="sort-wrap">
+                            <button type="button" class="sort-btn toolbar-btn " >
+                                <i class="fa-solid fa-arrow-down-wide-short"></i>
+                                <span>ترتيب</span>
+                            </button>
+                            
+                            <div class="sort-menu small-menu" id="sort-menu"> <!-- open -->
+                                {% with sorts=sort_options %}
+                                    {% comment %} حسب تاريخ الانشاء {% endcomment %}
+                                    <button type="button" class="menu-link {% if selected_sort == '-upload_at' %}selected{% endif %}" onclick="applySort('-upload_at')">
+                                        <i class="fa-regular fa-clock"></i>
+                                        الأحدث أولاً
+                                    </button>
+
+                                    <button type="button" class="menu-link {% if selected_sort == 'upload_at' %}selected{% endif %}" onclick="applySort('upload_at')">
+                                        <i class="fa-regular fa-clock"></i>
+                                        الأقدم أولاً
+                                    </button>
+
+                                    {% comment %} حسب تاريخ التعديل {% endcomment %}
+                                    <button type="button" class="menu-link {% if selected_sort == '-updated_at' %}selected{% endif %}" onclick="applySort('-updated_at')">
+                                        <i class="fa-regular fa-clock"></i>
+                                        الأحدث تعديلاً 
+                                    </button>
+
+                                    <button type="button" class="menu-link {% if selected_sort == 'updated_at' %}selected{% endif %}" onclick="applySort('updated_at')">
+                                        <i class="fa-regular fa-clock"></i>
+                                        الأقدم تعديلاً 
+                                    </button>
+
+                                    {% comment %} حسب  الابجدية {% endcomment %}
+                                    <button type="button" class="menu-link {% if selected_sort == 'name' %}selected{% endif %}" onclick="applySort('name')">
+                                        <i class="fa-solid fa-arrow-up-a-z"></i>
+                                        أبجدياً (أ → ي)
+                                    </button>
+
+                                    <button type="button" class="menu-link {% if selected_sort == '-name' %}selected{% endif %}" onclick="applySort('-name')">
+                                        <i class="fa-solid fa-arrow-down-a-z"></i>
+                                        أبجدياً (ي → أ)
+                                    </button>
+
+                                    {% comment %} حسب  السعر {% endcomment %}
+
+                                    <button type="button" class="menu-link {% if selected_sort == 'price' %}selected{% endif %}" onclick="applySort('price')">
+                                        <i class="fa-solid fa-arrow-down-1-9"></i>
+                                        السعر: الأرخص أولاً
+                                    </button>
+
+                                    <button type="button" class="menu-link {% if selected_sort == '-price' %}selected{% endif %}" onclick="applySort('-price')">
+                                        <i class="fa-solid fa-arrow-up-1-9"></i>
+                                        السعر: الأغلى أولاً
+                                    </button>
+                                {% endwith %}
+                                <!-- hidden sort input -->
+                                <input type="hidden" name="sort" id="sort-input" value="{{ selected_sort }}">
+
+                            </div>
+                            
+                        </div>
+
+                    </div>
+                        
+                    </div>
+
+                <!-- ══ FILTER PANEL ═════════════════════════════════════ -->
+                <div class="filter-panel {% if selected_status or selected_type or selected_gender or selected_is_visible or selected_offer or price_min or price_max %}open{% endif %}">
+                    <div class="filter-grid">
+
+                        <div class="field">
+                            <label>نوع المنتج</label>
+                            <select name="type" >
+                                <option value="">الكل</option>
+                                <option value="clothes"     {% if selected_type == 'clothes' %}selected{% endif %}>ملابس</option>
+                                <option value="watches"     {% if selected_type == 'watches' %}selected{% endif %}>ساعات</option>
+                                <option value="Accessories" {% if selected_type == 'Accessories' %}selected{% endif %}>اكسسوارات</option>
+                                {% comment %} #chanege-later ضيف نوع اخرى {% endcomment %}
+                                <option value="Accessories" >أخرى</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label>جنس المنتج</label>
+                            <select name="gender" >
+                                <option value="">الكل</option>
+                                <option value="male"   {% if selected_gender == 'male' %}selected{% endif %}>رجالي</option>
+                                <option value="female" {% if selected_gender == 'female' %}selected{% endif %}>نسائي</option>
+                                <option value="unisex" {% if selected_gender == 'unisex' %}selected{% endif %}>كلا الجنسين</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label>حالة المنتج</label>
+                            <select name="status" >
+                                <option value="">الكل</option>
+                                <option value="checking" {% if selected_status == 'checking' %}selected{% endif %}>جاري المراجعة</option>
+                                <option value="approved" {% if selected_status == 'approved' %}selected{% endif %}>مقبول</option>
+                                <option value="rejected" {% if selected_status == 'rejected' %}selected{% endif %}>مرفوض</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label>ظهور المنتج</label>
+                            <select name="is_visible" >
+                                <option value="">الكل</option>
+                                <option value="true"  {% if selected_is_visible == 'true' %}selected{% endif %}>ظاهر</option>
+                                <option value="false" {% if selected_is_visible == 'false' %}selected{% endif %}>مخفي</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label> التخفيض</label>
+                            <select name="offer" >
+                                <option value="">الكل</option>
+                                <option value="true"  {% if selected_offer == 'true' %}selected{% endif %}>عليه تخفيض</option>
+                                <option value="false" {% if selected_offer == 'false' %}selected{% endif %}>بدون تخفيض</option>
+                            </select>
+                        </div>
+
+                        
+                        <div class="field">
+                            <label>نطاق السعر</label>
+                            <div class="price-row">
+                                <input type="number" name="price_min"  placeholder="من" min="0" value="{{ price_min }}">
+                                <span>—</span>
+                                <input type="number" name="price_max"  placeholder="إلى" min="0" value="{{ price_max }}">
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="filter-actions">
+                        <a href="{% url 'store:store_products' sid %}" class="filter-btn action-btn link-btn" >مسح الكل</a>
+                        <button type="submit" class="action-btn link-btn">
+                            تطبيق
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+
+            <!-- ══ Data Summary ═════════════════════════════════════════ -->
+            <div class="data-summary">
+                <span class="count">
+                    إجمالي المنتجات: <strong >{{ page_obj.paginator.count }}</strong> منتج
+                    &nbsp;·&nbsp; الصفحة <strong>{{ page_obj.number }}</strong> من <strong>{{ page_obj.paginator.num_pages }}</strong>
+                </span>
+
+                <!-- Active filter chips -->
+                {% if selected_status %}
+                    <button class="chip" onclick="clearParam('status')">
+                        <i class="fa-solid fa-xmark"></i>
+                        الحالة: {{ selected_status_display  }}
+                    </button>
+                {% endif %}
+                {% if selected_type %}
+                    <button class="chip" onclick="clearParam('type')">
+                        <i class="fa-solid fa-xmark"></i>
+                        النوع: {{ selected_type_display  }}
+                    </button>
+                {% endif %}
+                {% if selected_gender %}
+                    <button class="chip" onclick="clearParam('gender')">
+                        <i class="fa-solid fa-xmark"></i>
+                        الجنس: {{ selected_gender_display  }}
+                    </button>
+                {% endif %}
+                {% if selected_is_visible %}
+                    <button class="chip" onclick="clearParam('is_visible')">
+                        <i class="fa-solid fa-xmark"></i>
+                        الظهور: {% if selected_is_visible == 'true' %}ظاهر{% else %}مخفي{% endif %}
+                    </button>
+                {% endif %}
+                {% if selected_offer %}
+                    <button class="chip" onclick="clearParam('offer')">
+                        <i class="fa-solid fa-xmark"></i>
+                        {% if selected_offer == 'true' %}عليه تخفيض{% else %}بدون تخفيض{% endif %}
+                    </button>
+                {% endif %}
+                {% if price_min or price_max %}
+                    <button class="chip" onclick="clearParam('price_min;price_max')">
+                        <i class="fa-solid fa-xmark"></i>
+                        السعر: {{ price_min|default:"0" }} — {{ price_max|default:"∞" }}
+                    </button>
+                {% endif %}
+                {% if search %}
+                    <button class="chip" onclick="clearParam('search')">
+                        <i class="fa-solid fa-xmark"></i>
+                        بحث: "{{ search }}"
+                    </button>
+                {% endif %}
+
+            </div>
+
+            <!-- ══ TABLE ═════════════════════════════════════════════ -->
+            
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>الصورة</th>
+                            <th>الاسم</th>
+                            <th>السعر</th>
+                            <th>الظهور</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    {% if page_obj %}
+                        <tbody>
+                            {% for product in page_obj %}
+                                <tr data-view-url="{% url 'store:edit_product' product.id %}">
+                                    <td>{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
+                                    <td>
+                                        <img src="{{ product.thumbnail_img.url }}" alt="{{ product.name }}" width="80" height="80" alt="">
+                                    </td>
+                                    {% comment %} #change-later تعامل مع حالة لو كان اسم المنتج طويل جدا {% endcomment %}
+                                    <td>{{ product.name }}</td> 
+
+                                    <td class="price-cell">
+                                        <div class="price-wrapper">
+                                            {% if product.offer %}
+                                                <span class="old-price">
+                                                    {{ product.price|floatformat:0 }}
+                                                </span>
+                                            {% endif %}
+                                            <span class="new-price">
+                                                {{ product.get_price }}
+                                            </span>
+                                            <span class="currency">د.ل</span>
+                                        </div>
+                                    </td>     
+
+                                    <td class="{% if product.is_visible %}complete{% else %}cancel{% endif %}" >{{ product.get_is_visible_display }}</td>
+                                    <td>
+                                        {% if product.status == "rejected" %}
+                                            <div class="icon-td alert-td cancel">
+                                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                                <span>مرفوض</span>
+                                            </div>
+                                        {% endif %}
+                                    </td>               
+                                    <td>
+                                        <button
+                                            type="button"
+                                            class="td-actions"
+                                            aria-label="الإجراءات"
+                                            data-id="{{ product.id }}"
+                                            data-name="{{ product.name }}"
+                                            data-view-url="{% url 'store:view_product' product.id %}"
+                                            data-edit-url="{% url 'store:edit_product' product.id %}"
+                                        >
+                                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+            
+                        </tbody>                
+                    {% endif %}
+                </table>
+
+                {% if not page_obj %}
+                    <div class="message">
+                        <div class="message-image">
+                            <img src="{% static "images/no-search-result.png" %}" alt="" width="100" height="80" >
+                        </div>
+                        <h2 class="message-title" >لم يتم العثور على اي منتجات</h2>
+                        <p class="message-content">
+                            لم نجد اي منتج يطابق بحثك，
+                            جرب تغيير كلمات البحث او تعديل الفلاتر 
+                            ثم حاول مرة اخرى
+                        </p>
+                        <a href="{% url 'store:store_products' sid %}" class="message-btn link-btn" >مسح البحث <i class="fa-solid fa-arrows-rotate"></i></a>
+                    </div>
+                {% endif %}
+
+            </div>
+
+            <!-- ══ PAGINATION ════════════════════════════════════════ -->
+                    
+            <div class="pagination">
+
+                <!-- معلومات النتائج -->
+                {% if page_obj %}
+                    <div class="pagination-info">
+                        عرض <strong>{{ page_obj.start_index }}</strong>
+                        إلى <strong>{{ page_obj.end_index }}</strong>
+                        من <strong>{{ page_obj.paginator.count }}</strong>
+                    </div>
+                {% endif %}
+
+                {% if page_obj.paginator.num_pages > 1 %}
+                    <!-- أزرار الصفحات -->
+                    <div class="pagination-controls">
+
+                        <!-- الصفحة السابقة -->
+                        {% if page_obj.has_previous %}
+                            <button
+                                type="button"
+                                class="page-btn"
+                                aria-label="الصفحة السابقة"
+                                onclick="window.location.href='?{{ query_string }}&page={{ page_obj.previous_page_number }}'"
+                            >
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        {% else %}
+                            <button
+                                type="button"
+                                class="page-btn disabled"
+                                aria-label="الصفحة السابقة"
+                                disabled
+                            >
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        {% endif %}
+
+                        <!-- رقم الصفحة -->
+                        <div class="page-indicator">
+                            <strong>{{ page_obj.number }}</strong>
+                            <span>/</span>
+                            <span>{{ page_obj.paginator.num_pages }}</span>
+                        </div>
+
+                        <!-- الصفحة التالية -->
+                        {% if page_obj.has_next %}
+                            <button
+                                type="button"
+                                class="page-btn"
+                                aria-label="الصفحة التالية"
+                                onclick="window.location.href='?{{ query_string }}&page={{ page_obj.next_page_number }}'"
+                            >
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                        {% else %}
+                            <button
+                                type="button"
+                                class="page-btn disabled"
+                                aria-label="الصفحة التالية"
+                                disabled
+                            >
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                        {% endif %}
+
+                    </div>
+                {% endif %}
+
+            </div>
+
+        </div>
+    {% else %}
+        <div class="data-content">
+            <div class="message-container">
+                <div class="message">
+                    <div class="message-image">
+                        <img src=" {% static "images/empty.png" %} " alt="" width="100" height="80" >
+                    </div>
+                    <h2 class="message-title" >لا توجد لديك منتجات بعد !</h2>
+                    <p class="message-content">
+                        يبدوا انك  لم تقم بإنشاء أي منتجات بعد ، 
+                        بإمكانك البدء الآن بإنشاء منتج جديد يدوياً
+                    </p>
+                    <a href="{% url "store:add_product" %}" class="message-btn primary-btn link-btn"> إنشاء منتج جديد <i class="fa-solid fa-plus"></i></a>
+                </div>
+            </div>
+
+        </div>
+    {% endif %}
+        
+</section>
+{% endblock content %}
+
+{% comment %} Page Scripts {% endcomment %}
+{% block page_scripts %}
+
+    {% include "store/dialogs/delete_product.html" %}
+
+    <!-- Start Action Menu -->
+    <div class="action-menu small-menu" id="action-menu">
+        <a id="view-btn" class="menu-link">
+            <i class="fa-regular fa-eye"></i>
+            <span>عرض</span>
+        </a>
+        
+        <a id="edit-btn" class="menu-link">
+            <i class="fa-regular fa-pen-to-square"></i>
+            <span>تعديل</span>
+        </a>
+        
+        <button id="delete-btn" type="button" class="menu-link cancel" onclick="openDeleteProductDialog(this)" data-id="" data-name="" data-redirect="{% url "store:store_products" sid %}">
+            <i class="fa-regular fa-trash-can"></i>
+            <span>حذف</span>
+        </button>
+    </div>
+    <!-- End Action Menu -->
+
+    <script src="{% static "js/tables.js" %}"></script>
+{% endblock %}

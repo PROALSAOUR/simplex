@@ -1,0 +1,407 @@
+{% extends "partials/base.html" %}
+{% load static %}
+
+{% comment %} Page Head {% endcomment %}
+{% block page_head %}
+    <link rel="stylesheet" href="{% static "css/tables.css" %} ">                            
+{% endblock page_head %}
+
+
+{% comment %} Page Content {% endcomment %}
+{% block content %}
+
+<section class="">
+
+    {% if can_view_orders %}
+        <!-- رأس القسم -->
+        <div class="section-header">
+            <div class="section-content">
+                <div class="section-icon order">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                </div>
+                <div class="section-details">
+                    <h1>جميع الطلبات</h1>
+                    <p> عرض وإدارة جميع الطلبات في متجرك.</p>
+                </div>
+            </div>
+
+            <a href="{% url "orders:add_order_manually" %}" class="add-button link-btn section-procedure primary-btn">إنشاء  طلب <i class="fa-solid fa-plus"></i> </a>
+        </div>
+        
+        {% if has_orders %}
+            <div class="data-content">
+
+                <form method="GET" autocomplete="off" id="search-form">
+
+                    <!-- ══ TOP BAR ══════════════════════════════════════════ -->
+                    <div class="toolbar">
+
+                        <!-- Search -->
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" name="search" class="search-input" value="{{ search }}" 
+                                placeholder="ابحث عن طريق الرقم التسلسلي او اسم المستلم" 
+                            >
+                            <button type="submit">بحث</button>
+                        </div>
+
+                        <div class="search-btns">
+                            
+                            <!-- Filter toggle -->
+                            <button type="button" class="filter-btn toolbar-btn ">
+                                <i class="fa-solid fa-sliders"></i>
+                            </button>
+                            
+                            <!-- Sort dropdown -->
+                            <div class="sort-wrap">
+                                <button type="button" class="sort-btn toolbar-btn " >
+                                    <i class="fa-solid fa-arrow-down-wide-short"></i>
+                                    <span>ترتيب</span>
+                                </button>
+                                
+                                <div class="sort-menu small-menu" id="sort-menu"> <!-- open -->
+                                    {% with sorts=sort_options %}
+                                        {% comment %} حسب تاريخ الانشاء {% endcomment %}
+                                        <button type="button" class="menu-link {% if selected_sort == '-order_date' %}selected{% endif %}" onclick="applySort('-order_date')">
+                                            <i class="fa-regular fa-clock"></i>
+                                            الأحدث أولاً
+                                        </button>
+
+                                        <button type="button" class="menu-link {% if selected_sort == 'order_date' %}selected{% endif %}" onclick="applySort('order_date')">
+                                            <i class="fa-regular fa-clock"></i>
+                                            الأقدم أولاً
+                                        </button>
+
+                                        {% comment %} حسب تاريخ التعديل {% endcomment %}
+                                        <button type="button" class="menu-link {% if selected_sort == '-updated_at' %}selected{% endif %}" onclick="applySort('-updated_at')">
+                                            <i class="fa-regular fa-clock"></i>
+                                            الأحدث تعديلاً 
+                                        </button>
+
+                                        <button type="button" class="menu-link {% if selected_sort == 'updated_at' %}selected{% endif %}" onclick="applySort('updated_at')">
+                                            <i class="fa-regular fa-clock"></i>
+                                            الأقدم تعديلاً 
+                                        </button>
+
+                                        {% comment %} حسب  القيمة {% endcomment %}
+
+                                        <button type="button" class="menu-link {% if selected_sort == 'tvalue' %}selected{% endif %}" onclick="applySort('tvalue')">
+                                            <i class="fa-solid fa-arrow-down-1-9"></i>
+                                            الأقل قيمة اولاً
+                                        </button>
+
+                                        <button type="button" class="menu-link {% if selected_sort == '-tvalue' %}selected{% endif %}" onclick="applySort('-tvalue')">
+                                            <i class="fa-solid fa-arrow-up-1-9"></i>
+                                            الأعلى قيمة اولاً
+                                        </button>
+                                    {% endwith %}
+                                    <!-- hidden sort input -->
+                                    <input type="hidden" name="sort" id="sort-input" value="{{ selected_sort }}">
+
+                                </div>
+                                
+                            </div>
+
+                        </div>
+                            
+                        </div>
+
+                    <!-- ══ FILTER PANEL ═════════════════════════════════════ -->
+                    <div class="filter-panel {% if selected_status or selected_verification_status %}open{% endif %}">
+                        <div class="filter-grid">
+
+                            <div class="field">
+                                <label>حالة الطلب</label>
+                                <select name="status" >
+                                    <option value="">الكل</option>
+                                    <option value="processing" {% if selected_status == 'processing' %}selected{% endif %}>جاري التجهيز</option>
+                                    <option value="delivered" {% if selected_status == 'delivered' %}selected{% endif %}>تم التسليم</option>
+                                    <option value="canceled" {% if selected_status == 'canceled' %}selected{% endif %}>ملغي</option>
+                                </select>
+                            </div>
+
+                            <div class="field">
+                                <label>حالة التحقق</label>
+                                <select name="verification_status" >
+                                    <option value="">الكل</option>
+                                        <option value="approved" {% if selected_verification_status == 'approved' %}selected{% endif %}>طلب حقيقي</option>
+                                    <option value="rejected" {% if selected_verification_status == 'rejected' %}selected{% endif %}>طلب وهمي</option>
+                                </select>
+                            </div>
+                    
+                            <div class="field">
+                                <label> قيمة الطلب</label>
+                                <div class="price-row">
+                                    <input type="number" name="tvalue_min"  placeholder="من" min="0" value="{{ tvalue_min }}">
+                                    <span>—</span>
+                                    <input type="number" name="tvalue_max"  placeholder="إلى" min="0" value="{{ tvalue_max }}">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="filter-actions">
+                            <a href="{% url 'orders:store_orders' sid %}" class="filter-btn action-btn link-btn" >مسح الكل</a>
+                            <button type="submit" class="action-btn link-btn">
+                                تطبيق
+                                <i class="fa-solid fa-check"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+
+                <!-- ══ Data Summary ═════════════════════════════════════════ -->
+                <div class="data-summary">
+                    <span class="count">
+                        إجمالي الطلبات: <strong >{{ page_obj.paginator.count }}</strong> طلب
+                        &nbsp;·&nbsp; الصفحة <strong>{{ page_obj.number }}</strong> من <strong>{{ page_obj.paginator.num_pages }}</strong>
+                    </span>
+
+                    <!-- Active filter chips -->
+                    {% if selected_status %}
+                        <button class="chip" onclick="clearParam('status')">
+                            <i class="fa-solid fa-xmark"></i>
+                            الحالة: {{ selected_status_display  }}
+                        </button>
+                    {% endif %}
+                    {% if selected_verification_status %}
+                        <button class="chip" onclick="clearParam('verification_status')">
+                            <i class="fa-solid fa-xmark"></i>
+                            حالة التحقق: {{ selected_verification_status_display  }}
+                        </button>
+                    {% endif %}
+                    
+                    {% if tvalue_min or tvalue_max %}
+                        <button class="chip" onclick="clearParam('tvalue_min;tvalue_max')">
+                            <i class="fa-solid fa-xmark"></i>
+                            القيمة: {{ tvalue_min|default:"0" }} — {{ tvalue_max|default:"∞" }}
+                        </button>
+                    {% endif %}
+                    {% if search %}
+                        <button class="chip" onclick="clearParam('search')">
+                            <i class="fa-solid fa-xmark"></i>
+                            بحث: "{{ search }}"
+                        </button>
+                    {% endif %}
+
+                </div>
+
+                <!-- ══ TABLE ═════════════════════════════════════════════ -->
+                
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>الرقم التسلسلي</th>
+                                <th>اسم المستلم</th>
+                                <th>القيمة</th>
+                                <th>الحالة</th>
+                                <th>التحقق</th>
+                                <th>تاريخ الطلب</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        {% if page_obj %}
+                            <tbody>
+                                {% for order in page_obj %}
+                                    <tr data-view-url="{% url 'orders:view_order' order.id %}">                                    
+                                        <td>{{ order.serial_number }}</td>
+
+                                        <td>{{ order.customer_name }}</td>
+
+                                        <td class="price-cell">
+                                            <div class="price-wrapper">
+                                                <span class="new-price">
+                                                    {{ order.total_selling_price }}
+                                                </span>
+                                                <span class="currency">د.ل</span>
+                                            </div>
+                                        </td>     
+
+                                        <td>
+                                            <div class="icon-td">
+                                                {% if order.status == "delivered" %}
+                                                    <i class="fa-solid fa-check complete"></i>
+                                                {% elif order.status == "processing" %}
+                                                    <i class="fa-solid fa-hourglass-half pending"></i>
+                                                {% else %}
+                                                    <i class="fa-solid fa-times cancel"></i>
+                                                {% endif %}
+                                                <span>{{ order.get_status_display }}</span>
+                                            </div>
+                                        </td>   
+
+                                        <td>
+                                            {% if order.verification_status == "rejected" %}
+                                                <div class="icon-td alert-td cancel">
+                                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                                    <span>طلب وهمي</span>
+                                                </div>
+                                            {% elif order.verification_status == "approved" %}
+                                                <div class="icon-td complete ">
+                                                    <span>طلب حقيقي</span>
+                                                </div>
+                                            {% endif %}
+                                        </td>   
+                                        
+                                        <td>{{ order.order_date|date:"l d M" }}</td>
+                                        
+                                        <td >
+                                            <div>
+                                                <i style="color: var(--blue-color);" class="fa-regular fa-eye"></i>
+                                                {% comment %} <span>عرض</span> {% endcomment %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                
+                            </tbody>                
+                        {% endif %}
+                    </table>
+
+                    {% if not page_obj %}
+                        <div class="message">
+                            <div class="message-image">
+                                <img src="{% static "images/no-search-result.png" %}" alt="" width="100" height="80" >
+                            </div>
+                            <h2 class="message-title" >لم يتم العثور على اي طلبات موافقة</h2>
+                            <p class="message-content">
+                                لم نجد اي طلب يطابق بحثك，
+                                جرب تغيير كلمات البحث او تعديل الفلاتر 
+                                ثم حاول مرة اخرى
+                            </p>
+                            <a href="{% url 'orders:store_orders' sid %}" class="message-btn link-btn" >مسح البحث <i class="fa-solid fa-arrows-rotate"></i></a>
+                        </div>
+                    {% endif %}
+
+                </div>
+
+                <!-- ══ PAGINATION ════════════════════════════════════════ -->
+                        
+                <div class="pagination">
+
+                    <!-- معلومات النتائج -->
+                    {% if page_obj %}
+                        <div class="pagination-info">
+                            عرض <strong>{{ page_obj.start_index }}</strong>
+                            إلى <strong>{{ page_obj.end_index }}</strong>
+                            من <strong>{{ page_obj.paginator.count }}</strong>
+                        </div>
+                    {% endif %}
+
+                    {% if page_obj.paginator.num_pages > 1 %}
+                        <!-- أزرار الصفحات -->
+                        <div class="pagination-controls">
+
+                            <!-- الصفحة السابقة -->
+                            {% if page_obj.has_previous %}
+                                <button
+                                    type="button"
+                                    class="page-btn"
+                                    aria-label="الصفحة السابقة"
+                                    onclick="window.location.href='?{{ query_string }}&page={{ page_obj.previous_page_number }}'"
+                                >
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            {% else %}
+                                <button
+                                    type="button"
+                                    class="page-btn disabled"
+                                    aria-label="الصفحة السابقة"
+                                    disabled
+                                >
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            {% endif %}
+
+                            <!-- رقم الصفحة -->
+                            <div class="page-indicator">
+                                <strong>{{ page_obj.number }}</strong>
+                                <span>/</span>
+                                <span>{{ page_obj.paginator.num_pages }}</span>
+                            </div>
+
+                            <!-- الصفحة التالية -->
+                            {% if page_obj.has_next %}
+                                <button
+                                    type="button"
+                                    class="page-btn"
+                                    aria-label="الصفحة التالية"
+                                    onclick="window.location.href='?{{ query_string }}&page={{ page_obj.next_page_number }}'"
+                                >
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+                            {% else %}
+                                <button
+                                    type="button"
+                                    class="page-btn disabled"
+                                    aria-label="الصفحة التالية"
+                                    disabled
+                                >
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+                            {% endif %}
+
+                        </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+        {% else %}
+            <div class="data-content">
+                <div class="message-container">
+                    <div class="message">
+                        <div class="message-image">
+                            <img src=" {% static "images/empty.png" %} " alt="" width="100" height="80" >
+                        </div>
+                        <h2 class="message-title" >لا توجد لديك طلبات بعد !</h2>
+                        <p class="message-content">
+                            يبدوا ان متجرك لم يقم بإستقبال أي طلبات بعد ، 
+                            بإمكانك البدء الآن بإنشاء طلب جديد يدوياً
+                        </p>
+                        <a href="{% url "orders:add_order_manually" %}" class="message-btn primary-btn link-btn"> إنشاء طلب جديد <i class="fa-solid fa-plus"></i></a>
+                    </div>
+                </div>
+
+            </div>
+        {% endif %}
+
+    {% else %}
+
+        <div class="message-container">
+            <div class="message">
+                <div class="message-image">
+                    <img src="{% static "images/locked.png" %}" alt="الطلبات مقفلة" width="100" height="80" >
+                </div>
+                <h2 class="message-title" > الطلبات محجوبة </h2>
+                <p class="message-content">
+                    تم إلغاء تفعيل المتجر بسبب عدم دفع الرسوم.
+                </p>
+
+                <div class="message-alert">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <p>
+                        لقد تم ايقاف تفعيل متجرك و حجب جميع الطلبات، 
+                        <br>
+                        يرجى التواصل مع الدعم الفني لإعادة تفعيل المتجر ومتابعة نشاطك.
+                    </p>
+                </div>
+
+                <a class="message-btn primary-btn link-btn"> تواصل مع الدعم لإعادة التفعيل <i class="fa-solid fa-headset"></i></a>
+
+                <span class="message-note"> <i class="fa-solid fa-shield-halved"></i>  فريق الدعم جاهز دائماً لمساعدتك  </span>                    
+
+            </div>
+        </div>
+    {% endif %}
+    
+        
+</section>
+{% endblock content %}
+
+{% comment %} Page Scripts {% endcomment %}
+{% block page_scripts %}
+    <script src="{% static "js/tables.js" %}"></script>
+{% endblock %}

@@ -1,0 +1,619 @@
+/* هذا الملف يحتوي على تنسيقات الجداول مثل التي بداخل صفحة الطلبات والمنتجات والمتاجر */
+/* ======================================================================================= */
+
+/* ═══════════════════════════════════════════
+    ToolBAR  (search + filter btn + sort btn)
+═══════════════════════════════════════════ */
+.data-content form .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: var(--secondary-background);
+    border: 1px solid var(--seprator-color);
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+    transition: all 0.3s ease;
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    -ms-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+}
+.data-content form .toolbar .search-box {
+    background-color: var(--gray-background);
+    color: var(--gray-color);
+    padding: 10px;
+    font-size: 14px;
+    width: 90%;
+    margin-left: 5px;
+    border: 1px solid var(--seprator-color);
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+.data-content form .toolbar .search-box i {
+    font-size: 14px;
+    margin-left: 10px;
+}
+.data-content form .toolbar .search-box input {
+    padding: 5px 0;
+    width: 85%;
+}
+.data-content form .toolbar  .search-box:has(input:focus) {
+    border: 1px solid var(--primary-color);
+    color: var(--main-text-color);
+}
+.data-content form .toolbar .search-box button {
+    display: none;
+}
+
+.data-content form .toolbar  .search-btns {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+.data-content form .toolbar .toolbar-btn {
+    padding: 10px;
+    margin: 0 5px;
+    font-size: 18px;
+    background-color: var(--gray-background);
+    color: var(--gray-color);
+    border: 1px solid var(--seprator-color);
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+.data-content form .toolbar .toolbar-btn span {
+    display: none;
+}
+.data-content form .toolbar .toolbar-btn.open {
+    background-color: var(--primary-color);
+    color: #ffffff;
+}
+@media (max-width:442px) {
+    .data-content form .toolbar .search-box {
+        padding: 5px 5px 5px 2px;
+        font-size: 10px;
+    }
+    .data-content form .toolbar .search-box i {
+        margin-left: 5px;
+        font-size: 10px;
+    }
+    .data-content form .toolbar .toolbar-btn {
+        padding: 7px;
+        margin: 0 3px;
+        font-size: 12px;
+    }
+}
+/* ═══════════════════════════════════════════
+    SORT DROPDOWN
+═══════════════════════════════════════════ */
+.data-content form .toolbar .sort-wrap {
+    position: relative;
+}
+.data-content form .toolbar .sort-wrap .sort-menu {
+    background-color: var(--gray-background);
+    border: 1px solid var(--seprator-color);
+    min-width: 150px;
+    z-index: 200;
+    left: 50%;
+    top:  140%;
+    transform: translateX(-10%) ;
+    -webkit-transform: translateX(-10%) ;
+    -moz-transform: translateX(-10%) ;
+    -ms-transform: translateX(-10%) ;
+    -o-transform: translateX(-10%) ;
+}
+.data-content form .toolbar .sort-wrap .sort-menu.open { 
+    visibility: visible;
+    opacity: 1;
+}
+.data-content form .toolbar .sort-wrap .sort-menu.open::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 7px;
+    border-width: 0 10px 10px;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 10px solid var(--gray-background);
+}
+.data-content form .toolbar .sort-menu .menu-link {
+    background-color: var(--gray-background);
+    gap: 10px;
+    padding: 10px;
+    font-size: 12px;
+}
+
+/* ═══════════════════════════════════════════
+    FILTER Panel 
+═══════════════════════════════════════════ */
+.data-content form .filter-panel {
+    background-color: var(--secondary-background);
+    border: 1px solid var(--seprator-color);
+    padding: 0px;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+    transition: 0.3s ease;
+    -webkit-transition: 0.3s ease;
+    -moz-transition: 0.3s ease;
+    -ms-transition: 0.3s ease;
+    -o-transition: 0.3s ease;
+}
+.data-content form .filter-panel.open {
+    max-height:unset;
+    opacity: 1;
+    margin-bottom: 16px;
+    padding: 20px;
+}
+.data-content form .filter-panel .filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+}
+.data-content form .filter-panel  .field {
+    border: 1px solid var(--seprator-color);
+    padding: 10px;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+.data-content form .filter-panel  .field label {
+    display: block;
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--main-text-color);
+    letter-spacing: .06em;
+    margin-bottom: 6px;
+}
+
+.data-content form .filter-panel select , .data-content form .filter-panel .price-row input  {
+    width: 100%;
+    background-color: var(--gray-background);
+    border: 1.5px solid var(--seprator-color);
+    color: var(--main-text-color);
+    padding: 9px 12px;
+    font-size: 12px;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+.data-content form .filter-panel .price-row {
+    display: flex;
+    gap: 8px;
+    align-items: center; 
+}
+.data-content form .filter-panel .price-row input {
+    flex: 1; 
+}
+.data-content form .filter-panel .price-row span {
+    color: var(--gray-color); 
+    font-size: .8rem; 
+}
+.data-content form .filter-panel .filter-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding-top: 14px;
+    border-top: 1px solid var(--seprator-color);
+}
+.data-content form .filter-panel .filter-actions .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 15px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -ms-border-radius: 3px;
+    -o-border-radius: 3px;
+}
+.data-content form .filter-panel .filter-actions a {
+    background-color: var(--gray-background);
+    color: var(--gray-color);
+    border: 1px solid var(--seprator-color);
+}
+.data-content form .filter-panel .filter-actions button {
+    background-color: var(--primary-color);
+    color: #ffffff;
+}
+/* ═══════════════════════════════════════════
+    Data Summary 
+═══════════════════════════════════════════ */
+.data-content .data-summary {
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 5px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    font-size: 10px;
+}
+.data-content .data-summary .count {
+    color: var(--gray-color);
+}
+.data-content .data-summary .count strong {
+    color: var(--main-text-color);
+    padding: 0 2px;
+}
+.data-content .data-summary .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid #4f7cff40;
+    background-color: var(--primary-background);
+    color: var(--primary-color);
+    border-radius: 15px;
+    padding: 5px 10px;
+    -webkit-border-radius: 15px;
+    -moz-border-radius: 15px;
+    -ms-border-radius: 15px;
+    -o-border-radius: 15px;
+}
+.data-content .data-summary .chip i {
+    font-size: 12px;
+}
+@media (min-width:500px) {
+    .data-content .data-summary {
+        font-size: 12px;
+    }
+    .data-content .data-summary .chip i {
+        font-size: 14px;
+    }
+}
+/* ═══════════════════════════════════════════
+    TABLE 
+═══════════════════════════════════════════ */
+.table-wrap {
+    user-select: none;
+    background-color: var(--secondary-background);
+    border: 1px solid var(--seprator-color);
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    overflow-x: auto;
+    /*  Scroler control in Firefox */
+    scrollbar-width: thin;
+}
+.table-wrap:has( tfoot) {
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+/* Scroler control in { Chrome / Edge / Safari } */
+.table-wrapper::-webkit-scrollbar {
+    height: 5px; 
+}
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 12px;
+} 
+table thead th {
+    padding: 16px 6px ;
+    background: var(--gray-background);
+    color: var(--main-text-color);
+    font-size: calc(1em + 1px);
+    text-align: center;
+    border-bottom: 1px solid var(--seprator-color);
+    line-height: 1.4;
+} 
+table td {
+    padding: 10px 5px;
+    color: var(--main-text-color);
+    border-bottom: 1px solid var(--seprator-color);
+    font-size: 1em ;
+    text-align: center;
+    white-space: nowrap;
+} 
+table tfoot td {
+    border-top: 1px solid var(--seprator-color);
+    background: var(--gray-background);
+    font-weight: 700;
+    font-size: calc(1em + 2px);
+}
+tbody tr:last-child td {
+    border-bottom: none;
+}
+tbody .complex-td span {
+    display: block;
+    margin-top: 2px;
+    color: var(--gray-color);
+}
+table tbody td:has(img) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+table tbody td:not(:has(img)) {
+    padding: 15px 5px;
+} 
+table tbody td img {
+    width: 100%;
+    min-width: 35px;
+    max-width: 45px;
+    height: auto;
+    aspect-ratio: 1 ;
+    object-fit: cover;
+    border:  1px solid var(--seprator-color);
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+
+table .cl-span {
+    font-size:  calc(1em - 1px);
+    display: block;
+    min-width: fit-content;
+    max-width: 50px;
+    margin: 0 auto;
+    padding: 5px;
+    font-weight: 700;
+    border-radius: 2px;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    -ms-border-radius: 2px;
+    -o-border-radius: 2px;
+}
+table .cl-span.complete {
+    background-color: var(--green-background);
+}
+table .cl-span.pending {
+    background-color: var(--yellow-background);
+}
+table .cl-span.cancel {
+    background-color: var(--red-background);
+}
+@media (min-width:500px) {
+    table .cl-span {
+        max-width: 70px;
+    }
+}
+@media (min-width:600px) {
+    table .cl-span {
+        max-width: 80px;
+    }
+}
+
+@media (max-width:500px) {
+    table {
+        font-size: 10px;
+    }
+}
+@media (min-width:800px) {
+    table {
+        font-size: 14px;
+    }
+}
+
+.table-wrap tbody tr:nth-child(odd) {
+    background: var(--secondary-background);
+}
+.table-wrap tbody tr:nth-child(even) {
+    background: var(--gray-background);
+}
+.table-wrap tbody tr:has(.alert-td) {
+    background: color-mix(
+        in srgb,
+        var(--red-background) 65%,
+        var(--background-color)
+    );  
+}
+.table-wrap tbody tr:hover {
+    background: var(--primary-background);
+}
+.table-wrap .icon-td {
+    display: flex;
+    gap: 5px;
+    font-weight: 700;
+}
+.table-wrap .icon-td i {
+    font-size: calc(1em + 3px);
+}
+.table-wrap .price-cell {
+    white-space: nowrap;
+}
+.table-wrap .price-cell .price-wrapper {
+    display: inline-flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 5px;
+}
+.table-wrap .price-cell .new-price {
+    font-weight: 700;
+}
+.table-wrap .price-cell .old-price {
+    position: relative;
+    display: inline-block;
+    color: var(--gray-color);
+}
+.table-wrap .price-cell .old-price::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -10%;
+    width: 120%;
+    height: 1px;
+    opacity: 0.8;
+    background-color: var(--gray-color);
+    transform-origin: center;
+    transform: rotate(-25deg);
+    -webkit-transform: rotate(-25deg);
+    -moz-transform: rotate(-25deg);
+    -ms-transform: rotate(-25deg);
+    -o-transform: rotate(-25deg);
+}
+
+.table-wrap .td-actions {
+    position:relative;
+    z-index:2;
+    width: 20px;
+    aspect-ratio: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: inherit ;
+    color: inherit;
+    transition: all .12s ease;
+    -webkit-transition: all .12s ease;
+    -moz-transition: all .12s ease;
+    -ms-transition: all .12s ease;
+    -o-transition: all .12s ease;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+.table-wrap .td-actions:hover {
+    color: #4b2be3;
+}
+.table-wrap .td-actions.open{
+    background-color: var(--gray-background);
+    border: 1px solid var(--seprator-color);
+}
+@media (min-width:500px) {
+    .table-wrap .td-actions {
+        /* font-size: 14px; */
+        width: 30px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+    Table Row Action Menu
+═══════════════════════════════════════════ */
+.action-menu {
+    visibility: hidden;
+    display: none;
+    position: absolute;
+    overflow:hidden;
+    z-index: 200;
+    top:0;
+    left:0;
+    font-size: 10px;
+    background-color: var(--gray-background);
+    border: 1px solid var(--seprator-color);
+    transform:scale(.96);
+    -webkit-transform:scale(.96);
+    -moz-transform:scale(.96);
+    -ms-transform:scale(.96);
+    -o-transform:scale(.96);
+    transition: opacity .12s ease, transform .12s ease, visibility .12s ease;
+    -webkit-transition: opacity .12s ease, transform .12s ease, visibility .12s ease;
+    -moz-transition: opacity .12s ease, transform .12s ease, visibility .12s ease;
+    -ms-transition: opacity .12s ease, transform .12s ease, visibility .12s ease;
+    -o-transition: opacity .12s ease, transform .12s ease, visibility .12s ease;
+}
+.action-menu.open {
+    display: block;
+    visibility: visible;
+    opacity: 1;
+    transform:scale(1);
+    -webkit-transform:scale(1);
+    -moz-transform:scale(1);
+    -ms-transform:scale(1);
+    -o-transform:scale(1);
+}
+.action-menu .menu-link {
+    padding: 5px 10px;
+    transition: all .1s ease;
+    -webkit-transition: all .1s ease;
+    -moz-transition: all .1s ease;
+    -ms-transition: all .1s ease;
+    -o-transition: all .1s ease;
+    gap: 10px;
+}
+@media (min-width:500px) {
+    .action-menu  {
+        font-size: 14px;
+    }
+    .action-menu .menu-link {
+        padding: 10px 15px;
+        gap: 15px;
+    }
+}
+/* ═══════════════════════════════════════════
+    Pagination 
+═══════════════════════════════════════════ */
+.data-content .pagination {
+    min-height: 30px;
+    user-select: none;
+    padding: 10px;
+    font-size: 12px;
+    background-color: var(--secondary-background);
+    border: 1px solid var(--seprator-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+.data-content .pagination .pagination-info {
+    color: var(--gray-color);
+    font-size: 10px;
+    margin-left: 5px;
+}
+.data-content .pagination .pagination-info strong {
+    color: var(--main-text-color);
+    margin: 0 2px;
+}
+.data-content .pagination .pagination-controls .page-btn {
+    background-color: var(--gray-background);
+    color: var(--main-text-color);
+    width: 25px;
+    aspect-ratio: 1;
+    margin: 2px;
+    box-shadow: var(--main-shadow);
+    border: 1px solid var(--seprator-color);
+    border-radius: 2px;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    -ms-border-radius: 2px;
+    -o-border-radius: 2px;
+}
+.data-content .pagination .pagination-controls .page-btn.active {
+    background-color: var(--primary-color);
+    color: #ffffff;
+}
+.data-content .pagination .pagination-controls .page-btn.disabled {
+    background-color: var(--gray-background);
+    color: var(--gray-color);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+.data-content .pagination .pagination-controls .page-indicator {
+    display:inline-block;
+    font-size: calc(1em + 2px);
+}
+@media (min-width:500px) {
+    .data-content .pagination .pagination-info {
+        font-size: 12px;
+    }
+    .data-content .pagination .pagination-controls .page-btn {
+        width: 35px;
+    }
+}

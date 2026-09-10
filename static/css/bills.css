@@ -1,0 +1,245 @@
+/* ═══════════════════════════════════════════════════════
+    Invoices Banner Section
+═════════════════════════════════════════════════════════ */
+.invoice-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 16px;
+    gap: 25px;
+    background: var(--gray-background);
+    padding: 28px 32px;
+    margin: 0 auto 20px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--seprator-color);
+    border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
+}
+
+.invoice-banner .banner-accent {
+    align-self: stretch;
+    width: 4px;
+    border-radius: 4px;
+    background: var(--primary-color);
+    z-index: 1;
+}
+.invoice-banner .banner-text {
+    flex: 1;
+    z-index: 1;
+}
+.invoice-banner .banner-text .banner-title {
+    font-size: calc(1em + 8px);
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+.invoice-banner .banner-text .banner-desc {
+    font-size: 1em;
+    line-height: 1.5;
+    color: var(--gray-color);
+    margin: 0;
+}
+
+.invoice-banner .banner-icon  {
+    flex-shrink: 0;
+    width: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+.invoice-banner .banner-icon img  {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+@media (max-width: 520px) {
+    .invoice-banner {
+      flex-direction: column;
+      text-align: center;
+      padding: 25px 20px;
+    }
+    .banner-accent { 
+        display: none; 
+    }
+  }
+/* ═══════════════════════════════════════════════════════
+    Month Status Section
+═════════════════════════════════════════════════════════ */
+.status-box {
+    background: var(--gray-background);
+    padding: 15px 10px;
+    margin: 0 auto;
+    font-size: 14px;
+    border: 1px solid var(--seprator-color);
+    border-radius: 15px;
+    -webkit-border-radius: 15px;
+    -moz-border-radius: 15px;
+    -ms-border-radius: 15px;
+    -o-border-radius: 15px;
+}
+.status-box  .status-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+.status-box  .status-title {
+    font-size: calc(1em + 4px);
+    font-weight: 700;
+}
+.status-box .status-cards {
+    display: grid;
+    grid-template-columns: 1fr ;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+.status-box .status-card {
+    padding: 15px 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
+}
+@media (min-width: 600px) {
+    .status-box {
+        padding: 20px;
+        font-size: 16px;
+    }
+    .status-box .status-cards {
+        grid-template-columns: 1fr 1fr;
+    }
+    .status-box .status-card {
+        padding: 20px 15px;
+    }
+}
+.status-box .status-card.green {
+    background: var(--green-background);
+}
+.status-box .status-card.blue {
+    background: var(--blue-background);
+}
+.status-box .card-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(1em + 8px);
+    flex-shrink: 0;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+}
+.status-box .status-card.green .card-icon {
+    background: var(--green-color);
+    color: var(--green-background) ;
+}
+.status-box .status-card.blue .card-icon {
+    background: var(--blue-color);
+    color: var(--blue-background) ;
+}
+.status-box .card-text {
+    flex: 1;
+}
+.status-box .card-label {
+    font-size: calc(1em + 2px);
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+.status-box .card-note {
+    font-size: calc(1em - 2px);
+    color: var(--gray-color);
+    margin-bottom: 8px;
+}
+.status-box .card-value {
+    font-size: calc(1em + 8px);
+    font-weight: 700;
+    margin: 0;
+}
+.status-box .card-value .currency {
+    font-size: calc(1em - 6px);
+}
+.status-box .status-card.green .card-value {
+    color: var(--green-color);
+}
+.status-box .status-card.blue .card-value {
+    color: var(--blue-color);
+}
+.status-box .status-note {
+    background: var(--primary-background);
+    border-color: transparent;
+}
+.status-box .status-note .notice-title , .status-box .status-note .notice-icon {
+    color: var(--primary-color);
+}
+/* ═══════════════════════════════════════════════════════
+    Inovice-Sale => Details Form Section
+    فورم التخفيض بقيمة الفاتورة
+═════════════════════════════════════════════════════════ */
+.invoice-values {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 15px;
+    width: 100%;
+}
+.invoice-value-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+    background-color: var(--gray-background) ;
+    border: 1px solid var(--seprator-color);
+    min-width: 0;
+    border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
+}
+.invoice-value-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.invoice-value-content .details-value {
+    font-size: calc(1em + 5px) !important;
+}
+.invoice-value-content .currency {
+    font-size: 0.75em;
+
+}
+.invoice-value-box.after-discount {
+    border-color: color-mix(
+        in srgb,
+        var(--green-color) 25%,
+        var(--seprator-color)
+    );
+}
+.invoice-value-box.after-discount .details-value {
+    color: var(--green-color);
+}
+@media (max-width: 400px) {
+    .invoice-values {
+        grid-template-columns: 1fr;
+    }
+    .invoice-value-box {
+        padding: 10px;
+    }
+
+}
+/* ═══════════════════════════════════════════════════════
+    ...
+═════════════════════════════════════════════════════════ */

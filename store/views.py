@@ -17,11 +17,16 @@ from store.forms import ProductAdminForm, ProductRegisterForm
 @login_required(login_url='accounts:log_in')
 @vendor_only
 def store_dashboard(request):
-    #change-later قم بإنشاء دالة الداشبورد
-    return render(request, 'store/dashboard.html')
+    #change-later قم بإكمال دالة الداشبورد
+    user_name = request.user.userprofile.name
+    
+    context = {
+        "user_name" : user_name ,
+    }
+    return render(request, 'store/dashboard.html', context)
 
 @login_required(login_url='accounts:log_in')
-def show_products(request, sid):
+def store_products(request, sid):
     """دالة عرض جميع المنتجات الخاصة بالمستخدم كما تحتوي على ألية البحث والفلترة """
     store = get_object_or_404(Store, id=sid)
     
@@ -31,6 +36,12 @@ def show_products(request, sid):
         raise Http404("المتجر غير موجود")  
     
     products = store.products.all()
+    has_products = products.exists()
+    
+    # ── تحويل الـ choices لقواميس (value -> label) لتسهيل الاستخدام ──
+    status_dict = dict(Product.STATUS_CHOICES)
+    type_dict = dict(Product.TYPE_CHOICES)
+    gender_dict = dict(Product.GENDER_CHOICES)
 
     # ── فلترة ──────────────────────────────────────────
     status = request.GET.get('status')
@@ -99,7 +110,7 @@ def show_products(request, sid):
     order_by = VALID_SORTS.get(selected_sort, '-upload_at')
     products = products.order_by(order_by)
     # ── Pagination ──────────────────────────────────────
-    paginator = Paginator(products, 20)
+    paginator = Paginator(products, 12)
     page_number = request.GET.get('page')
     try:
         page_obj = paginator.page(page_number if page_number else 1)
@@ -113,12 +124,16 @@ def show_products(request, sid):
 
     context = {
         'sid': sid,
+        "has_products": has_products,
         'page_obj': page_obj,
         'query_string': query_string,
         # قيم الفلاتر للحفاظ عليها في الـ form
         'selected_status': status or '',
+        'selected_status_display': status_dict.get(status, status), 
         'selected_type': product_type or '',
+        'selected_type_display': type_dict.get(product_type, product_type),
         'selected_gender': gender or '',
+        'selected_gender_display': gender_dict.get(gender, gender),
         'selected_is_visible': is_visible or '',
         'selected_offer': offer or '',
         'price_min': request.GET.get('price_min', ''),
@@ -126,7 +141,7 @@ def show_products(request, sid):
         'search': search,
         'selected_sort':   selected_sort,
     }
-    return render(request, 'store/show_products.html', context)
+    return render(request, 'store/store_products.html', context)
 
 @login_required(login_url='accounts:log_in')
 @vendor_only
@@ -199,7 +214,7 @@ def add_product(request):
                             )
 
             messages.success(request, "تمت إضافة المنتج بنجاح")
-            return redirect('store:show_products' , sid=store.id)
+            return redirect('store:store_products' , sid=store.id)
         else:
             # إعادة عرض النموذج مع الأخطاء
             context = {"add_form": form}

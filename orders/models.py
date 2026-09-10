@@ -55,10 +55,9 @@ class Order(models.Model):
         max_length=20,
         choices=STATUS_CHOICES,
         default='processing',
-        help_text='حالة الطلب: جاري التجهيز:الطلب قيد المراجعة و التجهيز | تم التسليم: تم تسليم الطلب للزبون | ملغي: تم إلغاء الطلب من قبل الزبون أو المتجر',
+        help_text=". عند تسليم المنتج للزبون، غيّر الحالة إلى تم التسليم ليتم تحديث إجمالي المبيعات والإحصائيات . إذا قام الزبون بإلغاء الطلب ، فغيّر الحالة إلى تم الإلغاء.",
     )
     
-    free_delivery = models.BooleanField(default=False, verbose_name="قيمة التوصيل" , choices=[(True, "مجاني"), (False, "غير مجاني")], help_text="حدد ما إذا كان هذا الطلب مشمولًا بالتوصيل المجاني أم لا.")
     order_date = models.DateTimeField(auto_now_add=True, verbose_name='تاريخ الطلب')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='تاريخ آخر تحديث')
     delivery_date = models.DateTimeField(null=True, blank=True, verbose_name='تاريخ التسليم')
@@ -70,6 +69,7 @@ class Order(models.Model):
     note = CKEditor5Field('ملاحظة', config_name='default', null=True, blank=True, help_text='يمكنك إضافة ملاحظات خاصة بالطلب، مثل تعليمات التوصيل أو طلبات خاصة من الزبون.')
 
     # حقول قيم الطلب
+    free_delivery = models.BooleanField(default=False, verbose_name="قيمة التوصيل" , choices=[(True, "مجاني"), (False, "غير مجاني")], help_text="حدد ما إذا كان هذا الطلب مشمولًا بالتوصيل المجاني أم لا.")
     total_purchase_price = models.PositiveIntegerField(verbose_name='إجمالي سعر الشراء', default=0, help_text='إجمالي تكلفة المنتجات في الطلب، محسوبة بناءً على أسعار الشراء لكل منتج والكمية المطلوبة.')
     total_selling_price = models.PositiveIntegerField(verbose_name='إجمالي سعر البيع', default=0, help_text='إجمالي سعر البيع للطلب، محسوبة بناءً على أسعار البيع لكل منتج والكمية المطلوبة.')
     total_profit = models.IntegerField(verbose_name='الربح', default=0, help_text='الربح المحقق من الطلب، محسوبًا كفرق بين إجمالي سعر البيع وإجمالي سعر الشراء.')
@@ -106,6 +106,10 @@ class Order(models.Model):
         self.total_purchase_price = totals.get('total_purchase') or 0
         self.total_selling_price = totals.get('total_selling') or 0
         self.total_profit = self.total_selling_price - self.total_purchase_price
+
+    def get_total_qty(self):
+        """حساب إجمالي كمية المنتجات في الطلب."""
+        return self.items.aggregate(total_qty=models.Sum('qty'))['total_qty'] or 0
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items', verbose_name='الطلب')

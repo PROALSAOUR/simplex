@@ -4,8 +4,8 @@ from .views import *
 app_name = 'orders'
 
 urlpatterns = [
-    path('<int:sid>/', show_orders, name='show_orders'), 
-    path('edit/<int:oid>', edit_order, name='edit_order'), 
+    path('<int:sid>/', store_orders, name='store_orders'), 
+    path('view/<int:oid>', view_order, name='view_order'), 
     path('add/', add_order, name='add_order'), 
     path('add/manually/', add_order_manually, name='add_order_manually'), 
     

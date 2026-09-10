@@ -52,26 +52,6 @@ def handle_order_delivery(sender, instance, **kwargs):
 
                 item.product.save(update_fields=['total_sales'])
                 
-@receiver(pre_save, sender=Order)
-def handle_order_verification(sender, instance, **kwargs):    
-    """
-    عند تغيير حالة التحقق إلى طلب وهمي:
-    - تحويل حالة الطلب إلى ملغي
-    """
-    
-    # الطلب جديد وليس تعديل
-    if not instance.pk:
-        return
-    
-    try:
-        old_order = Order.objects.get(pk=instance.pk)
-    except Order.DoesNotExist:
-        return
-    
-    # عند التحويل إلى طلب وهمي
-    if old_order.verification_status != 'rejected' and instance.verification_status == 'rejected':
-        instance.status = 'canceled'
-
 @receiver(post_save, sender=OrderItem)
 def update_order_totals_on_item_save(sender, instance, **kwargs):
     """

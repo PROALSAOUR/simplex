@@ -1,0 +1,242 @@
+/* ======================================================================================= */
+/* Start Varibules */
+/* ======================================================================================= */
+:root {
+    /* colors */
+    --main-text-color: #333333; 
+    --background-color: #fcfcfe; 
+    --secondary-background : #f2f2f2;
+    --primary-color:#3e10d8;
+    --primary-background:#eae7fc;
+    --seprator-color : #0000001b;
+    --shadow-color: #00000026;
+    
+    --gray-color: #767987;
+    --gray-background: #f7f8fa;
+    --blue-color:#0038c4;
+    --blue-background:#a9c9fd;
+    --purple-color:#2800c9;
+    --purple-background:#c2a8f7;
+    --yellow-color: #947100;
+    --yellow-background:#ffdd9a;
+    --green-color:#009c2a;
+    --green-background:#c4f4ca ;
+    --red-color: #b00000;
+    --red-background: #f7c1c1;
+
+    /* shadows */
+    --main-shadow: 0px 0px 10px 0px var(--shadow-color);
+    /* others */
+    --header-height: 75px;
+    --click-scale: 0.98;
+
+}
+
+/* الثيم الغامق */
+.dark-mode {
+    --main-text-color:#ececec;
+    --background-color: #0f1219;
+    --secondary-background :#0b0e14a6;
+    --primary-color:#6f4ff4;
+    --primary-background:#1a1a36;
+    --seprator-color :#ffffff13; 
+    --shadow-color: #00000073;
+    
+    --gray-color: #878fa0;
+    --gray-background: #12151c;
+    --blue-color:#3761b1;
+    --blue-background:#101e35;
+    --purple-color:#5b45ca;
+    --purple-background:#191d38;
+    --yellow-color:#dea136;
+    --yellow-background:#302514;
+    --green-color:#639867;
+    --green-background:#112624 ;
+    --red-color: #c95a5a;
+    --red-background: #321719;
+    
+}
+/* ======================================================================================= */
+/* Start Global Rules */
+/* ======================================================================================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+html {
+    transition: background-color 0.3s ease, color 0.3s ease;
+    -webkit-transition: background-color 0.3s ease, color 0.3s ease;
+    -moz-transition: background-color 0.3s ease, color 0.3s ease;
+    -ms-transition: background-color 0.3s ease, color 0.3s ease;
+    -o-transition: background-color 0.3s ease, color 0.3s ease;
+}
+body {
+    font-family: "Almarai", sans-serif;
+    background-color: var(--background-color);
+    color: var(--main-text-color);
+    min-height: 100vh;
+    margin:0;
+
+}
+button {
+    border: none;
+    cursor: pointer;
+}
+ul {
+    list-style: none;
+}
+a {
+    text-decoration: none;
+    cursor: pointer;
+    color: inherit;
+}
+select {
+    background-color: inherit;
+    color: inherit;
+    border: none;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    outline: none;
+}
+input , textarea {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    border: none;
+    outline: none;
+    background: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+}
+input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+summary {
+    list-style-type:none;
+}
+select:focus , input:focus {
+    border-color: var(--primary-color) !important;
+}
+button:active , a:active {
+    transform:scale(var(--click-scale)) !important;
+    -webkit-transform:scale(var(--click-scale)) !important;
+    -moz-transform:scale(var(--click-scale)) !important;
+    -ms-transform:scale(var(--click-scale)) !important;
+    -o-transform:scale(var(--click-scale)) !important;
+}
+[id] {
+    /* عند النقر على الرابط بواسطة الهاشتاج احتساب قيمة ارتفاع الهيدر */
+    scroll-margin-top: var(--header-height);
+}
+.container {
+    width: 95%;           
+    max-width: 900px;   
+    margin: 10px auto 30px;   
+    padding: 10px;    
+}
+@media (min-width:800px) {
+    .container {
+        width: 85%;                 
+    }
+}
+main.container {
+    /* Adjust this value based on the height of your header */
+    padding-top: var(--header-height); 
+    position: relative;   
+}
+.currency {
+    color: var(--gray-color);
+    font-size:  calc(1em - 2px);
+}
+.required {
+    color: var(--red-color);
+    font-size: calc(1em + 2px);
+}
+.primary-btn {
+    background-color: var(--primary-color) !important;
+    color: #ffffff !important;
+    font-weight: bold;
+}
+.remove-btn {
+    background-color: #ff0000 !important;
+    color: #ffffff !important;
+}
+.replace-btn {
+    background-color: #0066ff !important;
+    color: #ffffff !important;
+}
+.save-btn {
+    background-color: #1d9e75 !important;
+    color: #ffffff !important;
+}
+.primary-cl {
+    color: var(--primary-color) !important;
+}
+.complete {
+    color: var(--green-color) !important;
+}
+.pending {
+    color: var(--yellow-color) !important;
+}
+.cancel {
+    color: var(--red-color) !important;
+}
+/* ======================================================================================= */
+/* Start Global Effects */
+/* ======================================================================================= */
+.link-btn:hover {
+    background-color: var(--primary-background) !important;
+    color: var(--primary-color) !important;
+    transform:scale(1.05);
+    -webkit-transform:scale(1.05);
+    -moz-transform:scale(1.05);
+    -ms-transform:scale(1.05);
+    -o-transform:scale(1.05);
+}
+.link-btn:hover i {
+    color: var(--primary-color) !important;
+}
+/* ========================= */
+/* Start Global Social  */
+/* ========================= */
+.facebook:active , .facebook:hover {
+    background-color: #1877F2 !important;
+    color: #ffffff  !important;
+}
+.youtube:active , .youtube:hover {
+    background-color: #FF0000 !important;
+    color: #ffffff  !important;
+}
+.messenger:active , .messenger:hover {
+    background-color: #0084FF !important;
+    color: #ffffff  !important;
+}
+.tiktok:active , .tiktok:hover {
+    background-color: #000000 !important;
+    color: #ffffff  !important;
+
+}
+.instagram:active , .instagram:hover {
+    background-color: #E1306C !important;
+    color: #ffffff  !important;
+
+}
+.whatsapp:active , .whatsapp:hover {
+    background-color: #25D366 !important;
+    color: #ffffff  !important;
+}
+.phone-call:active , .phone-call:hover {
+    background-color: #F97316 !important;
+    color: #ffffff  !important;
+}
