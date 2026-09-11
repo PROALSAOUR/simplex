@@ -209,6 +209,25 @@ function openDetailsWithErrors() {
         }
     });
 }
-
 openDetailsWithErrors();
+// ==========================================================
+// إزالة حالة الخطأ من الحقول عند تغيير القيمة الخاطئة، بحيث لا تبقى حالة الخطأ بعد أن يقوم المستخدم بتصحيح القيمة.
+document.querySelectorAll('.field.has-error .input').forEach(input => {
+    input.addEventListener('input', function () {
+        const wrapper = this.closest('.field'); 
+        wrapper.classList.remove('has-error');
+    }); 
+});
+// ==========================================================
+// دالة تقوم بالانتقال إلى أول حقل يحتوي على خطأ عند تحميل الصفحة التي بها اخطاء بالحقول الفورم، بحيث يسهل على المستخدم معرفة مكان الخطأ مباشرة.
+function scrollToFirstError() { 
+    const firstError = document.querySelector('.field.has-error'); 
+    if (!firstError) { 
+        return;
+    } 
+    const headerHeight = parseInt( getComputedStyle(document.documentElement) .getPropertyValue('--header-height') ) || 75; 
+    const top = firstError.getBoundingClientRect().top + window.scrollY - headerHeight - 10; 
+    window.scrollTo({ top: top, behavior: 'smooth' }); 
+} 
+window.addEventListener('load', scrollToFirstError);
 // ==========================================================

@@ -30,6 +30,7 @@
     الحقول النصية 
 ═══════════════════════════════════════════ */
 .field .input {
+    position: relative;
     font-size: 1em ;
     display: flex;
     justify-content: space-between;
@@ -46,6 +47,19 @@
 .field .input:focus-within {
     border-color: var(--primary-color);
 }
+/* عند حدوث خطأ */
+.field.has-error .input {
+    border-color: var(--red-color);
+}
+.field .error-icon {
+    display: none;
+}
+.field.has-error .error-icon {
+    display: block;
+    color: var(--red-color);
+    margin-inline-end: 8px;
+}
+
 .input textarea {
     resize: none;
 }
@@ -64,7 +78,7 @@
     color: var(--gray-color);
     line-height: 1.5;
 }
-.field .help-text.error {
+.field.has-error .help-text {
     color: var(--red-color);
     font-weight: 600;
 }

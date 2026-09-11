@@ -423,51 +423,60 @@
 
                             {% if customer_form.errors %}
                                 <div class="field-errors">
-                                    يرجى تصحيح الأخطاء قبل اعادة حفظ حفظ التعديلات.
+                                    يرجى تصحيح الأخطاء قبل اعادة حفظ التعديلات.
                                 </div>
                             {% endif %}
 
-                            <div class="field">
+                            <div class="field {% if customer_form.customer_name.errors %}has-error{% endif %}">
                                 <label for="customer-name">اسم الزبون</label>
                                 <div class="input">
                                     <input id="customer-name" name="customer_name" type="text" placeholder="ادخل اسم الزبون الخاص بك ..."   value="{{ customer_form.customer_name.value|default:order.customer_name }}">
+                                    {% if customer_form.customer_name.errors %}
+                                        <i class="fa-solid fa-circle-exclamation error-icon"></i>
+                                    {% endif %}
                                     <i class="fa-solid fa-user"></i>
                                 </div>
                                 {% if customer_form.customer_name.errors %}
-                                    <span class="help-text error"> {{ customer_form.customer_name.errors.0 }} </span>
+                                    <span class="help-text"> {{ customer_form.customer_name.errors.0 }} </span>
                                 {% else %}
                                     <span class="help-text ">{{ customer_form.customer_name.help_text }}</span>
                                 {% endif %}
                             </div>
                             
-                            <div class="field">
+                            <div class="field {% if customer_form.customer_phone.errors %}has-error{% endif %}">
                                 <label for="customer-phone">رقم الهاتف</label>
                                 <div class="input">
                                     <input id="customer-phone"  name="customer_phone" type="text" placeholder="ادخل رقم هاتفك  ..."   value="{{ customer_form.customer_phone.value|default:order.customer_phone }}">
+                                    {% if customer_form.customer_phone.errors %}
+                                        <i class="fa-solid fa-circle-exclamation error-icon"></i>
+                                    {% endif %}
                                     <i class="fa-solid fa-phone-volume"></i>
                                 </div>
                                 {% if customer_form.customer_phone.errors %}
-                                    <span class="help-text error"> {{ customer_form.customer_phone.errors.0 }} </span>
+                                    <span class="help-text"> {{ customer_form.customer_phone.errors.0 }} </span>
                                 {% else %}
                                     <span class="help-text ">{{ customer_form.customer_phone.help_text }}</span>
                                 {% endif %}
                             
                             </div>
 
-                            <div class="field">
+                            <div class="field  {% if customer_form.customer_location.errors %}has-error{% endif %}">
                                 <label for="customer-location">عنوان الزبون</label>
                                 <div class="input">
                                     <input id="customer-location" name="customer_location" type="text" placeholder="ادخل موقع الزبون الخاص بك ..."   value="{{ customer_form.customer_location.value|default:order.customer_location }}">
+                                    {% if customer_form.customer_location.errors %}
+                                        <i class="fa-solid fa-circle-exclamation error-icon"></i>
+                                    {% endif %}
                                     <i class="fa-solid fa-location-dot"></i>
                                 </div>
                                 {% if customer_form.customer_location.errors %}
-                                    <span class="help-text error"> {{ customer_form.customer_location.errors.0 }} </span>
+                                    <span class="help-text"> {{ customer_form.customer_location.errors.0 }} </span>
                                 {% else %}
                                     <span class="help-text ">{{ customer_form.customer_location.help_text }}</span>
                                 {% endif %}
                             </div>
 
-                            <div class="field">
+                            <div class="field {% if customer_form.note.errors %}has-error{% endif %}">
                                 <label for="customer-notes">ملاحظة اضافية </label>
                                 <div class="input">
                                     <span class="counter" >
@@ -476,12 +485,15 @@
                                     <textarea id="customer-notes" name="note" placeholder="ادخل وصف المنتج ..." rows="5" cols="40"  maxlength="500" >{{ customer_form.note.value|default:order.note }}</textarea>
                                     <i class="fa-regular fa-note-sticky"></i>
                                 </div>
-                                <span class="help-text">{{ customer_form.note.help_text }}</span>
+                                {% if customer_form.note.errors %}
+                                    <span class="help-text"> {{ customer_form.note.errors.0 }} </span>
+                                {% else %}
+                                    <span class="help-text ">{{ customer_form.note.help_text }}</span>
+                                {% endif %}
                             </div>
                             
                         </div>
 
-                        
                         <div class="form-btns">
                             <button type="reset"  class="btn reset-btn">اعادة تعيين</button>
                             <button type="submit" class="btn save-btn">حفظ</button>
@@ -496,10 +508,14 @@
         </details>
 
         <div class="details-table">
-            <h4> <i class="fa-solid fa-box-open primary-cl"></i>  منتجات الطلب</h4>
-            {% if can_edit %} 
-                <button onclick="add_items.showModal()"> اضافة منتج </button>
-            {% endif %}
+
+            <div class="title-wrapper">
+                <h4> <i class="fa-solid fa-box-open primary-cl"></i>  منتجات الطلب</h4>
+                {% if can_edit %} 
+                    <button  onclick="add_items.showModal()"> اضافة منتج <i class="fa-solid fa-plus"></i> </button>
+                {% endif %}
+            </div>
+            
             <div class="table-wrap">
                 <table id="item-table">
                     <thead>
