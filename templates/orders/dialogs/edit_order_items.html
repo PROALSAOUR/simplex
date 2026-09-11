@@ -1,0 +1,57 @@
+{% load static %}
+
+{% comment %} #change-later ديالوج اضافة منتج الى الطلب {% endcomment %}
+<dialog id="add_items"> 
+    <form id="add_items_form" method="POST" data-url="{% url 'orders:add_order_item' order.id %}">
+        {% csrf_token %}
+
+        <div class="logo-image">
+            <img src=" {% static "images/d-long-logo.png" %} " alt="logo" width="120" height="80"  draggable="false">
+        </div>
+
+        <div class="dialog-content">
+            <h3 class="dialog-title"> تحذير </h3>
+            <div id="errors" style="color:red; display:none;"> سيتم عرض الاخطاء هنا </div>
+            <p>ابحث عن المنتج مباشرة ثم اختره لإضافة عنصر جديد للطلب.</p>
+            <input type="search" id="product-search" placeholder="ابحث عن منتج..." autocomplete="off" data-search-url="{% url "store:search_products" sid=order.store.id %}">
+
+            <div id="search-results"  data-product-button-type="add-to-order">
+                <!-- سيتم عرض نتائج البحث هنا -->            
+            </div>
+
+        </div>
+
+        <div class="dialog-actions">
+            <button type="button" onclick="add_items.close()">تراجع</button>
+        </div>
+        
+    </form>
+</dialog>
+
+{% comment %} ديالوج حذف منتج من الطلب {% endcomment %}
+<dialog id='delete_order_item_dialog' > 
+    <form id="delete_order_items_form" method="POST" data-url="{% url 'orders:delete_order_item' 0 %}">
+        {% csrf_token %}
+        <input type="hidden" name="order_item_id" id="delete-order-item-id">
+
+        <div class="logo-image">
+            <img src=" {% static "images/d-long-logo.png" %} " alt="logo" width="120" height="80"  draggable="false">
+        </div>
+
+        <div class="dialog-content">
+            <h3 class="dialog-title"> تحذير </h3>
+            <p>هل انت متأكد من رغبتك بإزالة المنتج: <span class="cancel" id="delete-order-item-name"></span> من الطلب بشكل نهائي؟ </p>
+            <br>
+            {% comment %} #change-later التنسيق سيئ و مو عاجبني {% endcomment %}
+            <p> بمجرد الضغط على زر "إزالة"، سيتم إزالة هذا المنتج من الطلب نهائيًا، ولن تتمكن من التراجع عن هذه العملية</p>
+        </div>
+
+        <div class="dialog-actions">
+            <button type="button" onclick="delete_order_item_dialog.close()">تراجع</button>
+            <button class="remove-btn" type="submit"> إزالة</button>
+        </div>
+        
+    </form>
+</dialog>
+
+<script src="{% static "js/orders/edit_order_items.js" %}"></script>

@@ -5,7 +5,7 @@ from accounts.models import Store
 
 class Product(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='products')
-    name = models.CharField(max_length=255 , verbose_name="اسم المنتج", help_text="قم بإدخال اسم المنتج")
+    name = models.CharField(max_length=50 , verbose_name="اسم المنتج", help_text="قم بإدخال اسم المنتج")
     thumbnail_img = models.ImageField(upload_to='store/Products/thumbnails' , verbose_name="صورة المنتج الرئيسية", help_text="قم بإدخال صورة المنتج الرئيسية التي ستظهر في صفحة المتجر وصفحة تفاصيل المنتج")
     description = CKEditor5Field('الوصف', config_name='default', help_text="قم بإدخال وصف وتفاصيل المنتج ")
     upload_at = models.DateTimeField(auto_now_add=True , verbose_name='تاريخ الإنشاء')

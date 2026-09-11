@@ -335,7 +335,7 @@
                 <span class="toggle"> <i class="fa-solid fa-chevron-up"></i> </span>
             </summary>
 
-            <!-- عند النقر على زر التعديل اظهر قائمة التعديل واخفي قائمة العرض -->
+            {% comment %} عند النقر على زر التعديل يتم اظهار قائمة التعديل و اخفاء قائمة العرض  {% endcomment %}
             <ul id="customer-list" class="details-list">
 
                 <!-- تعديل بيانات الزبون -->
@@ -402,7 +402,7 @@
             </ul>
 
             
-            <!--  فورم تعديل بيانات الزبون -->
+            {% comment %} فورم تعديل بيانات الزبون  {% endcomment %}
             <ul id="customer-form"  class="details-list {% if customer_form.errors %}has-errors{% endif %}" >
 
                 <li class="details-item">
@@ -470,10 +470,10 @@
                             <div class="field">
                                 <label for="customer-notes">ملاحظة اضافية </label>
                                 <div class="input">
-                                    <span class="counter" >  <!-- ضيف كلاس كانسل او كومبليت حسب العدد -->
+                                    <span class="counter" >
                                         <span class="current-c">0</span> / <span class="max-c"></span>
                                     </span>
-                                    <textarea id="customer-notes" name="note" placeholder="ادخل وصف المنتج ..." rows="5" cols="40"  maxlength="100" >{{ customer_form.note.value|default:order.note }}</textarea>
+                                    <textarea id="customer-notes" name="note" placeholder="ادخل وصف المنتج ..." rows="5" cols="40"  maxlength="500" >{{ customer_form.note.value|default:order.note }}</textarea>
                                     <i class="fa-regular fa-note-sticky"></i>
                                 </div>
                                 <span class="help-text">{{ customer_form.note.help_text }}</span>
@@ -496,8 +496,10 @@
         </details>
 
         <div class="details-table">
-            {% comment %} #change-later  التعامل مع حالة حذف واضافة منتج الى الطلب {% endcomment %}
             <h4> <i class="fa-solid fa-box-open primary-cl"></i>  منتجات الطلب</h4>
+            {% if can_edit %} 
+                <button onclick="add_items.showModal()"> اضافة منتج </button>
+            {% endif %}
             <div class="table-wrap">
                 <table id="item-table">
                     <thead>
@@ -581,7 +583,7 @@
 
 {% block out_container %}
 
-    {% include "orders/dialogs/delete_order_item.html" %}
+    {% include "orders/dialogs/edit_order_items.html" %}
 
     <!-- Start Action Menu -->
     <div class="action-menu small-menu" id="action-menu">

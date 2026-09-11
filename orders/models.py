@@ -63,8 +63,8 @@ class Order(models.Model):
     delivery_date = models.DateTimeField(null=True, blank=True, verbose_name='تاريخ التسليم')
 
     # حقول بيانات الزبون
-    customer_name = models.CharField(max_length=100, verbose_name='اسم الزبون', help_text='أدخل الاسم الكامل للزبون، مثل: محمد أحمد.')
-    customer_phone = models.CharField(max_length=100, verbose_name='رقم هاتف الزبون', help_text='أدخل رقم هاتف الزبون، مثل: 0912345678.')
+    customer_name = models.CharField(max_length=20, verbose_name='اسم الزبون', help_text='أدخل الاسم الكامل للزبون، مثل: محمد أحمد.')
+    customer_phone = models.CharField(max_length=15, verbose_name='رقم هاتف الزبون', help_text='أدخل رقم هاتف الزبون، مثل: 0912345678.')
     customer_location = models.CharField(max_length=100, verbose_name='عنوان الزبون', help_text='أدخل عنوان التوصيل ، مثل: بنغازي - السلماني .')
     note = CKEditor5Field('ملاحظة', config_name='default', null=True, blank=True, help_text='يمكنك إضافة ملاحظات خاصة بالطلب، مثل تعليمات التوصيل أو طلبات خاصة من الزبون.')
 
