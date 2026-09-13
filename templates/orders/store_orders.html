@@ -48,13 +48,13 @@
                         <div class="search-btns">
                             
                             <!-- Filter toggle -->
-                            <button type="button" class="filter-btn toolbar-btn ">
+                            <button type="button" onclick="toggleMenu(this, '.filter-panel')" class="filter-btn toolbar-btn ">
                                 <i class="fa-solid fa-sliders"></i>
                             </button>
                             
                             <!-- Sort dropdown -->
                             <div class="sort-wrap">
-                                <button type="button" class="sort-btn toolbar-btn " >
+                                <button type="button" onclick="toggleMenu(this, '.sort-menu', true)" class="sort-btn toolbar-btn" >
                                     <i class="fa-solid fa-arrow-down-wide-short"></i>
                                     <span>ترتيب</span>
                                 </button>
@@ -107,7 +107,7 @@
                         </div>
 
                     <!-- ══ FILTER PANEL ═════════════════════════════════════ -->
-                    <div class="filter-panel {% if selected_status or selected_verification_status %}open{% endif %}">
+                    <div class="panel filter-panel {% if selected_status or selected_verification_status or tvalue_min or tvalue_max %}open{% endif %}">
                         <div class="filter-grid">
 
                             <div class="field">
@@ -124,7 +124,7 @@
                                 <label>حالة التحقق</label>
                                 <select name="verification_status" >
                                     <option value="">الكل</option>
-                                        <option value="approved" {% if selected_verification_status == 'approved' %}selected{% endif %}>طلب حقيقي</option>
+                                    <option value="approved" {% if selected_verification_status == 'approved' %}selected{% endif %}>طلب حقيقي</option>
                                     <option value="rejected" {% if selected_verification_status == 'rejected' %}selected{% endif %}>طلب وهمي</option>
                                 </select>
                             </div>
@@ -140,7 +140,7 @@
 
                         </div>
 
-                        <div class="filter-actions">
+                        <div class="panel-actions filter-actions">
                             <a href="{% url 'orders:store_orders' sid %}" class="filter-btn action-btn link-btn" >مسح الكل</a>
                             <button type="submit" class="action-btn link-btn">
                                 تطبيق

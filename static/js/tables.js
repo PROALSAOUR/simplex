@@ -1,54 +1,29 @@
 // الكود والدوال المسؤولة عن قوائم الفلترة والترتيب
-function setupSearchToggle({
-    button,
-    target,
-    openClass = "open",
-    closeOnOutsideClick = false
-}) {
+function toggleMenu(button, targetSelector, closeOnOutsideClick = false) {
+    // فتح أو إغلاق القائمة المرتبطة بالزر
+    const target = document.querySelector(targetSelector);
+
     if (!button || !target) return;
 
-    function toggle() {
-        button.classList.toggle(openClass);
-        target.classList.toggle(openClass);
-    }
-    
-    // فتح / إغلاق القائمة عند الضغط على الزر
-    button.addEventListener("click", (event) => {
-        event.stopPropagation();
-        toggle();
-    });
-    // الإغلاق عند النقر خارج القائمة
-    if (closeOnOutsideClick) {
-        document.addEventListener("click", (event) => {
-            if (
-                !target.contains(event.target) &&
-                !button.contains(event.target)
-            ) {
-                button.classList.remove(openClass);
-                target.classList.remove(openClass);
-            }
-        });
+    button.classList.toggle("open");
+    target.classList.toggle("open");
+
+    if (closeOnOutsideClick && target.classList.contains("open")) {
+        setTimeout(() => {
+            document.addEventListener("click", function closeMenu(event) {
+                if (
+                    !target.contains(event.target) &&
+                    !button.contains(event.target)
+                ) {
+                    button.classList.remove("open");
+                    target.classList.remove("open");
+
+                    document.removeEventListener("click", closeMenu);
+                }
+            });
+        }, 0);
     }
 }
-document.addEventListener("DOMContentLoaded", () => {
-
-    // ===== أزرار الفلترة والترتيب =====
-
-    /* زر الترتيب */
-    setupSearchToggle({
-        button: document.querySelector(".sort-btn"),
-        target: document.querySelector(".sort-menu"),
-        closeOnOutsideClick: true
-    });
-
-    /* زر الفلترة */
-    setupSearchToggle({
-        button: document.querySelector(".filter-btn"),
-        target: document.querySelector(".filter-panel"),
-        closeOnOutsideClick: false
-    });
-
-});
 // =========================================================================
 // الكود والدوال المسؤولة عن قائمة زر الاكشن منيو داخل الجدول
 const menu = document.getElementById("action-menu");

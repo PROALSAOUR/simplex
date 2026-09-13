@@ -23,41 +23,10 @@
     -ms-transition: all 0.3s ease;
     -o-transition: all 0.3s ease;
 }
-.data-content form .toolbar .search-box {
-    background-color: var(--gray-background);
-    color: var(--gray-color);
-    padding: 10px;
-    font-size: 14px;
-    width: 90%;
-    margin-left: 5px;
-    border: 1px solid var(--seprator-color);
-    border-radius: 5px;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    -ms-border-radius: 5px;
-    -o-border-radius: 5px;
-}
-.data-content form .toolbar .search-box i {
-    font-size: 14px;
-    margin-left: 10px;
-}
-.data-content form .toolbar .search-box input {
-    padding: 5px 0;
-    width: 85%;
-}
-.data-content form .toolbar  .search-box:has(input:focus) {
-    border: 1px solid var(--primary-color);
-    color: var(--main-text-color);
-}
-.data-content form .toolbar .search-box button {
-    display: none;
-}
-
 .data-content form .toolbar  .search-btns {
     display: flex;
     justify-content: center;
     align-items: center;
-
 }
 .data-content form .toolbar .toolbar-btn {
     padding: 10px;
@@ -80,18 +49,53 @@
     color: #ffffff;
 }
 @media (max-width:442px) {
-    .data-content form .toolbar .search-box {
-        padding: 5px 5px 5px 2px;
-        font-size: 10px;
-    }
-    .data-content form .toolbar .search-box i {
-        margin-left: 5px;
-        font-size: 10px;
-    }
     .data-content form .toolbar .toolbar-btn {
         padding: 7px;
         margin: 0 3px;
         font-size: 12px;
+    }
+}
+/* ═══════════════════════════════════════════
+    Search Box
+═══════════════════════════════════════════ */
+.search-box {
+    background-color: var(--gray-background);
+    color: var(--gray-color);
+    padding: 10px;
+    font-size: 14px;
+    width: 90%;
+    margin-left: 5px;
+    border: 1px solid var(--seprator-color);
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+.search-box i {
+    font-size: 14px;
+    margin-left: 10px;
+}
+.search-box input {
+    padding: 5px 0;
+    width: 85%;
+}
+.search-box:has(input:focus) {
+    border: 1px solid var(--primary-color);
+    color: var(--main-text-color);
+}
+.search-box button {
+    display: none;
+}
+
+@media (max-width:442px) {
+    .search-box {
+        padding: 5px 5px 5px 2px;
+        font-size: 10px;
+    }
+    .search-box i {
+        margin-left: 5px;
+        font-size: 10px;
     }
 }
 /* ═══════════════════════════════════════════
@@ -135,9 +139,10 @@
 }
 
 /* ═══════════════════════════════════════════
-    FILTER Panel 
+    General Panel
+    ( Filter Panel + Add Item Panel ) 
 ═══════════════════════════════════════════ */
-.data-content form .filter-panel {
+.panel {
     background-color: var(--secondary-background);
     border: 1px solid var(--seprator-color);
     padding: 0px;
@@ -155,12 +160,35 @@
     -ms-transition: 0.3s ease;
     -o-transition: 0.3s ease;
 }
-.data-content form .filter-panel.open {
+.panel.open {
     max-height:unset;
     opacity: 1;
-    margin-bottom: 16px;
+    margin-bottom: 15px;
     padding: 20px;
 }
+.panel .panel-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding-top: 14px;
+    border-top: 1px solid var(--seprator-color);
+}
+.panel .panel-actions .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 15px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -ms-border-radius: 3px;
+    -o-border-radius: 3px;
+}
+/* ═══════════════════════════════════════════
+    FILTER Panel 
+═══════════════════════════════════════════ */
 .data-content form .filter-panel .filter-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
@@ -209,26 +237,6 @@
 .data-content form .filter-panel .price-row span {
     color: var(--gray-color); 
     font-size: .8rem; 
-}
-.data-content form .filter-panel .filter-actions {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-    padding-top: 14px;
-    border-top: 1px solid var(--seprator-color);
-}
-.data-content form .filter-panel .filter-actions .action-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 15px;
-    font-size: 12px;
-    font-weight: 600;
-    border-radius: 3px;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
-    -ms-border-radius: 3px;
-    -o-border-radius: 3px;
 }
 .data-content form .filter-panel .filter-actions a {
     background-color: var(--gray-background);

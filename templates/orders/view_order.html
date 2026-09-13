@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{% static "css/fields.css" %} ">         
     <link rel="stylesheet" href="{% static "css/details.css" %} ">
     <link rel="stylesheet" href="{% static "css/transactions.css" %} ">
+    <link rel="stylesheet" href="{% static "css/orders.css" %} ">
 {% endblock page_head %}
 
 {% comment %} Page Content {% endcomment %}
@@ -512,10 +513,14 @@
             <div class="title-wrapper">
                 <h4> <i class="fa-solid fa-box-open primary-cl"></i>  منتجات الطلب</h4>
                 {% if can_edit %} 
-                    <button  onclick="add_items.showModal()"> اضافة منتج <i class="fa-solid fa-plus"></i> </button>
+                    <button onclick="toggleMenu(this, '.add-item-panel')"> اضافة منتج <i class="fa-solid fa-plus"></i> </button>
                 {% endif %}
             </div>
-            
+
+            {% if can_edit %} 
+                {% include "orders/components/add-item-panel.html" %}
+            {% endif %}
+                        
             <div class="table-wrap">
                 <table id="item-table">
                     <thead>
@@ -599,7 +604,7 @@
 
 {% block out_container %}
 
-    {% include "orders/dialogs/edit_order_items.html" %}
+    {% include "orders/components/edit_order_items.html" %}
 
     <!-- Start Action Menu -->
     <div class="action-menu small-menu" id="action-menu">

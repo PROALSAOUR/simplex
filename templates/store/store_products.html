@@ -44,13 +44,13 @@
                     <div class="search-btns">
                         
                         <!-- Filter toggle -->
-                        <button type="button" class="filter-btn toolbar-btn ">
+                        <button type="button" onclick="toggleMenu(this, '.filter-panel')" class="filter-btn toolbar-btn ">
                             <i class="fa-solid fa-sliders"></i>
                         </button>
                         
                         <!-- Sort dropdown -->
                         <div class="sort-wrap">
-                            <button type="button" class="sort-btn toolbar-btn " >
+                            <button type="button" onclick="toggleMenu(this, '.sort-menu', true)" class="sort-btn toolbar-btn " >
                                 <i class="fa-solid fa-arrow-down-wide-short"></i>
                                 <span>ترتيب</span>
                             </button>
@@ -114,7 +114,7 @@
                     </div>
 
                 <!-- ══ FILTER PANEL ═════════════════════════════════════ -->
-                <div class="filter-panel {% if selected_status or selected_type or selected_gender or selected_is_visible or selected_offer or price_min or price_max %}open{% endif %}">
+                <div class="panel filter-panel {% if selected_status or selected_type or selected_gender or selected_is_visible or selected_offer or price_min or price_max %}open{% endif %}">
                     <div class="filter-grid">
 
                         <div class="field">
@@ -178,7 +178,7 @@
 
                     </div>
 
-                    <div class="filter-actions">
+                    <div class="panel-actions filter-actions">
                         <a href="{% url 'store:store_products' sid %}" class="filter-btn action-btn link-btn" >مسح الكل</a>
                         <button type="submit" class="action-btn link-btn">
                             تطبيق
@@ -263,7 +263,7 @@
                                 <tr data-view-url="{% url 'store:edit_product' product.id %}">
                                     <td>{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
                                     <td>
-                                        <img src="{{ product.thumbnail_img.url }}" alt="{{ product.name }}" width="80" height="80" alt="">
+                                        <img src="{% if product.thumbnail_img %}{{ product.thumbnail_img.url }}{% else %}{% static "images/default.jpg" %}{% endif %}" alt="{{ product.name }}" width="80" height="80" >
                                     </td>
                                     {% comment %} #change-later تعامل مع حالة لو كان اسم المنتج طويل جدا {% endcomment %}
                                     <td>{{ product.name }}</td> 
@@ -423,7 +423,7 @@
 {% endblock content %}
 
 {% block out_container %}
-    {% include "store/dialogs/delete_product.html" %}
+    {% include "store/components/delete_product.html" %}
 
     <!-- Start Action Menu -->
     <div class="action-menu small-menu" id="action-menu">
