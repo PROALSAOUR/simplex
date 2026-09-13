@@ -7,7 +7,9 @@
     <link rel="stylesheet" href="{% static "css/fields.css" %} ">         
     <link rel="stylesheet" href="{% static "css/details.css" %} ">
     <link rel="stylesheet" href="{% static "css/transactions.css" %} ">
-    <link rel="stylesheet" href="{% static "css/orders.css" %} ">
+    {% if can_edit %}
+        <link rel="stylesheet" href="{% static "css/orders.css" %} ">
+    {% endif %}
 {% endblock page_head %}
 
 {% comment %} Page Content {% endcomment %}
@@ -537,43 +539,8 @@
                     </thead>
                     <tbody>
                         {% for item in order.items.all %}
-                            <tr id="item-row-{{ item.id }}" {% if item.product %} data-view-url="{% url "store:edit_product" item.product.id %}" {% endif %}  >
-                                
-                                <td>
-                                    <img src="{% if item.product %}{{ item.product.thumbnail_img.url }}{% else %} {% static "images/default.jpg" %} {% endif %}" width="80" height="80" alt="{{ item.product.name }}">
-                                </td>
-                                <td>{% if item.product %} {{ item.product.name }} {% else %} المنتج محذوف {% endif %}</td>
-                                <td>{{ item.color }}</td>
-                                <td>{% if item.size %}{{ item.size }}{% else %} --- {% endif %}</td>
-                                <td class="item-qty" data-value="{{ item.qty }}">{{ item.qty }}</td>
-                                <td>{{ item.selling_price }}<span class="currency">د.ل</span></td>
-                                <td class="item-total" data-value="{{ item.get_total_price }}" >{{ item.get_total_price }}<span class="currency">د.ل</span></td>
-                                <td>
-                                    {% if can_edit %}
-                                        <button
-                                            type="button"
-                                            class="td-actions"
-                                            aria-label="الإجراءات"
-                                            data-id="{{ item.id }}"
-                                            data-name="{{ item.product.name }}"
-                                            {% if item.product %} data-view-url="{% url "store:edit_product" item.product.id %}" {% endif %}
-                                        >
-                                            <i class="fa-solid fa-ellipsis-vertical"></i>
-                                        </button>
-                                    {% else %}
-                                        {% if item.product %}
-                                            <a href="{% url "store:edit_product" item.product.id %}" class="view-btn" aria-label="عرض">
-                                                عرض
-                                                <i class="fa-solid fa-eye"></i> 
-                                            </a>
-                                        {% else %}
-                                            <i class="fa-solid fa-ban"></i>
-                                        {% endif %}
-                                    {% endif %}
-                                </td>
-                            </tr>
+                            {% include "orders/partials/order_item_row.html" with item=item %}
                         {% endfor %}
-                        
                     </tbody>
                     <tfoot>
                         <tr>
@@ -629,5 +596,8 @@
     <script src="{% static "js/tables.js" %}"></script>
     <script src="{% static "js/fields.js" %}"></script>
     <script src="{% static "js/details.js" %}"></script>
-    <script src="{% static "js/orders/edit_order.js" %}"></script>
+    {% if can_edit %}
+        <script src="{% static "js/orders/edit_order.js" %}"></script>
+        <script src="{% static "js/orders/search_products.js" %}"></script>
+    {% endif %}
 {% endblock %}

@@ -1,14 +1,16 @@
-<div class="panel add-item-panel ">
+<div class="panel add-item-panel">
 
     <div class="panel-header">
         <h4><i class="fa-regular fa-square-plus primary-cl"></i> إضافة منتج للطلب </h4>
         <p>ابحث عن المنتج الذي تريد إضافته ثم قم بإختياره</p>
     </div>
 
-    <div class="panel-content">
+    <form id="add_order_items_form" method="POST" data-url="{% url 'orders:add_order_item' order.id %}" class="panel-content">
+        {% csrf_token %}
         <div class="search-box">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" name="search" class="search-input" autocomplete="off"
+            <input type="text" name="search" id="product-search" class="search-input" autocomplete="off"
+                data-search-url="{% url "orders:search_products" oid=order.id %}"
                 placeholder="ابحث عن طريق اسم المنتج" 
             >
             <button type="submit">بحث</button>
@@ -16,115 +18,13 @@
 
         <div class="search-results" id="search-results"  data-product-button-type="add-to-order">
             <!-- سيتم عرض نتائج البحث هنا -->    
-
-            <!-- no result  -->
-            <div class="message" style="display: none;">
-                <p class="message-content">
-                    مع الاسف لايوجد منتجات مطابقة! <i class="fa-regular fa-face-frown"></i> 
-                </p>
-            </div>
-
-            <!-- result cards -->
-            
-            <details class="product-card" >
-
-                <summary>
-
-                    <div class="product-header">
-
-                        <img src="/images/deafult.jpg" alt="" width="50" height="50">
-
-                        <div class="product-info">
-                            <h4>تيشيرت رجالي قطني فاخر</h4> <!-- اعرض اول 20 حرف من الاسم فقط -->
-                            <span>
-                                50
-                                <span class="currency">د.ل</span>
-                            </span>
-                        </div>
-
-                    </div>
-
-                    <span class="product-toggle">
-                        <i class="fa-solid fa-chevron-up"></i>
-                    </span>
-
-                </summary>
-
-                <div class="product-options">
-
-                    <div class="product-option">
-
-                        <div class="option-title">اللون</div>
-
-                        <div class="option-values">
-                            <label class="option-value">
-                                <input type="radio" name="color" value="red" checked>
-                                <span>أحمر <i class="fa-solid fa-circle-check"></i></span>
-                            </label>
-
-                            <label class="option-value">
-                                <input type="radio" name="color" value="black">
-                                <span>أسود <i class="fa-solid fa-circle-check"></i></span>
-                            </label>
-
-                            <label class="option-value">
-                                <input type="radio" name="color" value="green">
-                                <span>أخضر <i class="fa-solid fa-circle-check"></i></span>
-                            </label>
-                        </div>
-
-                    </div>
-
-                    <div class="product-option">
-
-                        <div class="option-title">المقاس</div>
-
-                        <div class="option-values">
-                            <label class="option-value">
-                                <input type="radio" name="size" value="red" checked>
-                                <span>small <i class="fa-solid fa-circle-check"></i></span>
-                            </label>
-
-                            <label class="option-value">
-                                <input type="radio" name="size" value="black">
-                                <span>large <i class="fa-solid fa-circle-check"></i></span>
-                            </label>
-
-                            <label class="option-value">
-                                <input type="radio" name="size" value="green">
-                                <span>xx large <i class="fa-solid fa-circle-check"></i></span>
-                            </label>
-                        </div>
-
-                    </div>
-
-                    <div class="product-option">
-
-                        <label class="option-title">الكمية</label>
-
-                        <div class="quantity-control">
-                            <button type="button" class="qty-minus" aria-label="إنقاص">−</button>
-                            <input type="text" inputmode="decimal" class="qty-input" value="1" min="1" max="10">
-                            <button type="button" class="qty-plus" aria-label="زيادة">+</button>
-                        </div>
-
-                    </div>
-
-                    <button class="add-product-btn">
-                        إضافة الى الطلب
-                        <i class="fa-solid fa-plus"></i>
-                    </button>
-
-                </div>
-
-            </details>
             
         </div>
 
-    </div>
+    </form>
 
     <div class="panel-actions">
-        <button onclick="toggleMenu(this, '.add-item-panel')" class="action-btn" >إلغاء</button>
+        <button type="button" onclick="toggleMenu(this, '.add-item-panel')" class="action-btn" >إلغاء</button>
     </div>
 
 </div>

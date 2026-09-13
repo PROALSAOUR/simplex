@@ -1,0 +1,202 @@
+{% for product in products %}
+
+    <details class="product-card" >
+
+        <summary>
+
+            <div class="product-header">
+
+                <img src="{{ product.thumbnail_img.url }}" alt="{{ product.name }}" width="50" height="50">
+
+                <div class="product-info">
+                    <h4>{{ product.name|truncatechars:20  }}</h4>
+                    <span>
+                        {{ product.get_price }}
+                        <span class="currency">د.ل</span>
+                    </span>
+                </div>
+
+            </div>
+
+            <span class="product-toggle">
+                <i class="fa-solid fa-chevron-up"></i>
+            </span>
+
+        </summary>
+
+        <div class="product-options">
+
+            {% if product.available_colors %}
+
+                <!-- المعرف -->
+                <input type="hidden" name="product_{{ product.id }}" value="{{ product.id }}" >
+
+                <!-- الألوان -->
+                <div class="product-option">
+
+                    <div class="option-title">اللون</div>
+
+                    <div class="option-values">
+
+                        {% for color in product.available_colors %}
+                            <label class="option-value">
+
+                                <input
+                                    type="radio"
+                                    name="color_{{ product.id }}"
+                                    value="{{ color.id }}"
+                                    data-color-name="{{ color.color }}"
+                                    data-color-image="{% if color.image %}{{ color.image.url }}{% else %}{{ product.thumbnail_img.url }}{% endif %}"
+                                    {% if forloop.first %}checked{% endif %}
+                                >
+
+                                <span>
+                                    {{ color.color }}
+                                    <i class="fa-solid fa-circle-check"></i>
+                                </span>
+
+                            </label>
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- المقاسات -->
+                <div class="product-option">
+
+                    <div class="option-title">المقاس</div>
+
+                    <div class="option-values">
+
+                        {% for color in product.available_colors %}
+
+                            {% with sizes=color.sizes.all %}
+
+                                {% if sizes %}
+
+                                    <div class="size-group" data-color-id="{{ color.id }}" >
+
+                                        {% for size in sizes %}
+
+                                            <label class="option-value">
+
+                                                <input
+                                                    type="radio"
+                                                    name="size_{{ color.id }}_{{ product.id }}"
+                                                    value="{{ size.id }}"
+                                                    data-size-name="{{ size.size }}"
+                                                    {% if forloop.first %}checked{% endif %}
+                                                >
+
+                                                <span>
+                                                    {{ size.size }}
+                                                    <i class="fa-solid fa-circle-check"></i>
+                                                </span>
+
+                                            </label>
+
+                                        {% endfor %}
+
+                                    </div>
+
+                                {% endif %}
+
+                            {% endwith %}
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- الكمية -->
+                <div class="product-option">
+
+                    <label for="qty_{{ product.id }}" class="option-title">الكمية</label>
+
+                    <div class="qty-control">
+
+                        <button
+                            type="button"
+                            class="qty-minus"
+                            aria-label="إنقاص"
+                            onclick="changeQuantity(this, -1)"
+                        >−</button>
+
+                        <input
+                            type="text"
+                            id="qty_{{ product.id }}"
+                            inputmode="decimal"
+                            class="qty-input"
+                            value="1"
+                            min="1"
+                            max="{{ product.max_quantity_per_order }}"
+                        >
+
+                        <button
+                            type="button"
+                            class="qty-plus"
+                            aria-label="زيادة"
+                            onclick="changeQuantity(this, 1)"
+                        >+</button>
+
+                    </div>
+
+                </div>
+
+                <!-- زر الإضافة -->
+                {% if button_type == "add-to-order" %}
+
+                    <button
+                        type="button"
+                        class="add-product-btn"
+                        onclick="addOrderItem(this)"
+                    >
+                        إضافة الى الطلب
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+
+                {% else %}
+
+                    <button
+                        type="button"
+                        class="add-cart-btn"
+                    >
+                        إضافة إلى السلة
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+
+                {% endif %}
+
+
+            {% else %}
+
+                <!-- لا توجد ألوان -->
+                <div class="message">
+
+                    <p class="message-content">
+                        مع الأسف لا توجد ألوان متوفرة من هذا المنتج!
+                        <i class="fa-regular fa-face-frown"></i>
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </details>
+
+{% empty %}
+
+    <!-- no result  -->
+    <div class="message">
+        <p class="message-content">
+            مع الاسف لايوجد منتجات مطابقة! <i class="fa-regular fa-face-frown"></i> 
+        </p>
+    </div>
+
+{% endfor %}

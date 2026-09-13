@@ -1,3 +1,4 @@
+// اكواد و دوال حذف عنصر من الطلب 
 function openDeleteItemDialog(button) {
     // جيب قيمة الاسم والاي دي من الداتا سيت
     const itemId = button.dataset.id;
@@ -92,7 +93,179 @@ function setupDeleteOrderItem() {
 }
 
 setupDeleteOrderItem();
+// =======================================================================================================
+// أكواد ودوال إضافة عنصر إلى الطلب
 
+function addOrderItem(button) {
+    // إضافة المنتج المحدد إلى الطلب وإرسال بياناته إلى الخادم
+
+    const card = button.closest(".product-card");
+
+    if (!card) {
+        return;
+    }
+
+    const form = document.getElementById("add_order_items_form");
+
+    if (!form) {
+        return;
+    }
+
+    const url = form.dataset.url;
+
+    if (!url) {
+        return;
+    }
+
+    const csrfToken = form.querySelector(
+        "[name='csrfmiddlewaretoken']"
+    );
+
+    if (!csrfToken) {
+        return;
+    }
+
+    const productInput = card.querySelector(
+        "input[name^='product_']"
+    );
+
+    const colorInput = card.querySelector(
+        "input[name^='color_']:checked"
+    );
+
+    const quantityInput = card.querySelector(
+        ".qty-input"
+    );
+
+    if (!productInput || !colorInput || !quantityInput) {
+        showToast(
+            "failed-toast",
+            "يرجى اختيار بيانات المنتج."
+        );
+        return;
+    }
+
+    const colorId = colorInput.value;
+
+    const sizeGroup = card.querySelector(
+        `.size-group[data-color-id="${colorId}"]`
+    );
+
+    const sizeInput = sizeGroup
+        ? sizeGroup.querySelector("input[type='radio']:checked")
+        : null;
+
+    const formData = new FormData();
+
+    formData.append(
+        "csrfmiddlewaretoken",
+        csrfToken.value
+    );
+
+    formData.append(
+        "product_id",
+        productInput.value
+    );
+
+    formData.append(
+        "color_id",
+        colorId
+    );
+
+    formData.append(
+        "size_id",
+        sizeInput ? sizeInput.value : ""
+    );
+
+    formData.append(
+        "quantity",
+        quantityInput.value
+    );
+
+    fetch(url, {
+        method: "POST",
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+        },
+        body: formData,
+    })
+        .then(function (response) {
+            if (!response.ok) {
+                throw new Error(
+                    "حدث خطأ أثناء تنفيذ الطلب."
+                );
+            }
+
+            return response.json();
+        })
+        .then(function (data) {
+
+            if (!data.success) {
+                showToast(
+                    "failed-toast",
+                    data.message
+                );
+
+                return;
+            }
+
+            // إضافة الصف الجديد إلى جدول المنتجات
+            appendTableRow(data.item_html);
+
+            // تحديث إجماليات الطلب
+            updateOrderTotals(data.order_totals);
+
+            // تحديث إجمالي الكمية والسعر داخل الجدول
+            updateTableTotals();
+
+            // اغلاق بانل اضافة منتج 
+            closeAddItemPanel();
+
+            // إظهار رسالة النجاح
+            showToast(
+                "success-toast",
+                data.message
+            );
+
+            // إغلاق بطاقة المنتج بعد إضافته
+            card.open = false;
+
+            // إعادة الكمية إلى القيمة الافتراضية
+            quantityInput.value = 1;
+        })
+        .catch(function (error) {
+            console.error(error);
+
+            showToast(
+                "failed-toast",
+                "حدث خطأ أثناء إضافة المنتج، يرجى المحاولة مرة أخرى."
+            );
+        });
+}
+
+function appendTableRow(itemHtml) {
+    // إضافة صف جديد إلى نهاية جدول الطلب
+    const tbody = document.querySelector("#item-table tbody");
+
+    if (!tbody) {
+        return;
+    }
+
+    tbody.insertAdjacentHTML("beforeend", itemHtml);
+}
+
+function closeAddItemPanel() {
+    // إغلاق بانل إضافة المنتج بعد إتمام الإضافة
+    const panel = document.querySelector(".add-item-panel");
+
+    if (!panel) {
+        return;
+    }
+
+    panel.classList.remove("open");
+}
+// =======================================================================================================
+//  اكواد و دوال مشتركة بين الاضافة والحذف 
 function updateTableTotals() {
     // دالة لتحديث إجمالي الكمية والسعر الإجمالي للمنتجات في الطلب داخل الجدول
     // يتم استدعائها بمجرد تحميل الصفحة وايضا عند حذف او اضافة أي منتج من الطلب لتحديث القيم المعروضة
@@ -147,7 +320,48 @@ function updateOrderTotals(totals) {
         profitElement.textContent = ` ${totals.profit} `;
     }
 }
+// =======================================================================================================
+// في مربع نتائج البحث منع فتح اكثر من بطاقة منتج واحدة لمنع الزحام 
+function setupProductCards() {
+    // السماح بفتح بطاقة منتج واحدة فقط حتى مع إضافة البطاقات ديناميكيًا
+    const container = document.querySelector("#search-results");
 
-function updateTableRows(item) {
-    
+    if (!container) return;
+
+    function setupCard(card) {
+        card.addEventListener("toggle", () => {
+            if (!card.open) return;
+
+            container.querySelectorAll("details.product-card").forEach(otherCard => {
+                if (otherCard !== card && otherCard.open) {
+                    otherCard.open = false;
+                }
+            });
+        });
+    }
+
+    // تفعيل البطاقات الموجودة حاليًا
+    container.querySelectorAll("details.product-card").forEach(setupCard);
+
+    // تفعيل أي بطاقة تتم إضافتها لاحقًا
+    const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+            mutation.addedNodes.forEach(node => {
+                if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+                if (node.matches("details.product-card")) {
+                    setupCard(node);
+                }
+
+                node.querySelectorAll?.("details.product-card").forEach(setupCard);
+            });
+        });
+    });
+
+    observer.observe(container, {
+        childList: true,
+        subtree: true
+    });
 }
+setupProductCards();
+// =======================================================================================================

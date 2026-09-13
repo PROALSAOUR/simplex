@@ -11,4 +11,6 @@ urlpatterns = [
     
     path('order-item/<int:item_id>/delete/', delete_order_item, name='delete_order_item'),
     path('<int:oid>/add/order-item/', add_order_item, name='add_order_item'),
+    
+    path('<int:oid>/add/order-item/search/', search_products, name='search_products'), 
 ]

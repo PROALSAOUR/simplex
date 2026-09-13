@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.db import transaction , models as db_models
 from django.db.models import Q
 from django.views.decorators.http import require_POST
+from django.template.loader import render_to_string
 import json
 
 from orders.models import *
@@ -374,14 +375,19 @@ def view_order(request, oid):
 @login_required(login_url='accounts:log_in')
 @require_POST
 def add_order_item(request, oid):
-    """إضافة عنصر جديد للطلب من داخل صفحة التعديل وتحديث إجماليات الطلب بدون إعادة تحميل الصفحة."""
+    """إضافة عنصر جديد للطلب من داخل صفحة التعديل وتحديث إجماليات الطلب ."""
     order = get_object_or_404(Order, id=oid)
     user_type = get_user_type(request.user)
+    
+    can_edit = (
+        user_type == "admin"
+        or order.status == "processing"
+    )
 
     if user_type == 'vendor' and request.user.userprofile.store != order.store:
         raise Http404("الطلب غير موجود")
 
-    if user_type == 'vendor' and (order.status != 'processing' or order.verification_status == 'rejected'):
+    if not can_edit :
         return JsonResponse({
             "success": False,
             "status": "failed",
@@ -425,21 +431,20 @@ def add_order_item(request, oid):
         "status": "success",
         "message": "تمت إضافة المنتج إلى الطلب بنجاح.",
 
-        "item": {
-            "id": order_item.id,
-            "product": order_item.product.name,
-            "product_id": order_item.product.id,
-            "color": order_item.color,
-            "size": order_item.size,
-            "qty": order_item.qty,
-            "price": str(order_item.selling_price),
-            "total": str(order_item.get_total_price()),
-            "image": order_item.image.url if order_item.image else "",
-        },
+        "item_html": render_to_string(
+            "orders/partials/order_item_row.html",
+            {
+                "item": order_item,
+                "can_edit": can_edit,
+            },
+            
+            request=request,
+        ),
+
         "order_totals": {
             "selling": order.total_selling_price,
             "profit": order.total_profit,
-            "purchase": order.total_purchase_price
+            "purchase": order.total_purchase_price,
         }
     })
 
@@ -487,3 +492,42 @@ def delete_order_item(request, item_id):
         }
     })
     
+def search_products(request, oid):
+    
+    """دالة البحث عن منتجات يتم استعمالها اثناء البحث عن منتج للإضافته للطلب بصفحة تعديل الطلب"""
+
+    query = request.GET.get("q", "").strip()
+    
+    # تحديد نوع الزر الذي سيتم عرضه في نتائج البحث، يمكن أن يكون "add-to-order" أو "add-to-cart"
+    button_type = request.GET.get(
+        "button_type",
+        "add-to-order"
+    )
+    
+    order = get_object_or_404(Order, id=oid)
+    store = order.store
+    
+    products = Product.objects.filter(
+        name__icontains=query,
+        is_visible=True,
+        store = store
+    ).exclude(
+        status="rejected"
+    ).prefetch_related(
+        "colors__sizes"
+    )[:10]
+    
+    for product in products:
+        product.available_colors = [
+            color for color in product.colors.all()
+            if color.available
+        ]
+        
+    return render(
+        request,
+        "orders/partials/searched_product_card.html",
+        {
+            "products": products,
+            "button_type": button_type
+        }
+    )

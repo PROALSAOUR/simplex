@@ -231,3 +231,35 @@ function scrollToFirstError() {
 } 
 window.addEventListener('load', scrollToFirstError);
 // ==========================================================
+// دوال التحكم بازرار النقصان والزيادة الخاصة بالكمية
+function changeQuantity(button, amount) {
+    /* تغيير كمية المنتج مع الالتزام بالحد الأدنى والأقصى */
+    const container = button.closest(".qty-control");
+
+    if (!container) return;
+
+    const input = container.querySelector(".qty-input");
+
+    if (!input) return;
+
+    let value = parseInt(input.value, 10);
+
+    if (Number.isNaN(value)) {
+        value = 1;
+    }
+
+    const min = 1;
+    const max = parseInt(input.max, 10);
+
+    value += amount;
+
+    value = Math.max(value, min);
+
+    if (!Number.isNaN(max)) {
+        value = Math.min(value, max);
+    }
+
+    input.value = value;
+}
+// ==========================================================
+

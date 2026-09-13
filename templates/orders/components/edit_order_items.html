@@ -13,7 +13,7 @@
             <h3 class="dialog-title"> تحذير </h3>
             <div id="errors" style="color:red; display:none;"> سيتم عرض الاخطاء هنا </div>
             <p>ابحث عن المنتج مباشرة ثم اختره لإضافة عنصر جديد للطلب.</p>
-            <input type="search" id="product-search" placeholder="ابحث عن منتج..." autocomplete="off" data-search-url="{% url "store:search_products" sid=order.store.id %}">
+            <input type="search" id="product-search" placeholder="ابحث عن منتج..." autocomplete="off" data-search-url="{% url "orders:search_products" oid=order.id %}">
 
             <div id="search-results"  data-product-button-type="add-to-order">
                 <!-- سيتم عرض نتائج البحث هنا -->            

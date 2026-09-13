@@ -164,7 +164,7 @@
     visibility:visible;
 }
 /* ازرار الكمية */
-.product-card .product-options .quantity-control {
+.product-card .product-options .qty-control {
     display: flex;
     align-items: center;
     gap: 0;
@@ -178,7 +178,7 @@
     -ms-border-radius: 5px;
     -o-border-radius: 5px;
 }
-.product-card .product-options  .quantity-control button {
+.product-card .product-options  .qty-control button {
     width: 30px;
     height: 30px;
     border: none;
@@ -194,11 +194,11 @@
     -ms-transition: background var(--transition);
     -o-transition: background var(--transition);
 }
-.product-card .product-options .quantity-control button:hover {
+.product-card .product-options .qty-control button:hover {
     background: var(--primary-background);
     color: #fff;
 }
-.product-card .product-options .quantity-control input {
+.product-card .product-options .qty-control input {
     width: 50px;
     height: 30px;
     border: none;

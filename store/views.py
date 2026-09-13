@@ -45,6 +45,7 @@ def store_products(request, sid):
 
     # ── فلترة ──────────────────────────────────────────
     status = request.GET.get('status')
+    #change-later استبعد حالة قيد المراجعة من الخيارات كي لا يراها المستخدم
     valid_statuses = [choice[0] for choice in Product.STATUS_CHOICES]
     if status in valid_statuses:
         products = products.filter(status=status)
@@ -452,42 +453,3 @@ def view_product(request, pid):
         'product_price': str(product.get_price()),
     }
     return render(request, 'store/view_product.html', context)
-
-def search_products(request, sid):
-
-    """دالة البحث عن منتجات يتم استعمالها اثناء البحث عن منتج للإضافته للطلب بصفحة تعديل الطلب"""
-
-    query = request.GET.get("q", "").strip()
-    
-    # تحديد نوع الزر الذي سيتم عرضه في نتائج البحث، يمكن أن يكون "add-to-order" أو "add-to-cart"
-    button_type = request.GET.get(
-        "button_type",
-        "add-to-order"
-    )
-    
-    store = get_object_or_404(Store, id=sid)
-    
-
-    products = Product.objects.filter(
-        name__icontains=query,
-        is_visible=True,
-        status="approved", 
-        store = store
-    ).prefetch_related(
-        "colors__sizes"
-    )[:10]
-    
-    for product in products:
-        product.available_colors = [
-            color for color in product.colors.all()
-            if color.available
-        ]
-        
-    return render(
-        request,
-        "partials/store/product_cards.html",
-        {
-            "products": products,
-            "button_type": button_type
-        }
-    )
