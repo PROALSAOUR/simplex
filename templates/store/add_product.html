@@ -32,7 +32,7 @@
 
         <div class="sections">
 
-            <details class="details" >
+            <details class="details">
 
                 <summary class="details-header">
 
@@ -119,7 +119,7 @@
 
             </details>
 
-            <details class="details" open>
+            <details class="details">
 
                 <summary class="details-header">
 
@@ -132,108 +132,262 @@
 
                     <div class="fields-container">
 
-                        <div class="field image-field ">
-                            <h4 class="field-title"> صورة المنتج الرئيسية <span class="required">*</span></h4>
-                            <!-- <div class="field-errors">اخطاء الحقل هنا</div> -->
-                            <span class="help-text"> سوف تظهر في صفحة المتجر وصفحة تفاصيل المنتج</span>
+                        <!-- الصورة الرئيسية -->
+                        <div class="field image-field {% if add_form.thumbnail_img.errors %}has-error{% endif %}">
+
+                            <h4 class="field-title">
+                                {{ add_form.thumbnail_img.label }}
+                                <span class="required">*</span>
+                            </h4>
+
+                            {% if add_form.thumbnail_img.errors %}
+                                <span class="help-text">
+                                    {{ add_form.thumbnail_img.errors.0 }}
+                                </span>
+                            {% else %}
+                                <span class="help-text">
+                                    {{ add_form.thumbnail_img.help_text }}
+                                </span>
+                            {% endif %}
 
 
-                            <!-- مربع رفع الصور -->
-                            <label  for="id_thumbnail_img" id="custom_upload_box" class="upload-box" >
-                                <i class="fa-solid fa-cloud-arrow-up primary-cl "></i>
-                                <h5 class="primary-cl">انقر لاختيار صورة</h5>
-                                <p>او اسحبها وافلتها هنا </p>
+                            <!-- مربع رفع الصورة الرئيسية -->
+                            <label
+                                for="id_thumbnail_img"
+                                id="custom_upload_box"
+                                class="upload-box"
+                            >
+                                <i class="fa-solid fa-cloud-arrow-up primary-cl"></i>
+
+                                <h5 class="primary-cl">
+                                    انقر لاختيار صورة
+                                </h5>
+
+                                <p>
+                                    أو اسحبها وأفلتها هنا
+                                </p>
                             </label>
 
 
-                            <!-- المعاينة -->
-                            <div style="display: none;" class="preview_box" id="thumbnail_preview_box" >
-                                
-                                <div class="image-item" draggable="true" >
+                            {% comment %}
+                                Django يقوم بإضافة input الخاص بالصورة الرئيسية
+                            {% endcomment %}
+                            {{ add_form.thumbnail_img }}
+
+
+                            <!-- معاينة الصورة الرئيسية -->
+                            <div
+                                class="preview_box"
+                                id="thumbnail_preview_box"
+                                style="display: none;"
+                            >
+
+                                <div
+                                    class="image-item"
+                                    draggable="false"
+                                >
 
                                     <div class="image-details">
-                                        <img class="image-preview main-image" src="/images/deafult.jpg" alt="" width="50" height="50" >
+
+                                        <img
+                                            class="image-preview main-image"
+                                            src=""
+                                            alt="صورة المنتج الرئيسية"
+                                            width="50"
+                                            height="50"
+                                        >
+
                                         <div class="image-info">
-                                            <p>الحجم: 86.3 KB</p>
-                                            <p>النوع: image/jpeg</p>
+
+                                            <p>
+                                                الحجم:
+                                            </p>
+
+                                            <p>
+                                                النوع:
+                                            </p>
+
                                         </div>
+
                                     </div>
-                                    <button type="button" class="image-btn replace-btn">استبدال</button>
+
+
+                                    <button
+                                        id="change_image_btn"
+                                        type="button"
+                                        class="image-btn replace-btn"
+                                    >
+                                        استبدال
+                                    </button>
 
                                 </div>
-                                    
+
                             </div>
 
-                            <!-- الانبوت يضيفه جانغو  -->
-                            <input type="file" name="thumbnail_img" accept="image/*" required="" aria-describedby="id_thumbnail_img_helptext" id="id_thumbnail_img">
-                        
                         </div>
 
-                        <div class="field image-field ">
-                            <h4 class="field-title"> صور المنتج <span class="required">*</span></h4>
-                            <!-- <div class="field-errors">اخطاء الحقل هنا</div> -->
-                            <span class="help-text"> سوف تظهر في صفحة المتجر وصفحة تفاصيل المنتج</span>
+                        <!-- صور المنتج -->
+                        <div class="field image-field">
+
+                            <input
+                                type="hidden"
+                                name="images_order"
+                                id="images_order"
+                            >
+
+                            <input
+                                type="hidden"
+                                name="deleted_images"
+                                id="deleted_images"
+                            >
+
+
+                            <h4 class="field-title">
+                                صور المنتج
+                                <span class="required">*</span>
+                            </h4>
+
+                            <span class="help-text">
+                                أضف صوراً إضافية للمنتج
+                            </span>
+
 
                             <!-- مربع رفع الصور -->
-                            <div style="display: none;" class="upload-box" id="uploadBox">
-                                <i class="fa-solid fa-cloud-arrow-up primary-cl "></i>
-                                <h5 class="primary-cl">انقر لاختيار الصور</h5>
-                                <p>او اسحبها وافلتها هنا </p>
-                                <p>يمكنك رفع عدة صور (اقصى عدد 10)</p>
-                                <input type="file" id="fileInput" multiple accept="image/*">
+                            <div
+                                class="upload-box"
+                                id="uploadBox"
+                            >
+
+                                <i class="fa-solid fa-cloud-arrow-up primary-cl"></i>
+
+                                <h5 class="primary-cl">
+                                    انقر لاختيار الصور
+                                </h5>
+
+                                <p>
+                                    أو اسحبها وأفلتها هنا
+                                </p>
+
+                                <p>
+                                    يمكنك رفع عدة صور (أقصى عدد {{ 30 }})
+                                </p>
+
+                                <input
+                                    type="file"
+                                    id="fileInput"
+                                    multiple
+                                    accept="image/*"
+                                >
+
                             </div>
-                            
-                            <!-- المعاينة -->
-                            <div class="preview_box" id="thumbnail_preview_box" >
-                                <div class="images-list" id="imagesList">
-                            
-                                    <div class="image-item" draggable="true" >
+
+
+                            <!-- معاينة صور المنتج -->
+                            <div
+                                class="preview_box"
+                                id="images_preview_box"
+                                style="display: none;"
+                            >
+
+                                <div
+                                    class="images-list"
+                                    id="imagesList"
+                                >
+
+                                    {% comment %}
+                                        هذا العنصر Prototype.
+                                        JavaScript يقوم بنسخه عند إضافة الصور.
+                                        لا تحذف هذا العنصر من القالب.
+                                    {% endcomment %}
+
+                                    <div
+                                        class="image-item"
+                                        draggable="true"
+                                    >
 
                                         <div class="image-details">
-                                            <div class="drag-handle">☰<span class="image-number">1</span></div>
-                                            <img class="image-preview" src="/images/deafult.jpg" alt="" width="40" height="40" >
-                                            <div class="image-info">
-                                                <p>الحجم: 86.3 KB</p>
-                                                <p>النوع: image/jpeg</p>
+
+                                            <div class="drag-handle">
+                                                ☰
+                                                <span class="image-number">
+                                                    1
+                                                </span>
                                             </div>
+
+
+                                            <img
+                                                class="image-preview"
+                                                src=""
+                                                alt=""
+                                                width="40"
+                                                height="40"
+                                            >
+
+
+                                            <div class="image-info">
+
+                                                <p>
+                                                    الحجم:
+                                                </p>
+
+                                                <p>
+                                                    النوع:
+                                                </p>
+
+                                            </div>
+
                                         </div>
-                                        <button type="button" class="image-btn remove-btn">حذف</button>
+
+                                        <button
+                                            type="button"
+                                            class="image-btn remove-btn"
+                                        >
+                                            حذف
+                                        </button>
 
                                     </div>
 
-                                    <div class="image-item" draggable="true" >
 
-                                        <div class="image-details">
-                                            <div class="drag-handle">☰<span class="image-number">2</span></div>
-                                            <img class="image-preview" src="/images/deafult.jpg" alt="" width="40" height="40" >
-                                            <div class="image-info">
-                                                <p>الحجم: 86.3 KB</p>
-                                                <p>النوع: image/jpeg</p>
-                                            </div>
-                                        </div>
-                                        <button type="button" class="image-btn remove-btn">حذف</button>
+                                    {% comment %}
+                                        Prototype لنص المساعدة
+                                    {% endcomment %}
 
-                                    </div>
-                                    <p class="help-text">يمكنك امساك ايقونة ( ☰ ) لتغيير ترتيب الصور </p>
+                                    <p class="help-text">
+                                        يمكنك إمساك أيقونة (☰) لتغيير ترتيب الصور
+                                    </p>
+
+
+                                    {% comment %}
+                                        Prototype لإضافة صور أخرى.
+                                        JavaScript يقوم بنسخه عند الحاجة.
+                                    {% endcomment %}
 
                                     <label class="mini-upload upload-box">
-                                        <h5>إضافة المزيد من الصور</h5>
-                                        <input type="file" multiple="" accept="image/*" style="display:none;">
+
+                                        <h5>
+                                            إضافة المزيد من الصور
+                                        </h5>
+
+                                        <input
+                                            type="file"
+                                            multiple
+                                            accept="image/*"
+                                        >
+
                                     </label>
+
                                 </div>
-                                
+
                             </div>
 
-                            
                         </div>
-                        
-                    </div>
 
+                    </div>
                 </div>
 
             </details>
 
-            <details class="details" >
+            <details class="details">
 
                 <summary class="details-header">
 
@@ -516,10 +670,10 @@
 
 {% block out_container %}{% endblock out_container %}
 
-
 {% comment %} Page Scripts {% endcomment %}
 {% block page_scripts %}
     <script src="{% static "js/fields.js" %}"></script>
     <script src="{% static "js/details.js" %}"></script>
     <script src="{% static "js/products/product_pricing.js" %}"></script>
+    <script src="{% static "js/products/product_images.js" %}"></script>
 {% endblock %}
