@@ -265,8 +265,7 @@
                                     <td>
                                         <img src="{% if product.thumbnail_img %}{{ product.thumbnail_img.url }}{% else %}{% static "images/default.jpg" %}{% endif %}" alt="{{ product.name }}" width="80" height="80" >
                                     </td>
-                                    {% comment %} #change-later تعامل مع حالة لو كان اسم المنتج طويل جدا {% endcomment %}
-                                    <td>{{ product.name }}</td> 
+                                    <td>{{ product.name|truncatechars:20 }}</td> 
 
                                     <td class="price-cell">
                                         <div class="price-wrapper">

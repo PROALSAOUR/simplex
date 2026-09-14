@@ -45,12 +45,11 @@
                 </li>
                     
                 {% if  USER_TYPE == "vendor" %}
-                    {% comment %} #change-later وضع كلاس اكتف للصفحة الحالية  {% endcomment %}
                     <li><a class="menu-link link-btn" href="{% url 'store:vendors_dashboard' %}"><i class="fa-solid fa-home"></i><p> الرئيسية </p></a></li>
                     <li><a class="menu-link link-btn" href="{% url "orders:store_orders" STORE_ID %}"><i class="fa-solid fa-cart-shopping"></i><p> الطلبات </p> </a></li>
                     <li><a class="menu-link link-btn" href="{% url "store:store_products" STORE_ID %}"><i class="fa-solid fa-box-open"></i><p> المنتجات </p> </a></li>
-                    <li><a class="menu-link link-btn" href="oiugyftwd"><i class="fa-solid fa-chart-line"></i><p> الإحصائيات </p> </a></li>
-                    <li><a class="menu-link link-btn" href="oiugyftwdrf"><i class="fa-solid fa-wallet"></i><p> المالية </p> </a></li>
+                    <li><a class="menu-link link-btn" href=""><i class="fa-solid fa-chart-line"></i><p> الإحصائيات </p> </a></li>
+                    <li><a class="menu-link link-btn" href=""><i class="fa-solid fa-wallet"></i><p> المالية </p> </a></li>
                 {% else %}
                     <li><a class="menu-link active  link-btn" href="{% url 'management:admins_dashboard' %}"><i class="fa-solid fa-home"></i><p> الرئيسية </p></a></li>
                 {% endif %}

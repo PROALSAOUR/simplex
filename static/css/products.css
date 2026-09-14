@@ -109,26 +109,33 @@
     قسم التسعير 
 ═════════════════════════════════════════════════════════ */
 .pricing-summary {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
     margin: 10px auto;
     padding: 10px;
-    width: 70%;
+    width: 90%;
     max-width: 400px;
-    min-width: fit-content;
     background-color: var(--primary-background);
     border: 1px solid var(--seprator-color);
     border-radius: 5px;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    -ms-border-radius: 5px;
-    -o-border-radius: 5px;
 }
-.pricing-summary  .s-item {
+.pricing-summary .s-item {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-width: 0;
+    padding: 8px 12px;
+}
+/* الشاشات الكبيرة */
+@media (min-width: 500px) {
+    .pricing-summary {
+        grid-template-columns: repeat(4, 1fr);
+        max-width: 600px;
+    }
+
 }
 .pricing-summary  .s-item .s-title {
     margin-bottom: 10px;
@@ -139,7 +146,6 @@
 }
 .pricing-summary  .s-item .s-value:not(.ar) {
     direction: ltr;
-
 }
 /* ═══════════════════════════════════════════════════════
     قسم متغيرات المنتج

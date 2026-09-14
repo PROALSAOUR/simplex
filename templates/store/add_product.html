@@ -1,0 +1,525 @@
+{% extends "partials/base.html" %}
+{% load static %}      
+
+{% comment %} Page Head {% endcomment %}
+{% block page_head %}
+    <link rel="stylesheet" href="{% static "css/fields.css" %} ">
+    <link rel="stylesheet" href="{% static "css/details.css" %} ">
+    <link rel="stylesheet" href="{% static "css/products.css" %} ">
+{% endblock page_head %}
+
+{% comment %} Page Content {% endcomment %}
+{% block content %}
+
+    <!-- رأس القسم -->
+    <div class="section-header">
+        <div class="section-content">
+            <div class="section-details">
+                <h1><i class="primary-cl fa-solid fa-square-plus"></i> إنشاء منتج جديد</h1>
+            </div>
+        </div>
+        <button class="back-btn" id="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i> </button>
+    </div>
+
+    <form method="POST" id="add_product_form" enctype="multipart/form-data">
+        {% csrf_token %}
+        <nav>
+            <div class="nav-btns">
+                <button type="submit"  class="save-btn">حفظ</button>
+                <button type="button" class="reset" >الغاء</button>
+            </div>
+        </nav>
+
+        <div class="sections">
+
+            <details class="details" >
+
+                <summary class="details-header">
+
+                    <h4 class="header-title"><i class="fa-solid fa-book primary-cl"></i> المعلومات الأساسية  </h4>
+                    <span class="toggle"> <i class="fa-solid fa-chevron-up"></i> </span>
+
+                </summary>
+
+                <div class="details-body grid">
+
+                    <div class="fields-container">
+
+                        <div class="field {% if add_form.name.errors %}has-error{% endif %}">
+                            <label for="name">{{  add_form.name.label }}<span class="required">*</span></label>
+                            <div class="input">
+                                <input id="name" name="name" type="text" placeholder="ادخل اسم المنتج ..." >
+                                {% if add_form.name.errors %}
+                                    <i class="fa-solid fa-circle-exclamation error-icon"></i>
+                                {% endif %}
+                            </div>
+                            {% if add_form.name.errors %}
+                                <span class="help-text"> {{ add_form.name.errors.0 }} </span>
+                            {% else %}
+                                <span class="help-text">{{ add_form.name.help_text }}</span>
+                            {% endif %}
+                            
+                        </div>
+                        
+                        <div class="field checkbox-field  {% if add_form.is_visible.errors %}has-error{% endif %}">
+                            <div class="checkbox-control">
+                                <label for="is_visible">{{  add_form.is_visible.label }}</label>
+                                <input type="checkbox" name="is_visible" id="is_visible" checked>
+                            </div>
+                            {% if add_form.is_visible.errors %}
+                                <span class="help-text"> {{ add_form.is_visible.errors.0 }} </span>
+                            {% else %}
+                                <span class="help-text">{{ add_form.is_visible.help_text }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="field {% if add_form.type.errors %}has-error{% endif %}">
+                            <div class="select-control">
+                                <label for="type"> {{ add_form.type.label }} <span class="required">*</span></label>
+                        
+                                <div class="js-custom-select">
+                                    <select id="type" name="type" required>
+                                            {% for value, label in add_form.type.field.choices %}
+                                                <option value="{{ value }}"
+                                                    {% if add_form.type.value == value %}selected{% endif %}>
+                                                    {{ label }}
+                                                </option>
+                                            {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            {% if add_form.type.errors %}
+                                <span class="help-text"> {{ add_form.type.errors.0 }} </span>
+                            {% else %}
+                                <span class="help-text">{{ add_form.type.help_text }}</span>
+                            {% endif %}
+                        </div>
+                        
+                    </div>
+
+                    <div class="fields-container">
+                        <div class="field {% if add_form.description.errors %}has-error{% endif %}">
+                            <label for="description">وصف المنتج <span class="required">*</span></label>
+                            <div class="input">
+                                <span class="counter" > 
+                                    <span class="current-c">0</span>/<span class="max-c"></span>
+                                </span>
+                                {% comment %} #change-later غير اقصى حد للوصف {% endcomment %}
+                                <textarea name="description" id="description"  placeholder="ادخل وصف المنتج ..." rows="5" cols="40"  maxlength="500" ></textarea>
+                            </div>
+                            {% if add_form.description.errors %}
+                                <span class="help-text"> {{ add_form.description.errors.0 }} </span>
+                            {% else %}
+                                <span class="help-text">{{ add_form.description.help_text }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </div>
+
+            </details>
+
+            <details class="details" open>
+
+                <summary class="details-header">
+
+                    <h4 class="header-title"><i class="fa-solid fa-image primary-cl"></i> صور المنتج </h4>
+                    <span class="toggle"> <i class="fa-solid fa-chevron-up"></i> </span>
+
+                </summary>
+
+                <div class="details-body">
+
+                    <div class="fields-container">
+
+                        <div class="field image-field ">
+                            <h4 class="field-title"> صورة المنتج الرئيسية <span class="required">*</span></h4>
+                            <!-- <div class="field-errors">اخطاء الحقل هنا</div> -->
+                            <span class="help-text"> سوف تظهر في صفحة المتجر وصفحة تفاصيل المنتج</span>
+
+
+                            <!-- مربع رفع الصور -->
+                            <label  for="id_thumbnail_img" id="custom_upload_box" class="upload-box" >
+                                <i class="fa-solid fa-cloud-arrow-up primary-cl "></i>
+                                <h5 class="primary-cl">انقر لاختيار صورة</h5>
+                                <p>او اسحبها وافلتها هنا </p>
+                            </label>
+
+
+                            <!-- المعاينة -->
+                            <div style="display: none;" class="preview_box" id="thumbnail_preview_box" >
+                                
+                                <div class="image-item" draggable="true" >
+
+                                    <div class="image-details">
+                                        <img class="image-preview main-image" src="/images/deafult.jpg" alt="" width="50" height="50" >
+                                        <div class="image-info">
+                                            <p>الحجم: 86.3 KB</p>
+                                            <p>النوع: image/jpeg</p>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="image-btn replace-btn">استبدال</button>
+
+                                </div>
+                                    
+                            </div>
+
+                            <!-- الانبوت يضيفه جانغو  -->
+                            <input type="file" name="thumbnail_img" accept="image/*" required="" aria-describedby="id_thumbnail_img_helptext" id="id_thumbnail_img">
+                        
+                        </div>
+
+                        <div class="field image-field ">
+                            <h4 class="field-title"> صور المنتج <span class="required">*</span></h4>
+                            <!-- <div class="field-errors">اخطاء الحقل هنا</div> -->
+                            <span class="help-text"> سوف تظهر في صفحة المتجر وصفحة تفاصيل المنتج</span>
+
+                            <!-- مربع رفع الصور -->
+                            <div style="display: none;" class="upload-box" id="uploadBox">
+                                <i class="fa-solid fa-cloud-arrow-up primary-cl "></i>
+                                <h5 class="primary-cl">انقر لاختيار الصور</h5>
+                                <p>او اسحبها وافلتها هنا </p>
+                                <p>يمكنك رفع عدة صور (اقصى عدد 10)</p>
+                                <input type="file" id="fileInput" multiple accept="image/*">
+                            </div>
+                            
+                            <!-- المعاينة -->
+                            <div class="preview_box" id="thumbnail_preview_box" >
+                                <div class="images-list" id="imagesList">
+                            
+                                    <div class="image-item" draggable="true" >
+
+                                        <div class="image-details">
+                                            <div class="drag-handle">☰<span class="image-number">1</span></div>
+                                            <img class="image-preview" src="/images/deafult.jpg" alt="" width="40" height="40" >
+                                            <div class="image-info">
+                                                <p>الحجم: 86.3 KB</p>
+                                                <p>النوع: image/jpeg</p>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="image-btn remove-btn">حذف</button>
+
+                                    </div>
+
+                                    <div class="image-item" draggable="true" >
+
+                                        <div class="image-details">
+                                            <div class="drag-handle">☰<span class="image-number">2</span></div>
+                                            <img class="image-preview" src="/images/deafult.jpg" alt="" width="40" height="40" >
+                                            <div class="image-info">
+                                                <p>الحجم: 86.3 KB</p>
+                                                <p>النوع: image/jpeg</p>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="image-btn remove-btn">حذف</button>
+
+                                    </div>
+                                    <p class="help-text">يمكنك امساك ايقونة ( ☰ ) لتغيير ترتيب الصور </p>
+
+                                    <label class="mini-upload upload-box">
+                                        <h5>إضافة المزيد من الصور</h5>
+                                        <input type="file" multiple="" accept="image/*" style="display:none;">
+                                    </label>
+                                </div>
+                                
+                            </div>
+
+                            
+                        </div>
+                        
+                    </div>
+
+                </div>
+
+            </details>
+
+            <details class="details" >
+
+                <summary class="details-header">
+
+                    <h4 class="header-title"><i class="fa-solid  fa-dollar-sign primary-cl"></i>تسعير المنتج</h4>
+                    <span class="toggle"> <i class="fa-solid fa-chevron-up"></i> </span>
+
+                </summary>
+
+                <div class="details-body grid">
+
+                    <div class="fields-container">
+
+                        <div class="field {% if add_form.purchase_price.errors %}has-error{% endif %}">
+                            <label for="purchase_price"> {{  add_form.purchase_price.label }} <span class="required">*</span></label>
+                            <div class="input">
+                                <input name="purchase_price" id="purchase_price" type="text" placeholder="..." inputmode="decimal"><span class="currency">د.ل</span>
+                                {% if add_form.purchase_price.errors %}
+                                    <i class="fa-solid fa-circle-exclamation error-icon"></i>
+                                {% endif %}
+                            </div>
+                            {% if add_form.purchase_price.errors %}
+                                <span class="help-text"> {{ add_form.purchase_price.errors.0 }} </span>
+                            {% else %}
+                                <span class="help-text">{{ add_form.purchase_price.help_text }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div id="price_field" class="field {% if add_form.price.errors %}has-error{% endif %}">
+                            <label for="price">سعر البيع <span class="required">*</span></label>
+                            <div class="input">
+                                <input name="price" id="price" type="text" placeholder="..." inputmode="decimal" ><span class="currency">د.ل</span>
+                                {% if add_form.price.errors %}
+                                    <i class="fa-solid fa-circle-exclamation error-icon"></i>
+                                {% endif %}
+                            </div>
+                            {% if add_form.price.errors %}
+                                <span class="help-text"> {{ add_form.price.errors.0 }} </span>
+                            {% else %}
+                                <span class="help-text">{{ add_form.price.help_text }}</span>
+                            {% endif %}
+                        </div>
+                        
+                    </div>
+
+                    <div class="fields-container">
+                        
+                        <div id="offer_checkbox_field" class="field checkbox-field {% if add_form.offer.errors %}has-error{% endif %}">
+                            <div class="checkbox-control">
+                                <label >{{ add_form.offer.label }}</label>
+                                <input type="checkbox" name="offer" id="offer" >
+                            </div>
+                            {% if add_form.offer.errors %}
+                                <span class="help-text"> {{ add_form.offer.errors.0 }} </span>
+                            {% else %}
+                                <span class="help-text">{{ add_form.offer.help_text }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div id="offer_price_field" class="field {% if add_form.offer_price.errors %}has-error{% endif %}" >
+                            <label for="offer_price">{{ add_form.offer_price.label }}<span class="required">*</span></label>
+                            <div class="input">
+                                <input id="offer_price" name="offer_price" type="text" placeholder="..." inputmode="decimal" ><span class="currency">د.ل</span>
+                            </div>
+                            {% if add_form.offer_price.errors %}
+                                <span class="help-text"> {{ add_form.offer_price.errors.0 }}</span>
+                            {% else %}
+                                <span class="help-text">{{ add_form.offer_price.help_text }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="field checkbox-field {% if add_form.free_delivery.errors %}has-error{% endif %}">
+                            <div class="checkbox-control">
+                                <label for="free_delivery" >توصيل مجاني</label>
+                                <input name="free_delivery" id="free_delivery" type="checkbox" checked>
+                            </div>
+                            {% if add_form.free_delivery.errors %}
+                                <span class="help-text"> {{ add_form.free_delivery.errors.0 }}</span>
+                            {% else %}
+                                <span class="help-text">{{ add_form.free_delivery.help_text }}</span>
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                    <div id="pricing-summary" class="pricing-summary">
+
+                        <div class="s-item">
+                            <strong class="s-title" >قيمة الربح </strong>
+                            <span class="s-value ar">
+                                <span id="profit_value"></span>
+                                <span class="currency">د.ل</span>
+                            </span> 
+                        </div>
+
+                        <div class="s-item">
+                            <strong class="s-title" >نسبة الربح </strong>
+                            <span id="profit_margin_value" class="s-value"></span> 
+                        </div>
+
+                        <div id="offer_value_item" class="s-item">
+                            <strong class="s-title" >قيمة الخصم</strong>
+                            <span class="s-value ar cancel">
+                                <span  id="offer_value"></span>
+                                <span class="currency">د.ل</span>
+                            </span>
+                        </div>
+
+                        <div id="offer_percentage_item" class="s-item">
+                            <strong class="s-title" >نسبة الخصم</strong>
+                            <span id="offer_percentage" class="s-value cancel"></span> 
+                        </div>
+                    </div>
+
+                </div>
+
+            </details>
+
+            <details class="details">
+
+                <summary class="details-header">
+
+                    <h4 class="header-title">  <i class="fa-solid fa-palette primary-cl"></i>متغيرات المنتج</h4>                        
+                    <span class="toggle"> <i class="fa-solid fa-chevron-up"></i> </span>
+
+                </summary>
+
+                <div class="details-body">
+                    <input type="hidden" name="colors_data" id="colors_data">  <!-- حقل مخفي لبيانات الألوان  -->
+                        
+                    <div class="fields-container colors-varibles" id="color_form_container"> 
+
+                        <!-- قائمة الألوان المضافة -->
+                        <div class="colors-list"  id="colors-list">
+
+                            <div class="cv-card">
+                                <div class="cv-header">
+                                    <img src="/images/deafult.jpg" width="50" height="50" >
+                                    <h3>لون اسود</h3> 
+                                    <strong class="cancel" >غير متوفر</strong>
+                                </div>
+                                
+                                <h4 >المقاسات:</h4>
+
+                                <div class="cv-sizes">
+                                    <span>small</span>
+                                    <span>medium</span>
+                                    <span>large</span>
+                                    
+                                </div>
+
+                                <div class="cv-actions">
+                                    <button type="button" class="replace-btn" onclick="">تعديل</button>
+                                    <button type="button" class="remove-btn"  onclick="">حذف</button>
+                                </div>
+                            </div> 
+
+                        </div>
+
+                        <!-- نموذج إضافة لون -->
+                        <div style="display: none;" class="color-form" id="new-color-form">  
+                            <h3 class="form-title primary-cl" id="form-title-text">اضافة لون جديد</h3>
+
+                            <!-- قسم اسم اللون وحالة التوفر -->
+                            <div class="color-fields">
+                                
+                                <div class="field">
+                                    <label for="">اسم اللون <span class="required">*</span></label>
+                                    <div class="input">
+                                        <input type="text" placeholder="ادخل اسم اللون ..." >
+                                    </div>
+                                    <span class="help-text">نص المساعدة هنا نص المساعدة هنا</span>
+                                    <!-- <span class="feedback has-content cancel" id="err-color"> اسم اللون مطلوب</span> -->
+                                </div>
+                                
+                                <div class="field checkbox-field">
+                                    <div class="checkbox-control">
+                                        <label for="nc-available">حالة التوفر</label>
+                                        <input type="checkbox" id="nc-available" checked>
+                                    </div>
+                                    <span class="help-text">
+                                        هذاالمنتج متوفر وقابل للطلب في المتجر
+                                    </span>
+                                </div>
+
+                            </div>
+
+                            <!-- قسم الصورة -->
+                            <div class="color-image">
+
+                                <div class="field image-field ">
+                                    <h4 class="field-title"> صورة اللون  <span class="required">*</span></h4>
+                                    <span class="help-text"> تساعد زبائنك على تمييز اللون بسهولة</span>
+                                    <span class="feedback" id="err-image"> صورة اللون مطلوبة </span>
+
+                                    <!-- منطقة الرفع (قبل اختيار صورة) -->
+                                    <div class="upload-box" id="upload-area-wrap">
+                                        <i class="fa-solid fa-cloud-arrow-up primary-cl "></i>
+                                        <h5 class="primary-cl">انقر لاختيار صورة</h5>
+                                        <p>او اسحبها وافلتها هنا </p>
+                                        <input type="file" id="nc-image" accept="image/*" style="display:none;" onchange="SimplexColorManager.onImageSelected(this)">
+                                    </div>
+
+                                    <!-- معاينة الصورة بعد الاختيار -->
+                                    <!-- <div class="preview_box" id="img-selected-wrap" >
+                            
+                                        <div class="image-item" draggable="true" >
+
+                                            <div class="image-details">
+                                                <img id="nc-preview" class="image-preview main-image" src="/images/deafult.jpg" alt="" width="50" height="50" >
+                                                <div class="image-info">
+                                                    <p id="nc-fsize">الحجم: 86.3 KB</p>
+                                                    <p id="nc-ftype">النوع: image/jpeg</p>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="image-btn replace-btn">
+                                                <input type="file" accept="image/*" onchange="SimplexColorManager.onImageSelected(this)" style="position:absolute; inset:0; opacity:0;  width:100%; height:100%;">
+                                                استبدال
+                                            </button>
+                                            
+
+                                        </div>
+                                            
+                                    </div> -->
+                                    
+                                </div>                                    
+
+                            </div>
+
+                            <!-- قسم المقاسات  -->
+                            <div class="sizes-fields" id="nc-sizes-container"> 
+                                <div class="size-header">
+                                    <h5> المقاسات</h5>
+                                    <span>(يجب عليك اضافة مقاس واحد على الأقل و الا سوف يعتبر المنتج بمقاس موحد)</span>
+                                </div>
+
+                                <div class="sizes-list" id="nc-sizes-list">
+                                    <div class="size-item">
+                                        <span>X Large</span>
+                                        <button type="button" class="remove-size-btn">✕</button>
+                                    </div>
+                                    <div class="size-item">
+                                        <span>Large</span>
+                                        <button type="button" class="remove-size-btn">✕</button>
+                                    </div>
+                                    <div class="size-item">
+                                        <span>Small</span>
+                                        <button type="button" class="remove-size-btn">✕</button>
+                                    </div>
+
+                                </div>
+
+                                <div class="new-size" >
+                                    <input type="text" id="nc-size-input" placeholder="مثال: S أو M أو 42">
+                                    <button type="button" onclick="SimplexColorManager.addSizeToNew()">حفظ</button>
+                                </div>
+                            </div>
+
+                            <!-- قسم ازرار حفظ وإلغاء اللون -->
+                            <div class="form-btns">
+                                <button  type="button" onclick="SimplexColorManager.cancelForm()">إلغاء</button>
+                                <button class="save-btn" type="button" onclick="SimplexColorManager.saveColor()">حفظ اللون</button>
+                            </div>
+                        </div>
+
+                        <!-- زر إضافة لون -->
+                        <button class="upload-box" type="button" id="add-color-btn" onclick="SimplexColorManager.openNewColorForm()">
+                            <h5 >انقر لإضافة لون جديد <i class="fa-solid fa-plus "></i> </h5>
+                        </button>
+
+                    </div>
+                
+                </div>
+
+            </details>
+            
+        </div>
+
+    </form>
+{% endblock content %}
+
+{% block out_container %}{% endblock out_container %}
+
+
+{% comment %} Page Scripts {% endcomment %}
+{% block page_scripts %}
+    <script src="{% static "js/fields.js" %}"></script>
+    <script src="{% static "js/details.js" %}"></script>
+    <script src="{% static "js/products/product_pricing.js" %}"></script>
+{% endblock %}

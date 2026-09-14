@@ -10,11 +10,13 @@ class Product(models.Model):
     description = CKEditor5Field('الوصف', config_name='default', help_text="قم بإدخال وصف وتفاصيل المنتج ")
     upload_at = models.DateTimeField(auto_now_add=True , verbose_name='تاريخ الإنشاء')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='تاريخ آخر تحديث')
-    is_visible = models.BooleanField(default=False , choices=[(True, "ظاهر"),(False, "مخفي"),], verbose_name='الظهور للزبائن', help_text="قم بالأختيار ان كنت ترغب بإظهار المنتج للزبائن مباشرة \n ان لم تقم بتحديده سيتم إخفاء المنتج ولن يتمكن زبائنك من رؤيته")
-    purchase_price = models.DecimalField(max_digits=10, decimal_places=2 , verbose_name="سعر الشراء", help_text="أدخل سعر الجملة الذي اشتريت به المنتج")
+    is_visible = models.BooleanField(default=False , choices=[(True, "ظاهر"),(False, "مخفي"),], verbose_name='حالة الظهور', help_text="قم بالأختيار ان كنت ترغب بإظهار المنتج للزبائن مباشرة \n ان لم تقم بتحديده سيتم إخفاء المنتج ولن يتمكن زبائنك من رؤيته")
+    
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2 , verbose_name="سعر التكلفة", help_text="أدخل سعر الجملة الذي اشتريت به المنتج")
     price = models.DecimalField(max_digits=10, decimal_places=2 , verbose_name="سعر البيع", help_text="أدخل سعر البيع النهائي للمنتج ")
     offer = models.BooleanField(default=False , verbose_name="تخفيض", help_text="قم بتحديد هذا الخيار في حال كان المنتج عليه عرض تخفيض")
     offer_price = models.DecimalField(default=0 , max_digits=10, decimal_places=2 , verbose_name="السعر بعد التخفيض", help_text="أدخل سعر التخفيض الخاص بالمنتج")
+    
     free_delivery = models.BooleanField(default=False , verbose_name="توصيل مجاني", help_text="قم بتحديد هذا الخيار في حال كنت تقدم خدمة التوصيل المجاني لهذا المنتج")
     total_sales = models.PositiveIntegerField(default=0 , verbose_name="عدد المبيعات", help_text="اجمالي عدد مرات بيع المنتج")
     rejected_cause = models.TextField(verbose_name='سبب الرفض', blank=True, null=True, help_text='في حال تم رفض المنتج، يرجى توضيح سبب الرفض هنا ليتسنى للبائع معرفة التعديلات المطلوبة لإعادة رفع المنتج للمراجعة مرة أخرى')

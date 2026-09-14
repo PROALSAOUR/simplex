@@ -221,7 +221,7 @@ document.addEventListener("DOMContentLoaded",() => {
 // ==========================================================
 // دالة تقوم بتفعيل الرابط الفعال بالقائمة الجانبية بناءً على الموقع  الحالي
 function setActiveMenu() {
-    // تحديد الصفحة الحالية وإضافة كلاس اكتف للرابط المطابق
+    // تحديد الصفحة الحالية وإضافة كلاس active للرابط المطابق
     const currentPath = window.location.pathname;
     const menuLinks = document.querySelectorAll(".menu-link");
 
@@ -230,7 +230,13 @@ function setActiveMenu() {
     }
 
     menuLinks.forEach(function (link) {
-        const linkPath = new URL(link.href).pathname;
+        const href = link.getAttribute("href");
+
+        if (!href) {
+            return;
+        }
+
+        const linkPath = href.split("?")[0].split("#")[0];
 
         if (linkPath === currentPath) {
             link.classList.add("active");
