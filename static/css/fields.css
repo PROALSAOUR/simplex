@@ -329,7 +329,10 @@
     color: var(--gray-color);
 }
 .image-field input[type="file"] {
-    visibility: hidden;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
 }
 @media (min-width:500px) {
     .upload-box {

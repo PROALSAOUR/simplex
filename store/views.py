@@ -218,12 +218,12 @@ def add_product(request):
             return redirect('store:store_products' , sid=store.id)
         else:
             # إعادة عرض النموذج مع الأخطاء
-            context = {"add_form": form}
+            context = {"form": form}
             return render(request, 'store/add_product.html', context)
      
-    add_form = ProductRegisterForm()
+    form = ProductRegisterForm()
     context = {
-        "add_form": add_form,
+        "form": form,
     }
     return render(request, 'store/add_product.html', context)
 
