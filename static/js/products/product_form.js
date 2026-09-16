@@ -1,12 +1,30 @@
+// التحقق من حقول الفورم عبر اجاكس لمنع فقدان بيانات الفورم والصور والمتغيرات
 document.addEventListener("DOMContentLoaded", function () {
     // إرسال نموذج المنتج عبر AJAX لمنع إعادة تحميل الصفحة وفقدان الملفات
     const form = document.getElementById("add_product_form");
-
+    let submitting = false;
+    
     if (!form) {
         return;
     }
+    
+    // زر اعادة التعيين الخاص بالفورم 
+    const resetButton = form.querySelector('button[type="reset"].reset');
+    if (resetButton) {
+        resetButton.addEventListener("click", function () {
+            // إعادة جميع حقول النموذج والصور والألوان إلى حالتها الأصلية
+            form.reset();
 
-    let submitting = false;
+            if (window.SimplexImageManager) {
+                window.SimplexImageManager.resetImages();
+                window.SimplexImageManager.resetThumbnail();
+            }
+
+            if (window.SimplexColorManager) {
+                window.SimplexColorManager.resetColors();
+            }
+        });
+    }
 
     form.addEventListener("submit", async function (event) {
         // اعتراض الإرسال التقليدي وإرسال FormData عبر fetch
@@ -120,11 +138,7 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
         } catch (error) {
-            console.error(
-                "Product form submission error:",
-                error
-            );
-
+            
             showToast(
                 "failed-toast",
                 "حدث خطأ أثناء حفظ المنتج، يرجى المحاولة مرة أخرى."
@@ -256,3 +270,34 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 });
+// ================================================================
+// التحكم بظهور/إخفاء حقل سبب الرفض
+document.addEventListener('DOMContentLoaded', function () {
+    const statusField = document.getElementById('id_status');
+    const rejectedCauseField = document.getElementById('id_rejected_cause');
+    
+    // تحقق من وجود الحقول (قد لا تكون موجودة في صفحات المتاجر العادية)
+    if (!statusField || !rejectedCauseField) {
+        return;
+    }
+    
+    // البحث عن عنصر div الذي يحتوي على حقل سبب الرفض
+    const rejectedCauseContainer = rejectedCauseField.closest('div');
+    
+    // دالة للتحكم بالظهور والإخفاء
+    const toggleRejectedCauseField = function() {
+        const isRejected = statusField.value === 'rejected';
+        
+        if (rejectedCauseContainer) {
+            rejectedCauseContainer.style.display = isRejected ? 'block' : 'none';
+        }
+    };
+    
+    // إضافة event listener للتغيير الفوري
+    statusField.addEventListener('change', toggleRejectedCauseField);
+    statusField.addEventListener('input', toggleRejectedCauseField);
+    
+    // تشغيل الدالة عند تحميل الصفحة (للقيم المحفوظة مسبقاً)
+    toggleRejectedCauseField();
+});
+// ================================================================================

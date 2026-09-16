@@ -266,13 +266,6 @@ def add_product(request):
             )
 
         # ================================================================
-        # أخطاء النموذج
-        print("FORM ERRORS:", form.errors)
-        print(
-            "NON FIELD ERRORS:",
-            form.non_field_errors()
-        )
-
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return JsonResponse(
                 {
