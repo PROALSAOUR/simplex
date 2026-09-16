@@ -998,9 +998,7 @@
             removeNewSize(index);
         }
 
-
-        setForm('add_product_form');
-
+        setForm('product_form');
 
         const ncImage =
             document.getElementById('nc-image');

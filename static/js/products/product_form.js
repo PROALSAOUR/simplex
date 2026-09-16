@@ -1,7 +1,7 @@
 // التحقق من حقول الفورم عبر اجاكس لمنع فقدان بيانات الفورم والصور والمتغيرات
 document.addEventListener("DOMContentLoaded", function () {
     // إرسال نموذج المنتج عبر AJAX لمنع إعادة تحميل الصفحة وفقدان الملفات
-    const form = document.getElementById("add_product_form");
+    const form = document.getElementById("product_form");
     let submitting = false;
     
     if (!form) {

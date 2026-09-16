@@ -613,11 +613,7 @@ document.addEventListener("DOMContentLoaded", function () {
         );
     }
 
-    /*
-     * في صفحة تعديل المنتج يمكن استخدام:
-     * SimplexPricingManager.setForm("edit_product_form");
-     */
-    setForm("add_product_form");
+    setForm("product_form");
 
     /*
      * إتاحة مدير التسعير للصفحات الأخرى

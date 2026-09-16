@@ -493,7 +493,7 @@ def edit_product(request, pid):
     images_data_json = json.dumps(images_data, ensure_ascii=False)
     context = {
         'product': product,
-        'edit_form': form,
+        'form': form,
         'product_images': product_images,
         'colors_data_json': colors_data_json,
         'images_data_json': images_data_json,

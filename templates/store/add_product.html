@@ -21,7 +21,7 @@
         <button class="back-btn" id="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i> </button>
     </div>
 
-    <form method="POST" id="add_product_form" enctype="multipart/form-data" novalidate>
+    <form method="POST" id="product_form" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
         <nav>
             <div class="nav-btns">
@@ -128,7 +128,7 @@
 
                     <div class="fields-container">
                         <div class="field {% if form.description.errors %}has-error{% endif %}">
-                            <label for="description">وصف المنتج <span class="required">*</span></label>
+                            <label for="description">{{ form.description.label }} <span class="required">*</span></label>
                             <div class="input">
                                 <span class="counter" > 
                                     <span class="current-c">0</span>/<span class="max-c"></span>
@@ -892,7 +892,7 @@
         </div>
 
     </form>
-    
+
 {% endblock content %}
 
 {% block out_container %}{% endblock out_container %}
