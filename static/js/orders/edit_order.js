@@ -30,11 +30,10 @@ function setupCustomerEdit() {
     // أبقِ قائمة التعديل مفتوحة
     // ---------------------------------------------
 
-    if (customerForm.classList.contains("has-errors")) {
+    if (customerForm.classList.contains("has-error")) {
         customerList.hidden = true;
         customerForm.hidden = false;
     }
-
 
     // ---------------------------------------------
     // فتح قائمة التعديل

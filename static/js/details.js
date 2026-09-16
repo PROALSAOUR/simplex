@@ -28,5 +28,24 @@ function rememberDetailsState() {
     });
     
 }
-
 rememberDetailsState();
+// ==========================================================
+// فكرة الدالة باختصار: تبحث داخل كل ديتيلز عن .has-errors， 
+// وإذا وجدته تضيف خاصية open حتى يبقى القسم مفتوحًا ويظهر للمستخدم مكان الخطأ.
+function openDetailsWithErrors() {
+    const detailsElements = document.querySelectorAll("details");
+
+    if (!detailsElements.length) {
+        return;
+    }
+
+    detailsElements.forEach(function (details) {
+        const errorElement = details.querySelector(".has-error");
+
+        if (errorElement) {
+            details.open = true;
+        }
+    });
+}
+openDetailsWithErrors();
+// ==========================================================

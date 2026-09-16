@@ -132,6 +132,8 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             
             showFormErrors( form, data.errors || {}, data.non_field_errors || [] ); 
+            openDetailsWithErrors();
+            scrollToFirstError();
             showToast(
                 "failed-toast",
                 "يرجى تصحيح الأخطاء الموجودة في النموذج."

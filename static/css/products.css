@@ -38,6 +38,8 @@
     font-size: calc(1em - 2px);
 }
 .summary-card .card-details span  {
+    display: block;
+    margin-top: 5px;
     color: var(--gray-color);
     font-size: calc(1em + 2px);
 }
@@ -60,7 +62,7 @@
     font-size: calc(1em - 2px);
 }
 
-.summary-card .card-actions button {
+.summary-card .card-actions .card-btn {
     background-color: var(--primary-background);
     color: var(--gray-color);
     margin: 5px;

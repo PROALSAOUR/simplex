@@ -170,7 +170,7 @@
                 <span class="toggle"> <i class="fa-solid fa-chevron-up"></i> </span>
             </summary>
 
-            <ul class="details-list {% if status_form.errors %} has-errors{% endif %}">
+            <ul class="details-list {% if status_form.errors %} has-error{% endif %}">
 
                 <!-- يمكن تعديل الحالة -->
                 {% if can_edit %}
@@ -406,7 +406,7 @@
 
             
             {% comment %} فورم تعديل بيانات الزبون  {% endcomment %}
-            <ul id="customer-form"  class="details-list {% if customer_form.errors %}has-errors{% endif %}" >
+            <ul id="customer-form"  class="details-list {% if customer_form.errors %}has-error{% endif %}" >
 
                 <li class="details-item">
 

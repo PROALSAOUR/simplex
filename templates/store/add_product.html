@@ -21,7 +21,7 @@
         <button class="back-btn" id="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i> </button>
     </div>
 
-    <form method="POST" id="add_product_form" enctype="multipart/form-data">
+    <form method="POST" id="add_product_form" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
         <nav>
             <div class="nav-btns">
@@ -273,7 +273,6 @@
 
                             <h4 class="field-title">
                                 صور المنتج
-                                <span class="required">*</span>
                             </h4>
 
                             <span class="help-text">
@@ -893,6 +892,7 @@
         </div>
 
     </form>
+    
 {% endblock content %}
 
 {% block out_container %}{% endblock out_container %}

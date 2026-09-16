@@ -1,0 +1,965 @@
+{% extends "partials/base.html" %}
+{% load static %}      
+
+{% comment %} Page Head {% endcomment %}
+{% block page_head %}
+    <link rel="stylesheet" href="{% static "css/fields.css" %} ">
+    <link rel="stylesheet" href="{% static "css/details.css" %} ">
+    <link rel="stylesheet" href="{% static "css/products.css" %} ">
+{% endblock page_head %}
+
+{% comment %} Page Content {% endcomment %}
+{% block content %}
+
+    <!-- رأس القسم -->
+    <div class="section-header">
+        <div class="section-content">
+            <div class="section-details">
+                <h1><i class="fa-solid fa-square-pen primary-cl"></i> تعديل منتج </h1>
+            </div>
+        </div>
+        <button class="back-btn" id="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i> </button>
+    </div>
+
+    <div class="summary-card">
+        <div class="upper-part">
+
+            <div class="card-details">
+                <h3>{{ product.name }}</h3>
+                <p>
+                    تاريخ الانشاء
+                    <br>
+                    <span><i class="fa-regular fa-calendar-days"></i> {{ product.upload_at|date:"j F Y - g:i A" }} </span>
+                </p>
+                <p>
+                    أخر تعديل
+                    <br>
+                    <span><i class="fa-regular fa-calendar-days"></i> {{ product.updated_at|date:"j F Y - g:i A" }} </span>
+                </p>
+                {% if USER_TYPE == "admin" %}
+                <p>
+                    الحالة
+                    <br>
+                    <span class="{% if product.status == "approved" %}complete{% elif product.status == "rejected" %}cancel{% else %}pending{% endif %} " > ●  {{ product.get_status_display }}</span>
+                </p>
+                {% endif %}
+            </div>
+            <div class="card-image">
+                <img src="{{ product.thumbnail_img.url }}" alt="{{ product.name }}" width="100" height="100" draggable="false">
+            </div>
+        </div>
+
+        {% if product.status == "rejected" %}
+            <div class="notice rejected">
+                <div class="notice-icon">
+                    <i class="fa-regular fa-face-frown"></i>
+                </div>
+                <div class="notice-content">
+                    <strong class="notice-title">المنتج مرفوض !</strong>
+                    <p class="notice-text">
+                        {% if product.rejected_cause %}
+                            {{ product.rejected_cause }}
+                        {% else %}
+                            تم رفض هذا المنتج من قِبل إدارة الموقع، ولن يتمكن زبائنك من رؤيته.
+                            لمزيد من التفاصيل، يرجى التواصل مع الدعم.                        
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="card-actions">
+            <a class="card-btn view-btn" href="{% url "store:view_product" product.id %}" > معاينة <i class="fa-solid fa-eye"></i></a>
+            {% comment %} #change-later فعل زر نسخ الرابط {% endcomment %}
+            <button class="card-btn copy-url">نسخ الرابط <i class="fa-solid fa-copy"></i></button>
+            <button class="card-btn remove-btn" id="delete-btn" onclick="openDeleteProductDialog(this)" data-id="{{ product.id }}" data-name="{{ product.name }}" data-redirect="{% url "store:store_products" product.store.id %}" >حذف<i class="fa-solid fa-trash"></i></button>
+        </div>
+    </div>
+
+    <form method="POST" id="edit_product_form" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        <nav>
+            <div class="nav-btns">
+                <button type="submit"  class="save-btn">حفظ</button>
+                <button type="reset" class="reset" >اعادة تعيين</button>
+            </div>
+        </nav>
+
+        <div class="sections">
+
+            <details class="details">
+
+                <summary class="details-header">
+
+                    <h4 class="header-title"><i class="fa-solid fa-book primary-cl"></i> المعلومات الأساسية  </h4>
+                    <span class="toggle"> <i class="fa-solid fa-chevron-up"></i> </span>
+
+                </summary>
+
+                <div class="details-body grid">
+
+                    <div class="fields-container">
+
+                        <div class="field {% if form.name.errors %}has-error{% endif %}">
+                            <label for="name">{{  form.name.label }}<span class="required">*</span></label>
+                            <div class="input">
+                                <input id="name" name="name" type="text" placeholder="ادخل اسم المنتج ..." value="{{ form.name.value|default:'' }}" autocomplete="off" required>
+                                {% if form.name.errors %}
+                                    <i class="fa-solid fa-circle-exclamation error-icon"></i>
+                                {% endif %}
+                            </div>
+                            {% if form.name.errors %}
+                                <span class="help-text"> {{ form.name.errors.0 }} </span>
+                            {% else %}
+                                <span class="help-text">{{ form.name.help_text }}</span>
+                            {% endif %}
+                            
+                        </div>
+                        
+                        <div class="field checkbox-field  {% if form.is_visible.errors %}has-error{% endif %}">
+                            <div class="checkbox-control">
+                                <label for="is_visible">{{  form.is_visible.label }}</label>
+                                <input type="checkbox" name="is_visible" id="is_visible" {% if form.is_visible.value %}checked{% endif %}>
+                            </div>
+                            {% if form.is_visible.errors %}
+                                <span class="help-text"> {{ form.is_visible.errors.0 }} </span>
+                            {% else %}
+                                <span class="help-text">{{ form.is_visible.help_text }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="field {% if form.type.errors %}has-error{% endif %}">
+                            <div class="select-control">
+                                <label for="type"> {{ form.type.label }} </label>
+                        
+                                <div class="js-custom-select">
+                                    <select id="type" name="type" required>
+                                            {% for value, label in form.type.field.choices %}
+                                                <option value="{{ value }}"
+                                                    {% if form.type.value == value %}selected{% endif %}>
+                                                    {{ label }}
+                                                </option>
+                                            {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            {% if form.type.errors %}
+                                <span class="help-text"> {{ form.type.errors.0 }} </span>
+                            {% else %}
+                                <span class="help-text">{{ form.type.help_text }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="field {% if form.gender.errors %}has-error{% endif %}">
+                            <div class="select-control">
+                                <label for="gender">
+                                    {{ form.gender.label }}
+                                </label>
+
+                                <div class="js-custom-select">
+                                    <select id="gender" name="gender" required>
+                                        {% for value, label in form.gender.field.choices %}
+                                            <option value="{{ value }}"
+                                                {% if form.gender.value == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            {% if form.gender.errors %}
+                                <span class="help-text">
+                                    {{ form.gender.errors.0 }}
+                                </span>
+                            {% else %}
+                                <span class="help-text">
+                                    {{ form.gender.help_text }}
+                                </span>
+                            {% endif %}
+                                                
+                        </div>
+                    </div>
+
+                    <div class="fields-container">
+                        <div class="field {% if form.description.errors %}has-error{% endif %}">
+                            <label for="description">وصف المنتج <span class="required">*</span></label>
+                            <div class="input">
+                                <span class="counter" > 
+                                    <span class="current-c">0</span>/<span class="max-c"></span>
+                                </span>
+                                {% comment %} #change-later غير اقصى حد للوصف {% endcomment %}
+                                <textarea name="description" id="description"  placeholder="ادخل وصف المنتج ..."  rows="5" cols="40"  maxlength="500" required >{{ form.description.value|default:'' }}</textarea>
+                            </div>
+                            {% if form.description.errors %}
+                                <span class="help-text"> {{ form.description.errors.0 }} </span>
+                            {% else %}
+                                <span class="help-text">{{ form.description.help_text }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </div>
+
+            </details>
+
+            <details class="details">
+
+                <summary class="details-header">
+
+                    <h4 class="header-title"><i class="fa-solid fa-image primary-cl"></i> صور المنتج </h4>
+                    <span class="toggle"> <i class="fa-solid fa-chevron-up"></i> </span>
+
+                </summary>
+
+                <div class="details-body">
+
+                    <div class="fields-container">
+
+                        <!-- الصورة الرئيسية -->
+                        <div class="field image-field {% if form.thumbnail_img.errors %}has-error{% endif %}">
+
+                            <h4 class="field-title">
+                                {{ form.thumbnail_img.label }}
+                                <span class="required">*</span>
+                            </h4>
+
+                            {% if form.thumbnail_img.errors %}
+                                <span class="help-text">
+                                    {{ form.thumbnail_img.errors.0 }}
+                                </span>
+                            {% else %}
+                                <span class="help-text">
+                                    {{ form.thumbnail_img.help_text }}
+                                </span>
+                            {% endif %}
+
+
+                            <!-- مربع رفع الصورة الرئيسية -->
+                            <label
+                                for="{{ form.thumbnail_img.id_for_label }}"
+                                id="custom_upload_box"
+                                class="upload-box"
+                            >
+                                <i class="fa-solid fa-cloud-arrow-up primary-cl"></i>
+
+                                <h5 class="primary-cl">
+                                    انقر لاختيار صورة
+                                </h5>
+
+                                <p>
+                                    أو اسحبها وأفلتها هنا
+                                </p>
+                            </label>
+
+
+                            {% comment %}
+                                Django يقوم بإضافة input الخاص بالصورة الرئيسية
+                            {% endcomment %}
+                            {{ form.thumbnail_img }}
+
+
+                            <!-- معاينة الصورة الرئيسية -->
+                            <div
+                                class="preview_box"
+                                id="thumbnail_preview_box"
+                                style="display: none;"
+                            >
+
+                                <div
+                                    class="image-item"
+                                    draggable="false"
+                                >
+
+                                    <div class="image-details">
+
+                                        <img
+                                            class="image-preview main-image"
+                                            src=""
+                                            alt="صورة المنتج الرئيسية"
+                                            width="50"
+                                            height="50"
+                                        >
+
+                                        <div class="image-info">
+
+                                            <p>
+                                                الحجم:
+                                            </p>
+
+                                            <p>
+                                                النوع:
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <button
+                                        id="change_image_btn"
+                                        type="button"
+                                        class="image-btn replace-btn"
+                                    >
+                                        استبدال
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- صور المنتج -->
+                        <div class="field image-field">
+
+                            <input
+                                type="hidden"
+                                name="images_order"
+                                id="images_order"
+                            >
+
+                            <input
+                                type="hidden"
+                                name="deleted_images"
+                                id="deleted_images"
+                            >
+
+
+                            <h4 class="field-title">
+                                صور المنتج
+                            </h4>
+
+                            <span class="help-text">
+                                أضف صوراً إضافية للمنتج
+                            </span>
+
+
+                            <!-- مربع رفع الصور -->
+                            <div
+                                class="upload-box"
+                                id="uploadBox"
+                            >
+
+                                <i class="fa-solid fa-cloud-arrow-up primary-cl"></i>
+
+                                <h5 class="primary-cl">
+                                    انقر لاختيار الصور
+                                </h5>
+
+                                <p>
+                                    أو اسحبها وأفلتها هنا
+                                </p>
+
+                                <p>
+                                    يمكنك رفع عدة صور (أقصى عدد {{ 30 }})
+                                </p>
+
+                                <input
+                                    type="file"
+                                    id="fileInput"
+                                    multiple
+                                    accept="image/*"
+                                >
+
+                            </div>
+
+
+                            <!-- معاينة صور المنتج -->
+                            <div
+                                class="preview_box"
+                                id="images_preview_box"
+                                style="display: none;"
+                            >
+
+                                <div
+                                    class="images-list"
+                                    id="imagesList"
+                                >
+
+                                    {% comment %}
+                                        هذا العنصر Prototype.
+                                        JavaScript يقوم بنسخه عند إضافة الصور.
+                                        لا تحذف هذا العنصر من القالب.
+                                    {% endcomment %}
+
+                                    <div
+                                        class="image-item"
+                                        draggable="true"
+                                    >
+
+                                        <div class="image-details">
+
+                                            <div class="drag-handle">
+                                                ☰
+                                                <span class="image-number">
+                                                    1
+                                                </span>
+                                            </div>
+
+
+                                            <img
+                                                class="image-preview"
+                                                src=""
+                                                alt=""
+                                                width="40"
+                                                height="40"
+                                            >
+
+
+                                            <div class="image-info">
+
+                                                <p>
+                                                    الحجم:
+                                                </p>
+
+                                                <p>
+                                                    النوع:
+                                                </p>
+
+                                            </div>
+
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            class="image-btn remove-btn"
+                                        >
+                                            حذف
+                                        </button>
+
+                                    </div>
+
+
+                                    {% comment %}
+                                        Prototype لنص المساعدة
+                                    {% endcomment %}
+
+                                    <p class="help-text">
+                                        يمكنك إمساك أيقونة (☰) لتغيير ترتيب الصور
+                                    </p>
+
+
+                                    {% comment %}
+                                        Prototype لإضافة صور أخرى.
+                                        JavaScript يقوم بنسخه عند الحاجة.
+                                    {% endcomment %}
+
+                                    <label class="mini-upload upload-box">
+
+                                        <h5>
+                                            إضافة المزيد من الصور
+                                        </h5>
+
+                                        <input
+                                            type="file"
+                                            multiple
+                                            accept="image/*"
+                                        >
+
+                                    </label>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </details>
+
+            <details class="details">
+
+                <summary class="details-header">
+
+                    <h4 class="header-title"><i class="fa-solid  fa-dollar-sign primary-cl"></i>تسعير المنتج</h4>
+                    <span class="toggle"> <i class="fa-solid fa-chevron-up"></i> </span>
+
+                </summary>
+
+                <div class="details-body grid">
+
+                    <div class="fields-container">
+
+                        <div class="field {% if form.purchase_price.errors %}has-error{% endif %}">
+                            <label for="purchase_price"> {{  form.purchase_price.label }} <span class="required">*</span></label>
+                            <div class="input">
+                                <input name="purchase_price" id="purchase_price" type="text" placeholder="..." value="{{ form.purchase_price.value|default:'' }}" inputmode="decimal" autocomplete="off" required><span class="currency">د.ل</span>
+                                {% if form.purchase_price.errors %}
+                                    <i class="fa-solid fa-circle-exclamation error-icon"></i>
+                                {% endif %}
+                            </div>
+                            {% if form.purchase_price.errors %}
+                                <span class="help-text"> {{ form.purchase_price.errors.0 }} </span>
+                            {% else %}
+                                <span class="help-text">{{ form.purchase_price.help_text }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div id="price_field" class="field {% if form.price.errors %}has-error{% endif %}">
+                            <label for="price">سعر البيع <span class="required">*</span></label>
+                            <div class="input">
+                                <input name="price" id="price" type="text" placeholder="..." value="{{ form.price.value|default:'' }}" inputmode="decimal" autocomplete="off" required><span class="currency">د.ل</span>
+                                {% if form.price.errors %}
+                                    <i class="fa-solid fa-circle-exclamation error-icon"></i>
+                                {% endif %}
+                            </div>
+                            {% if form.price.errors %}
+                                <span class="help-text"> {{ form.price.errors.0 }} </span>
+                            {% else %}
+                                <span class="help-text">{{ form.price.help_text }}</span>
+                            {% endif %}
+                        </div>
+                        
+                    </div>
+
+                    <div class="fields-container">
+                        
+                        <div id="offer_checkbox_field" class="field checkbox-field {% if form.offer.errors %}has-error{% endif %}">
+                            <div class="checkbox-control">
+                                <label >{{ form.offer.label }}</label>
+                                <input type="checkbox" name="offer" id="offer" {% if form.offer.value %}checked{% endif %} >
+                            </div>
+                            {% if form.offer.errors %}
+                                <span class="help-text"> {{ form.offer.errors.0 }} </span>
+                            {% else %}
+                                <span class="help-text">{{ form.offer.help_text }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div id="offer_price_field" class="field {% if form.offer_price.errors %}has-error{% endif %}" >
+                            <label for="offer_price">{{ form.offer_price.label }}<span class="required">*</span></label>
+                            <div class="input">
+                                <input id="offer_price" name="offer_price" type="text" placeholder="..." value="{{ form.offer_price.value|default:'' }}" inputmode="decimal" autocomplete="off" ><span class="currency">د.ل</span>
+                            </div>
+                            {% if form.offer_price.errors %}
+                                <span class="help-text"> {{ form.offer_price.errors.0 }}</span>
+                            {% else %}
+                                <span class="help-text">{{ form.offer_price.help_text }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="field checkbox-field {% if form.free_delivery.errors %}has-error{% endif %}">
+                            <div class="checkbox-control">
+                                <label for="free_delivery" >توصيل مجاني</label>
+                                <input name="free_delivery" id="free_delivery" type="checkbox" {% if form.free_delivery.value %}checked{% endif %} >
+                            </div>
+                            {% if form.free_delivery.errors %}
+                                <span class="help-text"> {{ form.free_delivery.errors.0 }}</span>
+                            {% else %}
+                                <span class="help-text">{{ form.free_delivery.help_text }}</span>
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                    <div id="pricing-summary" class="pricing-summary">
+
+                        <div class="s-item">
+                            <strong class="s-title" >قيمة الربح </strong>
+                            <span class="s-value ar">
+                                <span id="profit_value"></span>
+                                <span class="currency">د.ل</span>
+                            </span> 
+                        </div>
+
+                        <div class="s-item">
+                            <strong class="s-title" >نسبة الربح </strong>
+                            <span id="profit_margin_value" class="s-value"></span> 
+                        </div>
+
+                        <div id="offer_value_item" class="s-item">
+                            <strong class="s-title" >قيمة الخصم</strong>
+                            <span class="s-value ar cancel">
+                                <span  id="offer_value"></span>
+                                <span class="currency">د.ل</span>
+                            </span>
+                        </div>
+
+                        <div id="offer_percentage_item" class="s-item">
+                            <strong class="s-title" >نسبة الخصم</strong>
+                            <span id="offer_percentage" class="s-value cancel"></span> 
+                        </div>
+                    </div>
+
+                </div>
+
+            </details>
+
+            <details class="details">
+
+                <summary class="details-header">
+
+                    <h4 class="header-title">  <i class="fa-solid fa-palette primary-cl"></i>متغيرات المنتج</h4>                        
+                    <span class="toggle"> <i class="fa-solid fa-chevron-up"></i> </span>
+
+                </summary>
+
+                {% comment %} قسم المقاسات والألوان {% endcomment %}
+                <div class="details-body">
+
+                    <input type="hidden" name="colors_data" id="colors_data">
+
+                    <div class="fields-container colors-varibles" id="color_form_container">
+
+                        <!-- قائمة الألوان المضافة -->
+                        <div class="colors-list" id="colors-list">
+
+                            <!-- قالب بطاقة اللون -->
+                            <template id="color-card-template">
+                                <div class="cv-card">
+
+                                    <div class="cv-header">
+
+                                        <img class="cv-image" src="" width="50" height="50" alt="صورة اللون" >
+                                        <h3 class="cv-name"></h3>
+                                        <strong class="cv-status"></strong>
+
+                                    </div>
+
+                                    <h4>المقاسات:</h4>
+
+                                    <div class="cv-sizes"> </div>
+
+                                    <div class="cv-actions">
+
+                                        <button
+                                            type="button"
+                                            class="replace-btn"
+                                            data-action="edit"
+                                        >
+                                            تعديل
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            class="remove-btn"
+                                            data-action="delete"
+                                        >
+                                            حذف
+                                        </button>
+
+                                    </div>
+
+                                </div>
+                            </template>
+
+                            <!-- قالب مقاس داخل بطاقة اللون -->
+                            <template id="color-size-template">
+                                <span></span>
+                            </template>
+
+                            <!-- رسالة المقاس الموحد -->
+                            <template id="uniform-size-template">
+                                <span class="uniform-size">مقاس موحد</span>
+                            </template>
+
+                        </div>
+
+                        <!-- نموذج إضافة / تعديل لون -->
+                        <div
+                            style="display:none;"
+                            class="color-form"
+                            id="new-color-form"
+                        >
+
+                            <h3
+                                class="form-title primary-cl"
+                                id="form-title-text"
+                            >
+                                إضافة لون جديد
+                            </h3>
+
+
+                            <!-- اسم اللون وحالة التوفر -->
+                            <div class="color-fields">
+
+                                <div class="field">
+
+                                    <label for="nc-color">
+                                        اسم اللون
+                                        <span class="required">*</span>
+                                    </label>
+
+                                    <div class="input">
+                                        <input
+                                            type="text"
+                                            id="nc-color"
+                                            placeholder="ادخل اسم اللون ..."
+                                            autocomplete="off"
+                                        >
+                                    </div>
+
+                                    <span
+                                        class="help-text"
+                                        id="err-color"
+                                    >
+                                        اسم اللون مطلوب
+                                    </span>
+
+                                </div>
+
+
+                                <div class="field checkbox-field">
+
+                                    <div class="checkbox-control">
+
+                                        <label for="nc-available">
+                                            حالة التوفر
+                                        </label>
+
+                                        <input
+                                            type="checkbox"
+                                            id="nc-available"
+                                            checked
+                                        >
+
+                                    </div>
+
+                                    <span class="help-text">
+                                        هل هذا اللون متوفر وقابل للطلب في المتجر
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- صورة اللون -->
+                            <div class="color-image">
+
+                                <div class="field image-field">
+
+                                    <h4 class="field-title">
+                                        صورة اللون
+                                        <span class="required">*</span>
+                                    </h4>
+
+                                    <span class="help-text">
+                                        تساعد زبائنك على تمييز اللون بسهولة
+                                    </span>
+
+                                    <span
+                                        class="feedback"
+                                        id="err-image"
+                                    >
+                                        صورة اللون مطلوبة
+                                    </span>
+
+
+                                    <!-- منطقة رفع الصورة -->
+                                    <label class="upload-box" id="upload-area-wrap" for="nc-image">
+
+                                        <i class="fa-solid fa-cloud-arrow-up primary-cl"></i>
+
+                                        <h5 class="primary-cl">
+                                            انقر لاختيار صورة
+                                        </h5>
+
+                                        <p>
+                                            او اسحبها وافلتها هنا
+                                        </p>
+
+                                        <input
+                                            type="file"
+                                            id="nc-image"
+                                            accept="image/*"
+                                            onchange="SimplexColorManager.onImageSelected(this)"
+                                            style="display:none;"
+                                        >
+
+                                    </label>
+
+
+                                    <!-- معاينة الصورة -->
+                                    <div
+                                        class="preview_box"
+                                        id="img-selected-wrap"
+                                        style="display:none;"
+                                    >
+
+                                        <div class="image-item">
+
+                                            <div class="image-details">
+
+                                                <img
+                                                    id="nc-preview"
+                                                    class="image-preview main-image"
+                                                    src=""
+                                                    alt="معاينة الصورة"
+                                                    width="50"
+                                                    height="50"
+                                                >
+
+                                                <div class="image-info">
+
+                                                    <p id="nc-fname"></p>
+
+                                                </div>
+
+                                            </div>
+
+
+                                            <button
+                                                type="button"
+                                                class="image-btn replace-btn"
+                                            >
+
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onchange="SimplexColorManager.onImageSelected(this)"
+                                                >
+
+                                                استبدال
+
+                                            </button>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- المقاسات -->
+                            <div
+                                class="sizes-fields"
+                                id="nc-sizes-container"
+                            >
+
+                                <div class="size-header">
+
+                                    <h5>
+                                        المقاسات
+                                    </h5>
+
+                                    <span>
+                                        (يجب عليك إضافة مقاس واحد على الأقل وإلا سوف يعتبر المنتج بمقاس موحد)
+                                    </span>
+
+                                </div>
+
+
+                                <div
+                                    class="sizes-list"
+                                    id="nc-sizes-list"
+                                >
+
+                                    <!-- قالب المقاس -->
+                                    <template id="new-size-template">
+
+                                        <div class="size-item">
+
+                                            <span class="size-name"></span>
+
+                                            <button
+                                                type="button"
+                                                class="remove-size-btn"
+                                            >
+                                                ✕
+                                            </button>
+
+                                        </div>
+
+                                    </template>
+
+                                    <!-- رسالة عدم وجود مقاسات -->
+                                    <template id="no-sizes-template">
+
+                                        <span class="no-sizes">
+                                            لم تتم إضافة مقاسات بعد — سيُعتبر المنتج بمقاس موحد
+                                        </span>
+
+                                    </template>
+
+                                </div>
+
+
+                                <div class="new-size">
+
+                                    <input
+                                        type="text"
+                                        id="nc-size-input"
+                                        placeholder="مثال: S أو M أو 42"
+                                        autocomplete="off"
+                                    >
+
+                                    <button
+                                        type="button"
+                                        onclick="SimplexColorManager.addSizeToNew()"
+                                    >
+                                        إضافة
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- أزرار النموذج -->
+                            <div class="form-btns">
+
+                                <button
+                                    type="button"
+                                    onclick="SimplexColorManager.cancelForm()"
+                                >
+                                    إلغاء
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="save-btn"
+                                    onclick="SimplexColorManager.saveColor()"
+                                >
+                                    حفظ اللون
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <!-- زر إضافة لون -->
+                        <button
+                            class="upload-box"
+                            type="button"
+                            id="add-color-btn"
+                            onclick="SimplexColorManager.openNewColorForm()"
+                        >
+
+                            <h5>
+                                انقر لإضافة لون جديد
+                                <i class="fa-solid fa-plus"></i>
+                            </h5>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </details>
+            
+        </div>
+
+    </form>
+    
+{% endblock content %}
+
+{% block out_container %}
+    {% include "store/components/delete_product.html" %}
+{% endblock out_container %}
+
+{% comment %} Page Scripts {% endcomment %}
+{% block page_scripts %}
+    <script src="{% static "js/fields.js" %}"></script>
+    <script src="{% static "js/details.js" %}"></script>
+    <script src="{% static "js/products/product_pricing.js" %}"></script>
+    <script src="{% static "js/products/product_images.js" %}"></script>
+    <script src="{% static 'js/products/product_colors.js' %}"></script>
+    <script src="{% static 'js/products/product_form.js' %}"></script>
+{% endblock %}
