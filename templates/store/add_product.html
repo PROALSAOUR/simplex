@@ -1,5 +1,6 @@
 {% extends "partials/base.html" %}
-{% load static %}      
+{% load static %}     
+{% load l10n %} 
 
 {% comment %} Page Head {% endcomment %}
 {% block page_head %}
@@ -198,11 +199,13 @@
                             </label>
 
 
-                            {% comment %}
-                                Django يقوم بإضافة input الخاص بالصورة الرئيسية
-                            {% endcomment %}
-                            {{ form.thumbnail_img }}
-
+                            <input
+                                type="file"
+                                name="thumbnail_img"
+                                id="id_thumbnail_img"
+                                accept="image/*"
+                                hidden
+                            >
 
                             <!-- معاينة الصورة الرئيسية -->
                             <div
@@ -431,7 +434,7 @@
                         <div class="field {% if form.purchase_price.errors %}has-error{% endif %}">
                             <label for="purchase_price"> {{  form.purchase_price.label }} <span class="required">*</span></label>
                             <div class="input">
-                                <input name="purchase_price" id="purchase_price" type="text" placeholder="..." value="{{ form.purchase_price.value|default:'' }}" inputmode="decimal" autocomplete="off" required><span class="currency">د.ل</span>
+                                <input name="purchase_price" id="purchase_price" type="text" placeholder="..." value="{{ form.purchase_price.value|unlocalize|default:'' }}" inputmode="decimal" autocomplete="off" required><span class="currency">د.ل</span>
                                 {% if form.purchase_price.errors %}
                                     <i class="fa-solid fa-circle-exclamation error-icon"></i>
                                 {% endif %}
@@ -446,7 +449,7 @@
                         <div id="price_field" class="field {% if form.price.errors %}has-error{% endif %}">
                             <label for="price">سعر البيع <span class="required">*</span></label>
                             <div class="input">
-                                <input name="price" id="price" type="text" placeholder="..." value="{{ form.price.value|default:'' }}" inputmode="decimal" autocomplete="off" required><span class="currency">د.ل</span>
+                                <input name="price" id="price" type="text" placeholder="..." value="{{ form.price.value|unlocalize|default:'' }}" inputmode="decimal" autocomplete="off" required><span class="currency">د.ل</span>
                                 {% if form.price.errors %}
                                     <i class="fa-solid fa-circle-exclamation error-icon"></i>
                                 {% endif %}
@@ -477,7 +480,7 @@
                         <div id="offer_price_field" class="field {% if form.offer_price.errors %}has-error{% endif %}" >
                             <label for="offer_price">{{ form.offer_price.label }}<span class="required">*</span></label>
                             <div class="input">
-                                <input id="offer_price" name="offer_price" type="text" placeholder="..." value="{{ form.offer_price.value|default:'' }}" inputmode="decimal" autocomplete="off" ><span class="currency">د.ل</span>
+                                <input id="offer_price" name="offer_price" type="text" placeholder="..." value="{{ form.offer_price.value|unlocalize|default:'' }}" inputmode="decimal" autocomplete="off" ><span class="currency">د.ل</span>
                             </div>
                             {% if form.offer_price.errors %}
                                 <span class="help-text"> {{ form.offer_price.errors.0 }}</span>

@@ -298,6 +298,419 @@ def add_product(request):
     )
 
 @login_required(login_url='accounts:log_in')
+@transaction.atomic
+def edit_product(request, pid):
+    # معالجة تعديل المنتج وإرجاع أخطاء التحقق عبر اجاكس دون إعادة تحميل الصفحة
+    product = get_object_or_404(Product, id=pid)
+    product_images = product.images.all()
+    user_type = get_user_type(request.user)
+
+    # تحقق أن المستخدم بائع وأن المنتج تابع لمتجره
+    if user_type == 'vendor':
+        if request.user.userprofile.store != product.store:
+            raise Http404("المنتج غير موجود")
+
+    if request.method == "POST":
+
+        # ============================================================
+        # إنشاء الفورم حسب نوع المستخدم
+        if user_type == "admin":
+            form = ProductAdminForm(
+                request.POST,
+                request.FILES,
+                instance=product
+            )
+        else:
+            form = ProductRegisterForm(
+                request.POST,
+                request.FILES,
+                instance=product
+            )
+
+        # ============================================================
+        # التحقق من صحة الفورم
+        if form.is_valid():
+
+            # حفظ بيانات المنتج
+            product = form.save(commit=False)
+
+            # عند تعديل المنتج من قبل البائع يعاد للمراجعة
+            if user_type == 'vendor':
+                product.status = "checking"
+
+            product.save()
+
+            # ============================================================
+            # حفظ الألوان والمقاسات
+            colors_data = request.POST.get("colors_data")
+
+            if colors_data is not None:
+                try:
+                    colors_list = json.loads(colors_data)
+                except (json.JSONDecodeError, ValueError, TypeError):
+                    colors_list = []
+
+                processed_color_ids = []
+
+                for i, color_item in enumerate(colors_list):
+                    color_id = color_item.get('id')
+
+                    image_file = request.FILES.get(
+                        f"color_image_{i}"
+                    )
+
+                    color_obj = None
+
+                    # البحث عن اللون الحالي إذا كان موجودًا
+                    if color_id:
+                        color_obj = ProductColor.objects.filter(
+                            id=color_id,
+                            product=product
+                        ).first()
+
+                    # إنشاء لون جديد إذا لم يكن موجودًا
+                    if not color_obj:
+                        color_obj = ProductColor(
+                            product=product
+                        )
+
+                    color_obj.color = color_item.get(
+                        'color',
+                        ''
+                    )
+
+                    available_value = color_item.get(
+                        'available',
+                        True
+                    )
+
+                    if isinstance(available_value, str):
+                        color_obj.available = (
+                            available_value.lower()
+                            in ['true', '1', 'yes']
+                        )
+                    else:
+                        color_obj.available = bool(
+                            available_value
+                        )
+
+                    # إذا تم رفع صورة جديدة للون
+                    if image_file:
+                        compressed_image = compress_image(
+                            image_file
+                        )
+
+                        if validate_image_file(
+                            compressed_image
+                        ):
+                            color_obj.image = (
+                                compressed_image
+                            )
+
+                    color_obj.save()
+
+                    processed_color_ids.append(
+                        color_obj.id
+                    )
+
+                    # حذف المقاسات القديمة وإعادة إنشائها
+                    color_obj.sizes.all().delete()
+
+                    for size_item in color_item.get(
+                        'sizes',
+                        []
+                    ):
+                        ProductSize.objects.create(
+                            product_color=color_obj,
+                            size=size_item.get(
+                                'size',
+                                ''
+                            ),
+                        )
+
+                # حذف الألوان التي لم تعد موجودة في البيانات
+                if processed_color_ids:
+                    product.colors.exclude(
+                        id__in=processed_color_ids
+                    ).delete()
+                else:
+                    product.colors.all().delete()
+
+            # ============================================================
+            # حذف الصور التي طلب المستخدم حذفها
+            deleted_images = request.POST.get(
+                "deleted_images"
+            )
+
+            if deleted_images:
+                try:
+                    deleted_ids = json.loads(
+                        deleted_images
+                    )
+
+                    ProductImages.objects.filter(
+                        id__in=deleted_ids,
+                        product=product
+                    ).delete()
+
+                except (
+                    json.JSONDecodeError,
+                    ValueError,
+                    TypeError
+                ):
+                    pass
+
+            # ============================================================
+            # معالجة الصور وترتيبها
+            order_data = request.POST.get(
+                "images_order"
+            )
+
+            if order_data:
+                try:
+                    order_list = json.loads(
+                        order_data
+                    )
+
+                    images = request.FILES.getlist(
+                        "images"
+                    )
+
+                    # ربط اسم الصورة بالملف المرفوع
+                    images_map = {
+                        img.name: img
+                        for img in images
+                    }
+
+                    # الحصول على بصمات الصور الموجودة لمنع التكرار
+                    existing_hashes = set()
+
+                    for existing in product.images.all():
+                        try:
+                            existing.image.open()
+
+                            file_bytes = (
+                                existing.image.read()
+                            )
+
+                            existing_hashes.add(
+                                hashlib.md5(
+                                    file_bytes
+                                ).hexdigest()
+                            )
+
+                            existing.image.close()
+
+                        except Exception:
+                            pass
+
+                    # معالجة ترتيب الصور
+                    for item in order_list:
+                        image_id = item.get("id")
+                        image_name = item.get("name")
+                        priority = item.get("index")
+                        is_existing = item.get(
+                            "isExisting",
+                            False
+                        )
+
+                        # ------------------------------------------------
+                        # صورة موجودة مسبقًا
+                        if is_existing and image_id:
+
+                            ProductImages.objects.filter(
+                                id=image_id,
+                                product=product
+                            ).update(
+                                priority=priority
+                            )
+
+                        # ------------------------------------------------
+                        # صورة جديدة
+                        elif not is_existing:
+
+                            image_file = images_map.get(
+                                image_name
+                            )
+
+                            if not image_file:
+                                continue
+
+                            if not validate_image_file(
+                                image_file
+                            ):
+                                continue
+
+                            # حساب بصمة الصورة قبل الضغط
+                            image_file.seek(0)
+
+                            uploaded_hash = (
+                                hashlib.md5(
+                                    image_file.read()
+                                ).hexdigest()
+                            )
+
+                            image_file.seek(0)
+
+                            # منع إضافة صورة مكررة
+                            if uploaded_hash in existing_hashes:
+                                continue
+
+                            # يتم ضغط الصور مرة أخرى من السيرفر
+                            # للتأكد من تقليل حجمها
+                            compressed_image = compress_image(
+                                image_file
+                            )
+
+                            ProductImages.objects.create(
+                                product=product,
+                                image=compressed_image,
+                                priority=priority
+                            )
+
+                except (
+                    json.JSONDecodeError,
+                    ValueError,
+                    TypeError
+                ):
+                    pass
+
+            # ============================================================
+            # نجاح العملية
+            messages.success(
+                request,
+                "تم تعديل المنتج بنجاح"
+            )
+
+            redirect_url = reverse(
+                "store:edit_product",
+                kwargs={
+                    "pid": product.id
+                }
+            )
+
+            # ============================================================
+            # استجابة AJAX
+            if request.headers.get(
+                "X-Requested-With"
+            ) == "XMLHttpRequest":
+
+                return JsonResponse({
+                    "success": True,
+                    "message": "تم تعديل المنتج بنجاح",
+                    "redirect_url": redirect_url,
+                })
+
+            # ============================================================
+            # الإرسال التقليدي
+            return redirect(
+                "store:edit_product",
+                pid=product.id
+            )
+
+        # ================================================================
+        # أخطاء التحقق
+        if request.headers.get(
+            "X-Requested-With"
+        ) == "XMLHttpRequest":
+
+            return JsonResponse(
+                {
+                    "success": False,
+                    "errors": form.errors.get_json_data(),
+                    "non_field_errors":
+                        form.non_field_errors().get_json_data(),
+                },
+                status=400
+            )
+
+        # ================================================================
+        # في حالة الإرسال التقليدي مع وجود أخطاء
+        # نكمل إلى بناء بيانات الصفحة بالأسفل
+
+    else:
+        # ================================================================
+        # GET
+        if user_type == "admin":
+            form = ProductAdminForm(
+                instance=product
+            )
+        else:
+            form = ProductRegisterForm(
+                instance=product
+            )
+
+    # ================================================================
+    # تجهيز بيانات الألوان
+    colors_data = []
+
+    for color in product.colors.prefetch_related(
+        'sizes'
+    ).all():
+
+        colors_data.append({
+            'id': color.id,
+            'color': color.color,
+            'available': color.available,
+            'imageURL': (
+                color.image.url
+                if color.image
+                else ''
+            ),
+            'imageName': (
+                color.image.name.split('/')[-1]
+                if color.image
+                else ''
+            ),
+            'sizes': [
+                {
+                    'size': size.size,
+                }
+                for size in color.sizes.all()
+            ],
+        })
+
+    colors_data_json = json.dumps(
+        colors_data,
+        ensure_ascii=False
+    )
+
+    # ================================================================
+    # تجهيز بيانات الصور
+    images_data = []
+
+    for image in product_images:
+
+        images_data.append({
+            'id': image.id,
+            'url': image.image.url,
+            'name': image.image.name.split('/')[-1],
+            'size': image.image.size,
+            'priority': image.priority,
+        })
+
+    images_data_json = json.dumps(
+        images_data,
+        ensure_ascii=False
+    )
+
+    # ================================================================
+    # بيانات القالب
+    context = {
+        'product': product,
+        'form': form,
+        'product_images': product_images,
+        'colors_data_json': colors_data_json,
+        'images_data_json': images_data_json,
+    }
+
+    return render(
+        request,
+        'store/edit_product.html',
+        context
+    )
+
+@login_required(login_url='accounts:log_in')
 @vendor_only
 @require_POST
 def delete_product(request):
@@ -323,182 +736,6 @@ def delete_product(request):
             "status": "error",
             "message": str(e)
         })
-    
-@login_required(login_url='accounts:log_in')
-def edit_product(request, pid):
-    """الدالة المسؤولة عن صفحة التعديل الخاصة بالمنتج"""
-    product = get_object_or_404(Product, id=pid)
-    product_images = product.images.all()
-    
-    user_type = get_user_type(request.user)
-    
-    # تحقق ان المستخدم بائع وان المنتج الذي يريد تعديله تابع لمتجره
-    if  user_type == 'vendor':
-        if request.user.userprofile.store != product.store :
-            raise Http404("المنتج غير موجود")
-        
-    if request.method == "POST":
-        if user_type == "admin":
-            form = ProductAdminForm(request.POST, request.FILES, instance=product)
-        else:
-            form = ProductRegisterForm(request.POST, request.FILES, instance=product)
-            
-        if form.is_valid():
-            product = form.save()
-            
-            #  لو المستخدم بائع اعد حالة المنتج الى جاري المراجعة عند اجراء اي تعديل عليه ليتم مراجعته من الادارة مرة اخرى قبل عرضه للزبائن
-            if user_type == 'vendor':
-                product.status = "checking"
-                product.save()
-
-            colors_data = request.POST.get("colors_data")
-            if colors_data is not None:
-                try:
-                    colors_list = json.loads(colors_data)
-                except (json.JSONDecodeError, ValueError):
-                    colors_list = []
-
-                processed_color_ids = []
-                for i, color_item in enumerate(colors_list):
-                    color_id = color_item.get('id')
-                    image_file = request.FILES.get(f"color_image_{i}")
-
-                    color_obj = None
-                    if color_id:
-                        color_obj = ProductColor.objects.filter(id=color_id, product=product).first()
-
-                    if not color_obj:
-                        color_obj = ProductColor(product=product)
-
-                    color_obj.color = color_item.get('color', '')
-                    available_value = color_item.get('available', True)
-                    if isinstance(available_value, str):
-                        color_obj.available = available_value.lower() in ['true', '1', 'yes']
-                    else:
-                        color_obj.available = bool(available_value)
-
-                    if image_file:
-                        compressed_image = compress_image(image_file)
-                        if validate_image_file(compressed_image):
-                            color_obj.image = compressed_image
-
-                    color_obj.save()
-                    processed_color_ids.append(color_obj.id)
-
-                    color_obj.sizes.all().delete()
-                    for size_item in color_item.get('sizes', []):
-                        ProductSize.objects.create(
-                            product_color=color_obj,
-                            size=size_item.get('size', ''),
-                        )
-
-                if processed_color_ids:
-                    product.colors.exclude(id__in=processed_color_ids).delete()
-                else:
-                    product.colors.all().delete()
-
-            # Handle images
-            deleted_images = request.POST.get("deleted_images")
-            if deleted_images:
-                try:
-                    deleted_ids = json.loads(deleted_images)
-                    ProductImages.objects.filter(id__in=deleted_ids, product=product).delete()
-                except (json.JSONDecodeError, ValueError):
-                    deleted_ids = []
-            else:
-                deleted_ids = []
-
-            order_data = request.POST.get("images_order")
-            if order_data:
-                try:
-                    order_list = json.loads(order_data)
-                    images = request.FILES.getlist("images")
-                    images_map = {img.name: img for img in images}
-
-                    existing_hashes = set()
-                    for existing in product.images.all():
-                        try:
-                            existing.image.open()
-                            file_bytes = existing.image.read()
-                            existing_hashes.add(hashlib.md5(file_bytes).hexdigest())
-                            existing.image.close()
-                        except Exception:
-                            pass
-
-                    for item in order_list:
-                        image_id = item.get("id")
-                        image_name = item.get("name")
-                        priority = item.get("index")
-                        is_existing = item.get("isExisting", False)
-
-                        if is_existing and image_id:
-                            # Update priority for existing image
-                            ProductImages.objects.filter(id=image_id, product=product).update(priority=priority)
-                        elif not is_existing:
-                            # Add new image if not duplicate by content
-                            image_file = images_map.get(image_name)
-                            if image_file and validate_image_file(image_file):
-                                image_file.seek(0)
-                                uploaded_hash = hashlib.md5(image_file.read()).hexdigest()
-                                image_file.seek(0)
-                                if uploaded_hash in existing_hashes:
-                                    continue
-                                # يتم ضغط الصور بواسطة دالة جافاسكريبت وضغطها هنا مرة أخرى للتأكد من تقليل حجمها
-                                compressed_image = compress_image(image_file)
-                                ProductImages.objects.create(
-                                    product=product,
-                                    image=compressed_image,
-                                    priority=priority
-                                )
-                except (json.JSONDecodeError, ValueError):
-                    pass
-
-            messages.success(request, "تم تعديل المنتج بنجاح")
-            return redirect('store:edit_product', pid=product.id)
-
-    else:
-        if user_type == "admin":
-            form = ProductAdminForm(instance=product)
-        else:
-            form = ProductRegisterForm(instance=product)
-    
-    colors_data = []
-    for color in product.colors.prefetch_related('sizes').all():
-        colors_data.append({
-            'id': color.id,
-            'color': color.color,
-            'available': color.available,
-            'imageURL': color.image.url if color.image else '',
-            'imageName': color.image.name.split('/')[-1] if color.image else '',
-            'sizes': [
-                {
-                    'size': size.size,
-                }
-                for size in color.sizes.all()
-            ],
-        })
-
-    colors_data_json = json.dumps(colors_data, ensure_ascii=False)
-    
-    images_data = []
-    for image in product_images:
-        images_data.append({
-            'id': image.id,
-            'url': image.image.url,
-            'name': image.image.name.split('/')[-1],
-            'size': image.image.size,
-            'priority': image.priority,
-        })
-
-    images_data_json = json.dumps(images_data, ensure_ascii=False)
-    context = {
-        'product': product,
-        'form': form,
-        'product_images': product_images,
-        'colors_data_json': colors_data_json,
-        'images_data_json': images_data_json,
-    }
-    return render(request, 'store/edit_product.html', context)
 
 def view_product(request, pid):
     """الدالة المسؤولة عن عرض صفحة المنتج للزبون ليتمكن من اجراء عملية الشراء منها"""

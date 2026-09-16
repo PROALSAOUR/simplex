@@ -83,6 +83,31 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ============================================================
+    // جلب نوع الصورة في صور المنتج 
+    async function updateExistingImageType( typeElement, imageUrl) {
+        // جلب نوع الصورة الموجودة فعلياً وعرضه داخل بيانات الصورة
+        if (!typeElement || !imageUrl) {
+            return;
+        }
+
+        try {
+            const response = await fetch(imageUrl);
+
+            if (!response.ok) {
+                throw new Error("تعذر تحميل الصورة");
+            }
+
+            const blob = await response.blob();
+
+            typeElement.textContent =
+                `النوع: ${blob.type || "صورة"}`;
+
+        } catch (error) {
+            // استخدام نوع بديل عند تعذر قراءة بيانات الصورة
+            typeElement.textContent = "النوع: صورة";
+        }
+    }
+    // ============================================================
     // إنشاء مفتاح للملف المرفوع
     function getFileKey(file) {
         // إنشاء مفتاح ثابت للملف مع الحفاظ على مفتاحه الأصلي بعد الضغط
@@ -113,20 +138,30 @@ document.addEventListener("DOMContentLoaded", function () {
     // ============================================================
     // مزامنة الملفات مع Form
     function syncFilesToForm() {
-        // مزامنة الصور الجديدة وترتيبها مع حقول النموذج
+        // مزامنة الصور المحذوفة والملفات الجديدة وترتيب الصور مع النموذج
         const form = fileInput?.form;
 
         if (!form) {
             return;
         }
 
+        // إزالة حقول الملفات الديناميكية القديمة
         form
             .querySelectorAll(".dynamic-file")
             .forEach((input) => input.remove());
 
+        // ------------------------------------------------------------
+        // الصور المحذوفة
+        // ------------------------------------------------------------
+
         if (deletedImagesInput) {
-            deletedImagesInput.value = deletedImageIds.join(",");
+            deletedImagesInput.value =
+                JSON.stringify(deletedImageIds);
         }
+
+        // ------------------------------------------------------------
+        // إضافة الصور الجديدة إلى FormData
+        // ------------------------------------------------------------
 
         uploadedFiles.forEach((file) => {
             const input = document.createElement("input");
@@ -145,22 +180,61 @@ document.addEventListener("DOMContentLoaded", function () {
             form.appendChild(input);
         });
 
-        const order = getAllImages().map((image) => {
-            if (image.type === "existing") {
-                return {
-                    type: "existing",
-                    id: image.id
-                };
+        // ------------------------------------------------------------
+        // استخراج الترتيب الحالي من DOM
+        // ------------------------------------------------------------
+
+        const items = imagesList
+            ? imagesList.querySelectorAll(
+                ".image-item.generated-image"
+            )
+            : [];
+
+        const order = [];
+
+        items.forEach((item, index) => {
+            const imageType = item.dataset.imageType;
+
+            // صورة موجودة مسبقاً
+            if (imageType === "existing") {
+                order.push({
+                    id: item.dataset.imageId,
+                    name: item.dataset.imageName || "",
+                    index: index,
+                    isExisting: true
+                });
+
+                return;
             }
 
-            return {
-                type: "uploaded",
-                key: getFileKey(image)
-            };
+            // صورة جديدة
+            if (imageType === "uploaded") {
+                const uploadKey = item.dataset.uploadKey;
+
+                const file = uploadedFiles.find(
+                    (uploadedFile) =>
+                        getFileKey(uploadedFile) === uploadKey
+                );
+
+                if (!file) {
+                    return;
+                }
+
+                order.push({
+                    name: file.name,
+                    index: index,
+                    isExisting: false
+                });
+            }
         });
 
+        // ------------------------------------------------------------
+        // حفظ ترتيب الصور داخل الحقل المخفي
+        // ------------------------------------------------------------
+
         if (imagesOrderInput) {
-            imagesOrderInput.value = JSON.stringify(order);
+            imagesOrderInput.value =
+                JSON.stringify(order);
         }
     }
 
@@ -207,30 +281,60 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // ============================================================
     // معلومات الصورة الرئيسية الموجودة
-    function updateThumbnailInfoFromExisting() {
-        // تحديث معلومات الصورة الرئيسية الموجودة مسبقاً
+    async function updateThumbnailInfoFromExisting() {
+        // جلب معلومات الصورة الرئيسية الحالية وعرض حجمها ونوعها
         const thumbnailPreviewBox =
             document.getElementById("thumbnail_preview_box");
 
-        if (!thumbnailPreviewBox) {
+        if (!thumbnailPreviewBox || !window.SimplexInitialThumbnailUrl) {
             return;
         }
 
-        const info = thumbnailPreviewBox.querySelector(".image-info");
+        const info =
+            thumbnailPreviewBox.querySelector(".image-info");
 
         if (!info) {
             return;
         }
 
-        const sizeElement = info.querySelector("p:first-child");
-        const typeElement = info.querySelector("p:last-child");
+        const sizeElement =
+            info.querySelector("p:first-child");
 
-        if (sizeElement) {
-            sizeElement.textContent = "الحجم: الصورة الحالية";
-        }
+        const typeElement =
+            info.querySelector("p:last-child");
 
-        if (typeElement) {
-            typeElement.textContent = "النوع: صورة المنتج";
+        try {
+            const response =
+                await fetch(window.SimplexInitialThumbnailUrl);
+
+            if (!response.ok) {
+                throw new Error("تعذر تحميل الصورة");
+            }
+
+            const blob =
+                await response.blob();
+
+            if (sizeElement) {
+                sizeElement.textContent =
+                    `الحجم: ${formatFileSize(blob.size)}`;
+            }
+
+            if (typeElement) {
+                typeElement.textContent =
+                    `النوع: ${blob.type || "صورة"}`;
+            }
+
+        } catch (error) {
+            // عرض معلومات بديلة إذا تعذر الحصول على بيانات الملف
+            if (sizeElement) {
+                sizeElement.textContent =
+                    "الحجم: غير معروف";
+            }
+
+            if (typeElement) {
+                typeElement.textContent =
+                    "النوع: صورة";
+            }
         }
     }
 
@@ -719,9 +823,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // تحديد نوع الصورة
         if (image.type === "existing") {
+            // حفظ بيانات الصورة الموجودة لاستخدامها عند إرسال النموذج
             item.dataset.imageType = "existing";
             item.dataset.imageId = image.id;
+            item.dataset.imageName = image.name || "";
         } else {
+            // حفظ مفتاح الصورة الجديدة لربطها بملف FormData
             item.dataset.imageType = "uploaded";
             item.dataset.uploadKey = getFileKey(image);
         }
@@ -757,6 +864,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // ------------------------------------------------------------
 
         if (info) {
+            // عرض معلومات الصورة الموجودة أو الجديدة
             const infoElements =
                 info.querySelectorAll("p");
 
@@ -771,18 +879,20 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             if (infoElements[1]) {
-                const imageType =
-                    image.mime_type ||
-                    image.file_type ||
-                    image.content_type ||
-                    image.type;
+                if (image.type === "existing") {
+                    // جلب نوع الصورة الموجودة فعلياً من ملف الصورة
+                    infoElements[1].textContent =
+                        "النوع: جارٍ التحميل...";
 
-                infoElements[1].textContent =
-                    `النوع: ${
-                        imageType === "existing"
-                            ? "صورة"
-                            : imageType || "صورة"
-                    }`;
+                    updateExistingImageType(
+                        infoElements[1],
+                        imageUrl
+                    );
+                } else {
+                    // عرض نوع الصورة الجديدة من الملف المرفوع
+                    infoElements[1].textContent =
+                        `النوع: ${image.type || "صورة"}`;
+                }
             }
         }
 
@@ -812,7 +922,6 @@ document.addEventListener("DOMContentLoaded", function () {
             // إنهاء السحب وحفظ الترتيب الجديد
             item.classList.remove("dragging");
 
-            updateOrderFromDOM();
             updateImageNumbers();
             syncFilesToForm();
         });
@@ -1015,51 +1124,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ============================================================
-    // تحديث ترتيب الصور من DOM
-    function updateOrderFromDOM() {
-        // استخراج ترتيب الصور الحالي من عناصر DOM
-        if (!imagesList) {
-            return;
-        }
-
-        const items =
-            imagesList.querySelectorAll(
-                ".image-item.generated-image"
-            );
-
-        const order = [];
-
-        items.forEach((item) => {
-            if (
-                item.dataset.imageType ===
-                "existing"
-            ) {
-                order.push({
-                    type: "existing",
-                    id: item.dataset.imageId
-                });
-
-                return;
-            }
-
-            if (
-                item.dataset.imageType ===
-                "uploaded"
-            ) {
-                order.push({
-                    type: "uploaded",
-                    key: item.dataset.uploadKey
-                });
-            }
-        });
-
-        if (imagesOrderInput) {
-            imagesOrderInput.value =
-                JSON.stringify(order);
-        }
-    }
-
-    // ============================================================
     // تحديث أرقام الصور
     function updateImageNumbers() {
         // تحديث أرقام الصور بعد تغيير ترتيبها
@@ -1155,13 +1219,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ============================================================
-    // التحقق قبل إرسال النموذج
-    function handleFormSubmit() {
-        // مزامنة الصور وترتيبها قبل إرسال النموذج
-        syncFilesToForm();
-    }
-
-    // ============================================================
     // تهيئة مدير الصور
     function init() {
         // تشغيل جميع وظائف إدارة صور المنتج
@@ -1178,10 +1235,10 @@ document.addEventListener("DOMContentLoaded", function () {
             document.querySelector("form");
 
         if (form) {
-            form.addEventListener(
-                "submit",
-                handleFormSubmit
-            );
+            form.addEventListener("submit", () => {
+                // مزامنة الصور قبل إرسال النموذج
+                syncFilesToForm();
+            });
         }
     }
 
