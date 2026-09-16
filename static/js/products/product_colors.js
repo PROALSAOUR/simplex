@@ -40,11 +40,12 @@
 
 
         function handleFormSubmit(event) {
-            // مزامنة بيانات الألوان قبل إرسال النموذج
+            // منع حفظ المنتج إذا لم تتم إضافة أي ألوان
             syncField();
 
             if (!colorsData.length) {
                 event.preventDefault();
+                event.stopImmediatePropagation();
 
                 showToast(
                     'failed-toast',

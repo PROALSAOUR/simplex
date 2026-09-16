@@ -10,7 +10,10 @@ class Product(models.Model):
     description = CKEditor5Field('الوصف', config_name='default', help_text="قم بإدخال وصف وتفاصيل المنتج ")
     upload_at = models.DateTimeField(auto_now_add=True , verbose_name='تاريخ الإنشاء')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='تاريخ آخر تحديث')
-    is_visible = models.BooleanField(default=True , verbose_name='حالة الظهور', help_text="قم بالأختيار ان كنت ترغب بإظهار المنتج للزبائن مباشرة \n ان لم تقم بتحديده سيتم إخفاء المنتج ولن يتمكن زبائنك من رؤيته")
+    
+    
+    VISIBLE_CHOICES = [(False, 'مخفي'), (True, 'ظاهر'),]
+    is_visible = models.BooleanField(default=True , choices=VISIBLE_CHOICES, verbose_name='حالة الظهور', help_text="قم بالأختيار ان كنت ترغب بإظهار المنتج للزبائن مباشرة \n ان لم تقم بتحديده سيتم إخفاء المنتج ولن يتمكن زبائنك من رؤيته")
     
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2 , verbose_name="سعر التكلفة", help_text="أدخل سعر الجملة الذي اشتريت به المنتج")
     price = models.DecimalField(max_digits=10, decimal_places=2 , verbose_name="سعر البيع", help_text="أدخل سعر البيع النهائي للمنتج ")

@@ -1,4 +1,5 @@
 from django.shortcuts import redirect, render, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse, Http404
@@ -146,86 +147,162 @@ def store_products(request, sid):
 
 @login_required(login_url='accounts:log_in')
 @vendor_only
-@transaction.atomic # تجعل كل العمليات داخل الدالة تُنفَّذ كحزمة واحدة، إذا حدث خطأ في أي خطوة يتم التراجع عن كل العمليات السابقة
+@transaction.atomic
 def add_product(request):
-    """الدالة المسؤولة عن صفحة اضافة منتج جديد """
+    # معالجة إضافة المنتج وإرجاع أخطاء التحقق عبر AJAX دون إعادة تحميل الصفحة
     store = request.user.userprofile.store
+
     if request.method == "POST":
-        form = ProductRegisterForm(request.POST, request.FILES, store=store)
+        form = ProductRegisterForm(
+            request.POST,
+            request.FILES,
+            store=store
+        )
+
         if form.is_valid():
             product = form.save(commit=False)
             product.store = store
             product.save()
-            
-            order_data = request.POST.get("images_order")
-            order_data = json.loads(order_data) if order_data else []
-            
-            images = request.FILES.getlist("images")
-            images_map = {img.name: img for img in images} # نحول الصور لقاموس (اسم → ملف)
-            for item in order_data:
-                image_name = item.get("name")
-                priority = item.get("index")
-                image_file = images_map.get(image_name)
-                if not image_file:  # تخطي إذا لم يتم العثور على الملف
-                    continue 
-                
+
+            # ============================================================
+            # حفظ الصور الإضافية
+            images_order_raw = request.POST.get("images_order", "")
+
+            try:
+                images_order = (
+                    json.loads(images_order_raw)
+                    if images_order_raw
+                    else []
+                )
+            except (json.JSONDecodeError, TypeError):
+                images_order = []
+
+            uploaded_images = request.FILES.getlist("images")
+
+            # إنشاء الصور حسب ترتيبها الموجود في images_order
+            uploaded_index = 0
+
+            for priority, item in enumerate(images_order):
+                if item.get("type") != "uploaded":
+                    continue
+
+                if uploaded_index >= len(uploaded_images):
+                    continue
+
+                image_file = uploaded_images[uploaded_index]
+                uploaded_index += 1
+
                 if not validate_image_file(image_file):
-                    continue  # تخطي الصورة إذا لم تكن صالحة  
-                  
-                # يتم ضغط الصور بواسطة دالة جافاسكريبت وضغطها هنا مرة أخرى للتأكد من تقليل حجمها
+                    continue
+
                 compressed_image = compress_image(image_file)
+
                 ProductImages.objects.create(
                     product=product,
                     image=compressed_image,
                     priority=priority
                 )
 
-            # ── حفظ الألوان والمقاسات ──────────────────────────────
-            colors_data = request.POST.get("colors_data")
-            if colors_data:
-                try:
-                    colors_list = json.loads(colors_data)
-                except (json.JSONDecodeError, ValueError):
-                    colors_list = []
+            # ============================================================
+            # حفظ الألوان والمقاسات
+            colors_raw = request.POST.get("colors_data", "")
 
-                for i, color_item in enumerate(colors_list):
-                    image_file = request.FILES.get(f"color_image_{i}")
-                    # ضغط الصورة إذا كانت موجودة
-                    compressed_image = compress_image(image_file) if image_file else None
-                    
-                    color_obj = ProductColor.objects.create(
-                        product=product,
-                        color=color_item.get("color", ""),
-                        available=color_item.get("available", True),
-                        image=compressed_image
+            try:
+                colors_data = (
+                    json.loads(colors_raw)
+                    if colors_raw
+                    else []
+                )
+            except (json.JSONDecodeError, TypeError):
+                colors_data = []
+
+            for index, color_data in enumerate(colors_data):
+                color_image = request.FILES.get(
+                    f"color_image_{index}"
+                )
+
+                compressed_color_image = None
+
+                if color_image and validate_image_file(color_image):
+                    compressed_color_image = compress_image(
+                        color_image
                     )
 
-                    sizes_list = color_item.get("sizes", [])
+                color = ProductColor.objects.create(
+                    product=product,
+                    color=color_data.get("color", ""),
+                    available=color_data.get("available", True),
+                    image=compressed_color_image
+                )
 
-                    #  المنتج دون مقاسات 
-                    #  → لا تضف مقاسات للون حيث ان المقاس موحد 
-                    if not sizes_list:
-                        continue
-                    else: # المنتج محددا مع مقاسات والمستخدم ضايف للألوان مقاسات
-                        for size_item in sizes_list:
+                for size_data in color_data.get("sizes", []):
+                    ProductSize.objects.create(
+                        product_color=color,
+                        size=size_data.get("size", "")
+                    )
 
-                            ProductSize.objects.create(
-                                product_color=color_obj,
-                                size=size_item.get("size", ""),
-                            )
+            # ============================================================
+            # نجاح العملية
+            messages.success(
+                request,
+                "تمت إضافة المنتج بنجاح"
+            )
 
-            messages.success(request, "تمت إضافة المنتج بنجاح")
-            return redirect('store:store_products' , sid=store.id)
-        else:
-            # إعادة عرض النموذج مع الأخطاء
-            context = {"form": form}
-            return render(request, 'store/add_product.html', context)
-     
-    form = ProductRegisterForm()
-    context = {
-        "form": form,
-    }
-    return render(request, 'store/add_product.html', context)
+            redirect_url = reverse(
+                "store:store_products",
+                kwargs={"sid": store.id}
+            )
+
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse({
+                    "success": True,
+                    "message": "تمت إضافة المنتج بنجاح",
+                    "redirect_url": redirect_url,
+                })
+
+            return redirect(
+                "store:store_products",
+                sid=store.id
+            )
+
+        # ================================================================
+        # أخطاء النموذج
+        print("FORM ERRORS:", form.errors)
+        print(
+            "NON FIELD ERRORS:",
+            form.non_field_errors()
+        )
+
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse(
+                {
+                    "success": False,
+                    "errors": form.errors.get_json_data(),
+                    "non_field_errors":
+                        form.non_field_errors().get_json_data(),
+                },
+                status=400
+            )
+
+        return render(
+            request,
+            "store/add_product.html",
+            {
+                "form": form,
+            }
+        )
+
+    # ================================================================
+    # GET
+    form = ProductRegisterForm(store=store)
+
+    return render(
+        request,
+        "store/add_product.html",
+        {
+            "form": form,
+        }
+    )
 
 @login_required(login_url='accounts:log_in')
 @vendor_only

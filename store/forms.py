@@ -7,6 +7,12 @@ from store.models import *
 class ProductRegisterForm(forms.ModelForm):
     images_order = forms.CharField(required=False, widget=forms.HiddenInput())
     deleted_images = forms.CharField(required=False, widget=forms.HiddenInput())
+    is_visible = forms.BooleanField(
+        required=False,
+        initial=True,
+        label=Product._meta.get_field('is_visible').verbose_name,
+        help_text=Product._meta.get_field('is_visible').help_text,
+    )
     
     class Meta:
         model = Product
@@ -34,6 +40,12 @@ class ProductRegisterForm(forms.ModelForm):
             return offer_price
 
         return offer_price or 0
+        
+    def clean_is_visible(self):
+        # تحويل قيمة checkbox إلى True أو False بشكل صحيح
+        value = self.cleaned_data.get('is_visible')
+
+        return bool(value)
         
     def clean_thumbnail_img(self):
         image = self.cleaned_data.get("thumbnail_img")
