@@ -23,31 +23,41 @@
     </div>
 
     <div class="summary-card">
-        <div class="upper-part">
-
-            <div class="card-details">
-                <h3>{{ product.name }}</h3>
-                <p>
-                    تاريخ الانشاء
-                    <br>
-                    <span><i class="fa-regular fa-calendar-days"></i> {{ product.upload_at|date:"j F Y - g:i A" }} </span>
-                </p>
-                <p>
-                    أخر تعديل
-                    <br>
-                    <span><i class="fa-regular fa-calendar-days"></i> {{ product.updated_at|date:"j F Y - g:i A" }} </span>
-                </p>
+        
+        <div class="product-top">
+                        
+            <h4 class="product-name">
+                {{ product.name }} 
                 {% if USER_TYPE == "admin" %}
-                <p>
-                    الحالة
-                    <br>
-                    <span class="{% if product.status == "approved" %}complete{% elif product.status == "rejected" %}cancel{% else %}pending{% endif %} " > ●  {{ product.get_status_display }}</span>
-                </p>
+                    <span class="status {% if product.status == "approved" %}complete{% elif product.status == "rejected" %}cancel{% else %}pending{% endif %}" > ●  {{ product.get_status_display }}</span> 
                 {% endif %}
+            </h4>
+
+            <div class="product-body">
+                <div class="photo-frame">
+                    <img src="{{ product.thumbnail_img.url }}" alt="{{ product.name }}" width="100" height="100" draggable="false">
+                </div>
+
+                <div class="product-meta">
+                    <div class="meta-row">
+                        <i class="fa-regular fa-calendar-days meta-icon"></i>
+                        <div class="meta-text">
+                            <span class="meta-label">تاريخ الانشاء</span>
+                            <span class="meta-value">{{ product.upload_at|date:"j F Y - g:i A" }}</span>
+                        </div>
+                    </div>
+
+                    <div class="meta-row">
+                        <i class="fa-regular fa-calendar-days meta-icon"></i>
+                        <div class="meta-text">
+                            <span class="meta-label">تاريخ التعديل</span>
+                            <span class="meta-value">{{ product.updated_at|date:"j F Y - g:i A" }}</span>
+                        </div>
+                    </div>
+
+                </div>
             </div>
-            <div class="card-image">
-                <img src="{{ product.thumbnail_img.url }}" alt="{{ product.name }}" width="100" height="100" draggable="false">
-            </div>
+
         </div>
 
         {% if product.status == "rejected" and USER_TYPE == "vendor" %}
