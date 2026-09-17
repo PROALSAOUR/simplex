@@ -84,6 +84,55 @@
 }
 
 /* ═══════════════════════════════════════════
+    الحقول الخاصة ب ازرار الكمية 
+═══════════════════════════════════════════ */
+.qty-control {
+    margin: 10px 0 5px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow: hidden;
+    width: fit-content;
+    background: var(--gray-background);
+    border: 1px solid  var(--seprator-color);
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+.qty-control button {
+    width: 30px;
+    height: 30px;
+    border: none;
+    background: var(--gray-background);
+    color: var(--main-text-color);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition);
+    -webkit-transition: background var(--transition);
+    -moz-transition: background var(--transition);
+    -ms-transition: background var(--transition);
+    -o-transition: background var(--transition);
+}
+.qty-control button:hover {
+    background: var(--primary-background);
+    color: #fff;
+}
+.qty-control input {
+    width: 50px;
+    height: 30px;
+    border: none;
+    border-right: 1px solid var(--seprator-color) !important;
+    border-left: 1px solid  var(--seprator-color) !important;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--main-text-color);
+}
+/* ═══════════════════════════════════════════
     عداد حروف التيكست اريا
 ═══════════════════════════════════════════ */
 .field .input:has(.counter) {

@@ -50,7 +50,7 @@
             </div>
         </div>
 
-        {% if product.status == "rejected" %}
+        {% if product.status == "rejected" and USER_TYPE == "vendor" %}
             <div class="notice rejected">
                 <div class="notice-icon">
                     <i class="fa-regular fa-face-frown"></i>
@@ -73,7 +73,10 @@
             <a class="card-btn view-btn" href="{% url "store:view_product" product.id %}" > معاينة <i class="fa-solid fa-eye"></i></a>
             {% comment %} #change-later فعل زر نسخ الرابط {% endcomment %}
             <button class="card-btn copy-url">نسخ الرابط <i class="fa-solid fa-copy"></i></button>
-            <button class="card-btn remove-btn" id="delete-btn" onclick="openDeleteProductDialog(this)" data-id="{{ product.id }}" data-name="{{ product.name }}" data-redirect="{% url "store:store_products" product.store.id %}" >حذف<i class="fa-solid fa-trash"></i></button>
+            {% if USER_TYPE == "vendor" %}
+                <button class="card-btn remove-btn" id="delete-btn" onclick="openDeleteProductDialog(this)" data-id="{{ product.id }}" data-name="{{ product.name }}" data-redirect="{% url "store:store_products" product.store.id %}" >حذف<i class="fa-solid fa-trash"></i></button>
+            {% endif %}    
+        
         </div>
     </div>
 
@@ -88,7 +91,67 @@
 
         <div class="sections">
 
-            <details class="details">
+            {% if USER_TYPE == "admin" %}
+                <details class="details" open>
+
+                    <summary class="details-header">
+
+                        <h4 class="header-title"><i class="fa-solid fa-bars-progress primary-cl"></i> حالة المنتج </h4>
+                        <span class="toggle"> <i class="fa-solid fa-chevron-up"></i> </span>
+
+                    </summary>
+
+                    <div class="details-body grid">
+
+                        <div class="fields-container">
+
+                            <div class="field {% if form.status.errors %}has-error{% endif %}">
+                                <div class="select-control">
+                                    <label for="status"> {{ form.status.label }} </label>
+                            
+                                    <div class="js-custom-select">
+                                        <select id="status" name="status" required>
+                                                {% for value, label in form.status.field.choices %}
+                                                    <option value="{{ value }}"
+                                                        {% if form.status.value == value %}selected{% endif %}>
+                                                        {{ label }}
+                                                    </option>
+                                                {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                {% if form.status.errors %}
+                                    <span class="help-text"> {{ form.status.errors.0 }} </span>
+                                {% else %}
+                                    <span class="help-text">{{ form.status.help_text }}</span>
+                                {% endif %}
+                            </div>
+
+                        </div>
+
+                        <div class="fields-container">
+                            <div class="field {% if form.rejected_cause.errors %}has-error{% endif %}">
+                                <label for="rejected_cause"> {{ form.rejected_cause.label }} <span class="required">*</span></label>
+                                <div class="input">
+                                    <span class="counter" > 
+                                        <span class="current-c">0</span>/<span class="max-c"></span>
+                                    </span>
+                                    <textarea name="rejected_cause" id="rejected_cause"  placeholder="ادخل سبب رفض المنتج ..."  rows="5" cols="40"  maxlength="500" required >{{ form.rejected_cause.value|default:'' }}</textarea>
+                                </div>
+                                {% if form.rejected_cause.errors %}
+                                    <span class="help-text"> {{ form.rejected_cause.errors.0 }} </span>
+                                {% else %}
+                                    <span class="help-text">{{ form.rejected_cause.help_text }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                    </div>
+
+                </details>
+            {% endif %}
+
+            <details class="details" open>
 
                 <summary class="details-header">
 
@@ -105,9 +168,7 @@
                             <label for="name">{{  form.name.label }}<span class="required">*</span></label>
                             <div class="input">
                                 <input id="name" name="name" type="text" placeholder="ادخل اسم المنتج ..." value="{{ form.name.value|default:'' }}" autocomplete="off" required>
-                                {% if form.name.errors %}
-                                    <i class="fa-solid fa-circle-exclamation error-icon"></i>
-                                {% endif %}
+                                <i class="fa-solid fa-circle-exclamation error-icon"></i>
                             </div>
                             {% if form.name.errors %}
                                 <span class="help-text"> {{ form.name.errors.0 }} </span>
@@ -198,13 +259,47 @@
                                 <span class="help-text">{{ form.description.help_text }}</span>
                             {% endif %}
                         </div>
+
+                        <div class="field {% if form.max_quantity_per_order.errors %}has-error{% endif %}">
+                            <label for="max_quantity_per_order" class="option-title">{{ form.max_quantity_per_order.label }}</label>
+                                <div class="qty-control ">
+                                    <button
+                                        type="button"
+                                        class="qty-minus"
+                                        aria-label="إنقاص"
+                                        onclick="changeQuantity(this, -1)"
+                                    >−</button>
+                                    <input
+                                        type="text"
+                                        id="max_quantity_per_order"
+                                        name="max_quantity_per_order"
+                                        inputmode="decimal"
+                                        class="qty-input"
+                                        value="{{ form.max_quantity_per_order.value|default:'10' }}"
+                                        min="1"
+                                        
+                                    >
+                                    <button
+                                        type="button"
+                                        class="qty-plus"
+                                        aria-label="زيادة"
+                                        onclick="changeQuantity(this, 1)"
+                                    >+</button>
+                                </div>
+                            {% if form.max_quantity_per_order.errors %}
+                                <span class="help-text"> {{ form.max_quantity_per_order.errors.0 }} </span>
+                            {% else %}
+                                <span class="help-text">{{ form.max_quantity_per_order.help_text }}</span>
+                            {% endif %}
+                        </div>
+
                     </div>
 
                 </div>
 
             </details>
 
-            <details class="details">
+            <details class="details" open>
 
                 <summary class="details-header">
 
@@ -464,7 +559,7 @@
 
             </details>
 
-            <details class="details">
+            <details class="details" open>
 
                 <summary class="details-header">
 
@@ -481,9 +576,7 @@
                             <label for="purchase_price"> {{  form.purchase_price.label }} <span class="required">*</span></label>
                             <div class="input">
                                 <input name="purchase_price" id="purchase_price" type="text" placeholder="..." value="{{ form.purchase_price.value|unlocalize|default:'' }}" inputmode="decimal" autocomplete="off" required><span class="currency">د.ل</span>
-                                {% if form.purchase_price.errors %}
-                                    <i class="fa-solid fa-circle-exclamation error-icon"></i>
-                                {% endif %}
+                                <i class="fa-solid fa-circle-exclamation error-icon"></i>
                             </div>
                             {% if form.purchase_price.errors %}
                                 <span class="help-text"> {{ form.purchase_price.errors.0 }} </span>
@@ -496,9 +589,7 @@
                             <label for="price">سعر البيع <span class="required">*</span></label>
                             <div class="input">
                                 <input name="price" id="price" type="text" placeholder="..." value="{{ form.price.value|unlocalize|default:'' }}" inputmode="decimal" autocomplete="off" required><span class="currency">د.ل</span>
-                                {% if form.price.errors %}
-                                    <i class="fa-solid fa-circle-exclamation error-icon"></i>
-                                {% endif %}
+                                <i class="fa-solid fa-circle-exclamation error-icon"></i>
                             </div>
                             {% if form.price.errors %}
                                 <span class="help-text"> {{ form.price.errors.0 }} </span>
@@ -582,7 +673,7 @@
 
             </details>
 
-            <details class="details">
+            <details class="details" open>
 
                 <summary class="details-header">
 

@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
+    // تهيئة مدير التسعير والتحقق من حقول الأسعار
 
     let form = null;
 
@@ -28,6 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
         "offer_percentage"
     );
 
+
     function getFormFromTarget(target) {
         // الحصول على النموذج سواء تم تمرير عنصر النموذج أو معرفه أو محدد CSS
         if (!target) {
@@ -46,6 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
             : null;
     }
 
+
     function setForm(target) {
         // ربط مدير التسعير بالنموذج المحدد وإعادة تهيئة التحقق والحسابات
         const formElement = getFormFromTarget(target);
@@ -55,10 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         if (form) {
-            form.removeEventListener(
-                "submit",
-                handleFormSubmit
-            );
+            form.removeEventListener("submit", handleFormSubmit);
         }
 
         form = formElement;
@@ -67,8 +67,9 @@ document.addEventListener("DOMContentLoaded", function () {
         bindPricingValidation();
     }
 
+
     function getNumericValue(input) {
-        // تحويل قيمة حقل السعر إلى رقم صالح أو إرجاع null إذا كانت القيمة غير صالحة
+        // تحويل قيمة حقل السعر إلى رقم صالح أو إرجاع null
         const value = input?.value?.trim();
 
         if (!value) {
@@ -82,27 +83,44 @@ document.addEventListener("DOMContentLoaded", function () {
             : null;
     }
 
+
+    function sanitizeDecimalInput(input) {
+        // السماح بالأرقام وعلامة عشرية واحدة فقط داخل حقل السعر
+        if (!input) {
+            return;
+        }
+
+        let value = input.value.replace(/[^\d.]/g, "");
+
+        const decimalIndex = value.indexOf(".");
+
+        if (decimalIndex !== -1) {
+            value =
+                value.substring(0, decimalIndex + 1) +
+                value.substring(decimalIndex + 1).replace(/\./g, "");
+        }
+
+        input.value = value;
+    }
+
+
     function formatNumber(value) {
         // تنسيق الرقم وإزالة الأصفار غير الضرورية بعد العلامة العشرية
         if (!Number.isFinite(value)) {
             return "";
         }
 
-        return Number(
-            value.toFixed(2)
-        ).toString();
+        return Number(value.toFixed(2)).toString();
     }
 
+
     function updateValueStatus(element, value) {
-        // تطبيق كلاس الربح أو الخسارة حسب قيمة الرقم مع إزالة الكلاسات القديمة
+        // تطبيق حالة الربح أو الخسارة على العنصر
         if (!element) {
             return;
         }
 
-        element.classList.remove(
-            "complete",
-            "cancel"
-        );
+        element.classList.remove("complete", "cancel");
 
         if (value > 0) {
             element.classList.add("complete");
@@ -111,19 +129,19 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+
     function setOfferPriceValidity(message) {
         // ضبط أو إزالة رسالة التحقق الخاصة بسعر التخفيض
         if (!offerPriceInput) {
             return;
         }
 
-        offerPriceInput.setCustomValidity(
-            message || ""
-        );
+        offerPriceInput.setCustomValidity(message || "");
     }
 
+
     function validateOfferPrice() {
-        // التحقق من أن سعر التخفيض أقل من السعر الأصلي دون منع البيع بخسارة
+        // التحقق من أن سعر التخفيض أقل من السعر الأصلي
         if (
             !offerCheckbox?.checked ||
             !offerPriceInput ||
@@ -133,13 +151,8 @@ document.addEventListener("DOMContentLoaded", function () {
             return true;
         }
 
-        const regularPrice = getNumericValue(
-            priceInput
-        );
-
-        const offerPrice = getNumericValue(
-            offerPriceInput
-        );
+        const regularPrice = getNumericValue(priceInput);
+        const offerPrice = getNumericValue(offerPriceInput);
 
         if (
             regularPrice === null ||
@@ -149,10 +162,6 @@ document.addEventListener("DOMContentLoaded", function () {
             return true;
         }
 
-        /*
-         * سعر التخفيض يجب أن يكون أقل
-         * من السعر قبل التخفيض.
-         */
         if (offerPrice >= regularPrice) {
             setOfferPriceValidity(
                 "يجب أن يكون سعر التخفيض أقل من السعر قبل التخفيض."
@@ -161,24 +170,23 @@ document.addEventListener("DOMContentLoaded", function () {
             return false;
         }
 
-        /*
-         * لا نتحقق من سعر التكلفة هنا.
-         *
-         * البيع بخسارة مسموح، وسيتم توضيحه
-         * في ملخص التسعير من خلال كلاس cancel.
-         */
         setOfferPriceValidity("");
 
         return true;
     }
 
-    function updateProfitLabels(profit, profitMargin) {
-        // تغيير مسميات الربح إلى الخسارة حسب نتيجة التسعير
+
+    function updateProfitLabels(profit) {
+        // تحديث تسميات الربح أو الخسارة حسب النتيجة الحالية
         const profitLabel =
-            profitValue?.closest(".s-item")?.querySelector(".s-title");
+            profitValue
+                ?.closest(".s-item")
+                ?.querySelector(".s-title");
 
         const profitMarginLabel =
-            profitMarginValue?.closest(".s-item")?.querySelector(".s-title");
+            profitMarginValue
+                ?.closest(".s-item")
+                ?.querySelector(".s-title");
 
 
         if (profit > 0) {
@@ -213,8 +221,29 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+
+    function resetPricingSummary() {
+        // إخفاء ملخص التسعير ومسح قيمه عند عدم اكتمال الأسعار
+        if (!pricingSummary) {
+            return;
+        }
+
+        pricingSummary.style.display = "none";
+
+        if (profitValue) {
+            profitValue.textContent = "";
+            updateValueStatus(profitValue, 0);
+        }
+
+        if (profitMarginValue) {
+            profitMarginValue.textContent = "";
+            updateValueStatus(profitMarginValue, 0);
+        }
+    }
+
+
     function updatePricingSummary() {
-        // حساب الربح أو الخسارة ونسبته وقيمة الخصم ونسبته وتحديث حالتها البصرية
+        // حساب الربح والخسارة والخصم وتحديث ملخص التسعير
         if (
             !pricingSummary ||
             !purchasePriceInput ||
@@ -225,57 +254,23 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        const purchasePrice = getNumericValue(
-            purchasePriceInput
-        );
-
-        const regularPrice = getNumericValue(
-            priceInput
-        );
+        const purchasePrice = getNumericValue(purchasePriceInput);
+        const regularPrice = getNumericValue(priceInput);
 
         const hasOffer = offerCheckbox?.checked;
 
-        const discountedPrice = getNumericValue(
-            offerPriceInput
-        );
+        const discountedPrice = getNumericValue(offerPriceInput);
 
 
-        /*
-         * لا نعرض الملخص إلا بعد إدخال
-         * سعر التكلفة وسعر البيع الأساسي.
-         */
         if (
             purchasePrice === null ||
             regularPrice === null
         ) {
-            pricingSummary.style.display = "none";
-
-            profitValue.textContent = "";
-            profitMarginValue.textContent = "";
-
-            updateValueStatus(
-                profitValue,
-                0
-            );
-
-            updateValueStatus(
-                profitMarginValue,
-                0
-            );
-
+            resetPricingSummary();
             return;
         }
 
 
-        /*
-         * تحديد السعر الفعلي الذي سيدفعه الزبون.
-         *
-         * مع التخفيض:
-         * السعر الفعلي = سعر التخفيض.
-         *
-         * بدون تخفيض:
-         * السعر الفعلي = سعر البيع.
-         */
         let actualSellingPrice = regularPrice;
 
         if (
@@ -286,84 +281,34 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        /*
-         * إظهار الملخص بعد توفر الأسعار الأساسية.
-         */
         pricingSummary.style.display = "";
 
 
-        /*
-         * حساب قيمة الربح:
-         *
-         * الربح =
-         * سعر البيع الفعلي - سعر التكلفة.
-         */
         const profit =
             actualSellingPrice - purchasePrice;
 
 
-        /*
-         * تحديد ما إذا كانت النتيجة
-         * ربحًا أو خسارة.
-         */
-        updateProfitLabels(
-            profit,
-            null
-        );
+        updateProfitLabels(profit);
 
 
-        /*
-         * عند الخسارة نعرض القيمة موجبة،
-         * لأن كلمة "الخسارة" توضح اتجاه القيمة.
-         */
         profitValue.textContent =
-            formatNumber(
-                Math.abs(profit)
-            );
+            formatNumber(Math.abs(profit));
 
 
-        /*
-         * تطبيق:
-         *
-         * complete للربح.
-         * cancel للخسارة.
-         * لا شيء عند التعادل.
-         */
         updateValueStatus(
             profitValue,
             profit
         );
 
 
-        /*
-         * حساب نسبة الربح أو الخسارة:
-         *
-         * النسبة =
-         * الربح ÷ سعر التكلفة × 100.
-         *
-         * استخدام سعر التكلفة كمرجع يجعل
-         * النسبة أكثر وضوحًا عند وجود خسارة.
-         */
         if (purchasePrice !== 0) {
 
             const profitMargin =
                 (profit / purchasePrice) * 100;
 
-
-            /*
-             * عرض النسبة بدون إشارة سالبة
-             * عند وجود خسارة.
-             */
             profitMarginValue.textContent =
-                formatNumber(
-                    Math.abs(profitMargin)
-                ) + "%";
+                formatNumber(Math.abs(profitMargin)) + "%";
 
-
-            /*
-             * تطبيق حالة الربح أو الخسارة
-             * على النسبة.
-             */
             updateValueStatus(
                 profitMarginValue,
                 profitMargin
@@ -380,59 +325,63 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        /*
-         * حساب قيمة الخصم ونسبته
-         * عند وجود تخفيض صالح.
-         */
         if (
             hasOffer &&
             discountedPrice !== null &&
             discountedPrice < regularPrice
         ) {
 
-            /*
-             * قيمة الخصم =
-             *
-             * السعر قبل التخفيض -
-             * السعر بعد التخفيض.
-             */
             const discountValue =
                 regularPrice - discountedPrice;
 
-
-            /*
-             * نسبة الخصم =
-             *
-             * قيمة الخصم ÷
-             * السعر قبل التخفيض × 100.
-             */
             const discountPercentage =
                 (discountValue / regularPrice) * 100;
 
 
-            offerValueItem.style.display = "flex";
+            if (offerValueItem) {
+                offerValueItem.style.display = "flex";
+            }
 
-            offerValue.textContent =
-                formatNumber(discountValue);
+            if (offerValue) {
+                offerValue.textContent =
+                    formatNumber(discountValue);
+            }
 
 
-            offerPercentageItem.style.display = "flex";
+            if (offerPercentageItem) {
+                offerPercentageItem.style.display = "flex";
+            }
 
-            offerPercentage.textContent =
-                "-" + formatNumber(discountPercentage) + "%";
+            if (offerPercentage) {
+                offerPercentage.textContent =
+                    "-" +
+                    formatNumber(discountPercentage) +
+                    "%";
+            }
 
         } else {
 
-            offerValueItem.style.display = "none";
-            offerPercentageItem.style.display = "none";
+            if (offerValueItem) {
+                offerValueItem.style.display = "none";
+            }
 
-            offerValue.textContent = "";
-            offerPercentage.textContent = "";
+            if (offerPercentageItem) {
+                offerPercentageItem.style.display = "none";
+            }
+
+            if (offerValue) {
+                offerValue.textContent = "";
+            }
+
+            if (offerPercentage) {
+                offerPercentage.textContent = "";
+            }
         }
     }
 
+
     function setOfferState(isEnabled) {
-        // إظهار أو إخفاء حقل التخفيض وتحديث تسمية السعر مع إبقاء النجمة
+        // إظهار أو إخفاء حقل التخفيض وتحديث تسمية سعر البيع
         if (
             !priceField ||
             !offerPriceField ||
@@ -451,52 +400,38 @@ document.addEventListener("DOMContentLoaded", function () {
         if (isEnabled) {
 
             if (priceLabel) {
-                /*
-                * تغيير نص الـ label فقط دون المساس
-                * بعنصر النجمة الموجود بداخله.
-                */
                 Array.from(priceLabel.childNodes).forEach(node => {
                     if (node.nodeType === Node.TEXT_NODE) {
-                        node.textContent = "السعر قبل التخفيض ";
+                        node.textContent =
+                            "السعر قبل التخفيض ";
                     }
                 });
             }
 
-            /*
-            * إبقاء نجمة الحقل مطلوبة ظاهرة.
-            */
             if (requiredStar) {
                 requiredStar.style.display = "";
             }
 
             offerPriceField.style.display = "block";
-
             offerPriceInput.required = true;
 
         } else {
 
             if (priceLabel) {
-                /*
-                * إعادة تسمية الحقل دون إزالة النجمة.
-                */
                 Array.from(priceLabel.childNodes).forEach(node => {
                     if (node.nodeType === Node.TEXT_NODE) {
-                        node.textContent = "سعر البيع ";
+                        node.textContent =
+                            "سعر البيع ";
                     }
                 });
             }
 
-            /*
-            * إبقاء نجمة الحقل مطلوبة ظاهرة.
-            */
             if (requiredStar) {
                 requiredStar.style.display = "";
             }
 
             offerPriceField.style.display = "none";
-
             offerPriceInput.required = false;
-
             offerPriceInput.value = "";
 
             setOfferPriceValidity("");
@@ -506,8 +441,21 @@ document.addEventListener("DOMContentLoaded", function () {
         updatePricingSummary();
     }
 
+
+    function handlePriceInput(input) {
+        // تنظيف حقل السعر ثم تحديث التحقق والحسابات
+        sanitizeDecimalInput(input);
+
+        setOfferPriceValidity("");
+
+        updatePricingSummary();
+
+        validateOfferPrice();
+    }
+
+
     function initOfferControls() {
-        // تهيئة التحكم في التخفيض وربط حقول الأسعار بالتحديث الفوري
+        // تهيئة التحكم بالتخفيض وحقول الأسعار
         if (
             !offerCheckbox ||
             !offerCheckboxField ||
@@ -520,25 +468,13 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-
-        /*
-         * تغيير حالة التخفيض عند الضغط
-         * على checkbox.
-         */
         offerCheckbox.addEventListener(
             "change",
             function () {
-                setOfferState(
-                    this.checked
-                );
+                setOfferState(this.checked);
             }
         );
 
-
-        /*
-         * تحديث الحسابات أثناء الكتابة
-         * في حقول الأسعار.
-         */
         [
             purchasePriceInput,
             priceInput,
@@ -548,61 +484,41 @@ document.addEventListener("DOMContentLoaded", function () {
             input?.addEventListener(
                 "input",
                 function () {
-
-                    /*
-                     * إزالة رسائل التحقق القديمة
-                     * أثناء تعديل القيمة.
-                     */
-                    setOfferPriceValidity("");
-
-
-                    /*
-                     * تحديث ملخص التسعير مباشرة.
-                     */
-                    updatePricingSummary();
-
-
-                    /*
-                     * التحقق من سعر التخفيض فقط
-                     * إذا كان التخفيض مفعلاً.
-                     */
-                    validateOfferPrice();
+                    handlePriceInput(this);
                 }
             );
+
         });
 
+        if (form) {
+            form.addEventListener(
+                "reset",
+                function () {
+                    // انتظار انتهاء إعادة تعيين النموذج ثم تحديث حالة التخفيض
+                    setTimeout(function () {
+                        setOfferState(offerCheckbox.checked);
+                    }, 0);
+                }
+            );
+        }
 
-        /*
-         * تطبيق حالة التخفيض الحالية
-         * عند تحميل الصفحة.
-         */
         setOfferState(
             offerCheckbox.checked
         );
-
-
-        /*
-         * تحديث الملخص عند تحميل الصفحة،
-         * وهو مهم خصوصًا في صفحة تعديل المنتج.
-         */
-        updatePricingSummary();
     }
 
     function handleFormSubmit(event) {
-        // منع إرسال النموذج فقط عند وجود سعر تخفيض غير صحيح
-        const offerPriceValid =
-            validateOfferPrice();
-
-        if (!offerPriceValid) {
-
+        // منع إرسال النموذج عند وجود سعر تخفيض غير صحيح
+        if (!validateOfferPrice()) {
             event.preventDefault();
 
             offerPriceInput?.reportValidity();
         }
     }
 
+
     function bindPricingValidation() {
-        // ربط التحقق من الأسعار بحدث إرسال النموذج
+        // ربط التحقق من سعر التخفيض بإرسال النموذج
         if (!form) {
             return;
         }
@@ -613,12 +529,10 @@ document.addEventListener("DOMContentLoaded", function () {
         );
     }
 
+
     setForm("product_form");
 
-    /*
-     * إتاحة مدير التسعير للصفحات الأخرى
-     * التي تستخدم نفس نظام التسعير.
-     */
+
     window.SimplexPricingManager = {
         setForm,
         validateOfferPrice,

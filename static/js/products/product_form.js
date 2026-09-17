@@ -273,33 +273,37 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 // ================================================================
-// التحكم بظهور/إخفاء حقل سبب الرفض
-document.addEventListener('DOMContentLoaded', function () {
-    const statusField = document.getElementById('id_status');
-    const rejectedCauseField = document.getElementById('id_rejected_cause');
-    
-    // تحقق من وجود الحقول (قد لا تكون موجودة في صفحات المتاجر العادية)
-    if (!statusField || !rejectedCauseField) {
-        return;
+// التحكم بظهور/إخفاء حقل سبب الرفض وفقا لحالة المنتج
+function setupRejectedCause() {
+    // إظهار سبب الرفض فقط عندما تكون حالة المنتج "مرفوض"
+    const status = document.getElementById("status");
+    const rejectedCause = document.getElementById("rejected_cause");
+
+    if (!status || !rejectedCause) return;
+
+    const rejectedCauseField = rejectedCause.closest(".field");
+    const form = status.closest("form");
+
+    function updateRejectedCause() {
+        // إظهار الحقل عند اختيار حالة الرفض وإخفاؤه في غير ذلك
+        const isRejected = status.value === "rejected";
+
+        rejectedCauseField.style.display = isRejected ? "" : "none";
+        rejectedCause.required = isRejected;
     }
-    
-    // البحث عن عنصر div الذي يحتوي على حقل سبب الرفض
-    const rejectedCauseContainer = rejectedCauseField.closest('div');
-    
-    // دالة للتحكم بالظهور والإخفاء
-    const toggleRejectedCauseField = function() {
-        const isRejected = statusField.value === 'rejected';
-        
-        if (rejectedCauseContainer) {
-            rejectedCauseContainer.style.display = isRejected ? 'block' : 'none';
-        }
-    };
-    
-    // إضافة event listener للتغيير الفوري
-    statusField.addEventListener('change', toggleRejectedCauseField);
-    statusField.addEventListener('input', toggleRejectedCauseField);
-    
-    // تشغيل الدالة عند تحميل الصفحة (للقيم المحفوظة مسبقاً)
-    toggleRejectedCauseField();
-});
+    // تحديث الحقل مباشرة عند تغيير الحالة
+    status.addEventListener("change", updateRejectedCause);
+
+    // إعادة تحديث الحقل بعد إعادة ضبط النموذج
+    if (form) {
+        form.addEventListener("reset", function () {
+            // انتظار انتهاء reset ثم قراءة القيمة الجديدة للحالة
+            setTimeout(updateRejectedCause, 0);
+        });
+    }
+    // تطبيق الحالة عند تحميل الصفحة
+    updateRejectedCause();
+}
+
+document.addEventListener("DOMContentLoaded", setupRejectedCause);
 // ================================================================================

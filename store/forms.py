@@ -9,7 +9,6 @@ class ProductRegisterForm(forms.ModelForm):
     deleted_images = forms.CharField(required=False, widget=forms.HiddenInput())
     is_visible = forms.BooleanField(
         required=False,
-        initial=True,
         label=Product._meta.get_field('is_visible').verbose_name,
         help_text=Product._meta.get_field('is_visible').help_text,
     )
@@ -22,6 +21,11 @@ class ProductRegisterForm(forms.ModelForm):
         # استقبل المتجر من الـ view
         self.store = kwargs.pop('store', None)
         super().__init__(*args, **kwargs)
+        
+        # إخفاء حقل الظهور بالكامل أثناء إنشاء المنتج
+        if not self.instance.pk:
+            self.fields.pop('is_visible', None)
+        
         # السعر بعد التخفيض ليس مطلوبا إلا عندما يتم تنشيط خيار التخفيض
         self.fields['offer_price'].required = False
         self.fields['max_quantity_per_order'].required = False

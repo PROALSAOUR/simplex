@@ -93,103 +93,166 @@ document.addEventListener('DOMContentLoaded', initTextareaCounters);
 */
 (function () {
     function buildCustomSelect(container) {
+        // إنشاء القائمة المخصصة بناءً على عنصر select الأصلي
         const nativeSel = container.querySelector('select');
+
         if (!nativeSel) return;
- 
+
         nativeSel.style.display = 'none';
- 
+
         const wrapper = document.createElement('div');
         wrapper.className = 'custom-select';
-        if (nativeSel.disabled) wrapper.classList.add('disabled');
- 
+
+        if (nativeSel.disabled) {
+            wrapper.classList.add('disabled');
+        }
+
         const trigger = document.createElement('div');
         trigger.className = 'select-trigger';
         trigger.tabIndex = 0;
         trigger.setAttribute('role', 'combobox');
         trigger.setAttribute('aria-haspopup', 'listbox');
         trigger.setAttribute('aria-expanded', 'false');
-        if (nativeSel.id) trigger.id = nativeSel.id + '-trigger';
- 
+
+        if (nativeSel.id) {
+            trigger.id = nativeSel.id + '-trigger';
+        }
+
         const valueLabel = document.createElement('span');
         valueLabel.className = 'select-value';
- 
+
         const icon = document.createElement('i');
         icon.className = 'fa-solid fa-chevron-down';
- 
+
         trigger.appendChild(valueLabel);
         trigger.appendChild(icon);
- 
+
         const panel = document.createElement('div');
         panel.className = 'select-panel';
         panel.setAttribute('role', 'listbox');
- 
+
         const optionEls = [];
+
         Array.from(nativeSel.options).forEach(function (opt) {
             const optDiv = document.createElement('div');
+
             optDiv.className = 'select-option';
             optDiv.textContent = opt.textContent.trim();
             optDiv.dataset.value = opt.value;
- 
-            if (opt.value === '') optDiv.classList.add('placeholder');
-            if (opt.disabled) optDiv.setAttribute('aria-disabled', 'true');
-            if (opt.selected) optDiv.classList.add('selected');
- 
+
+            if (opt.value === '') {
+                optDiv.classList.add('placeholder');
+            }
+
+            if (opt.disabled) {
+                optDiv.setAttribute('aria-disabled', 'true');
+            }
+
+            if (opt.selected) {
+                optDiv.classList.add('selected');
+            }
+
             optDiv.addEventListener('click', function () {
                 if (opt.disabled) return;
- 
+
                 nativeSel.value = opt.value;
-                nativeSel.dispatchEvent(new Event('change', { bubbles: true }));
- 
-                valueLabel.textContent = optDiv.textContent;
-                wrapper.classList.toggle('has-value', opt.value !== '');
- 
-                optionEls.forEach(function (o) { o.classList.remove('selected'); });
-                optDiv.classList.add('selected');
- 
+
+                nativeSel.dispatchEvent(
+                    new Event('change', { bubbles: true })
+                );
+
                 closePanel();
             });
- 
+
             panel.appendChild(optDiv);
             optionEls.push(optDiv);
         });
- 
-        const initiallySelected = nativeSel.options[nativeSel.selectedIndex];
-        valueLabel.textContent = initiallySelected ? initiallySelected.textContent.trim() : '';
-        if (nativeSel.value !== '') wrapper.classList.add('has-value');
- 
+
         wrapper.appendChild(trigger);
         wrapper.appendChild(panel);
+
         container.insertBefore(wrapper, nativeSel);
-        container.appendChild(nativeSel); // يبقى بالـ DOM (مخفي فقط) لأجل الفورم
- 
+        container.appendChild(nativeSel);
+
         function openPanel() {
             wrapper.classList.add('open');
             trigger.setAttribute('aria-expanded', 'true');
         }
+
         function closePanel() {
             wrapper.classList.remove('open');
             trigger.setAttribute('aria-expanded', 'false');
         }
- 
+
+        function syncCustomSelect() {
+            // مزامنة القائمة المخصصة مع قيمة select الأصلية
+            const selectedOption = nativeSel.options[nativeSel.selectedIndex];
+
+            valueLabel.textContent = selectedOption
+                ? selectedOption.textContent.trim()
+                : '';
+
+            wrapper.classList.toggle(
+                'has-value',
+                nativeSel.value !== ''
+            );
+
+            optionEls.forEach(function (optionEl) {
+                optionEl.classList.toggle(
+                    'selected',
+                    optionEl.dataset.value === nativeSel.value
+                );
+            });
+        }
+
+        // تحديث القائمة عند تغيير قيمة select
+        nativeSel.addEventListener('change', syncCustomSelect);
+
+        // تحديث القائمة بعد إعادة ضبط النموذج
+        const form = nativeSel.closest('form');
+
+        if (form) {
+            form.addEventListener('reset', function () {
+                // انتظار انتهاء reset ثم تحديث الواجهة المخصصة
+                setTimeout(syncCustomSelect, 0);
+            });
+        }
+
         trigger.addEventListener('click', function () {
             if (nativeSel.disabled) return;
-            wrapper.classList.contains('open') ? closePanel() : openPanel();
+
+            wrapper.classList.contains('open')
+                ? closePanel()
+                : openPanel();
         });
- 
+
         trigger.addEventListener('keydown', function (e) {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                wrapper.classList.contains('open') ? closePanel() : openPanel();
+
+                wrapper.classList.contains('open')
+                    ? closePanel()
+                    : openPanel();
             }
-            if (e.key === 'Escape') closePanel();
+
+            if (e.key === 'Escape') {
+                closePanel();
+            }
         });
- 
+
         document.addEventListener('click', function (e) {
-            if (!wrapper.contains(e.target)) closePanel();
+            if (!wrapper.contains(e.target)) {
+                closePanel();
+            }
         });
+
+        // مزامنة الواجهة عند تحميل القائمة
+        syncCustomSelect();
     }
- 
-    document.querySelectorAll('.js-custom-select').forEach(buildCustomSelect);
+
+    document
+        .querySelectorAll('.js-custom-select')
+        .forEach(buildCustomSelect);
 })();
 
 // ==========================================================

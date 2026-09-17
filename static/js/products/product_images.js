@@ -1,5 +1,3 @@
-// JavaScript code for managing product images 
-
 document.addEventListener("DOMContentLoaded", function () {
     // ============================================================
     // إدارة صور المنتج
@@ -339,39 +337,61 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ============================================================
-    // إعادة ضبط الصورة الرئيسية
+    // إعادة الصورة الأصلية في التعديل أو تصفير الصورة في الإنشاء
     function resetThumbnail() {
-            // إعادة الصورة الرئيسية إلى حالة الرفع الأصلية
-            const thumbnailInput =
-                document.getElementById("id_thumbnail_img");
+        const thumbnailInput =
+            document.getElementById("id_thumbnail_img");
 
-            const uploadLabel =
-                document.getElementById("custom_upload_box");
+        const uploadLabel =
+            document.getElementById("custom_upload_box");
 
-            const thumbnailPreviewBox =
-                document.getElementById("thumbnail_preview_box");
+        const thumbnailPreviewBox =
+            document.getElementById("thumbnail_preview_box");
 
-            const thumbnailImage =
-                thumbnailPreviewBox?.querySelector(".image-preview");
+        const thumbnailImage =
+            thumbnailPreviewBox?.querySelector(".image-preview");
 
+        // إذا كانت هناك صورة أصلية للمنتج في صفحة التعديل
+        if (window.SimplexInitialThumbnailUrl) {
             if (thumbnailInput) {
                 thumbnailInput.value = "";
-
-                delete thumbnailInput.dataset.hasInitialImage;
+                thumbnailInput.dataset.hasInitialImage = "true";
             }
 
             if (thumbnailImage) {
-                thumbnailImage.src = "";
+                thumbnailImage.src = window.SimplexInitialThumbnailUrl;
             }
 
             if (thumbnailPreviewBox) {
-                thumbnailPreviewBox.style.display = "none";
+                thumbnailPreviewBox.style.display = "";
             }
 
-            // إعادة إظهار مربع رفع الصورة الرئيسية
             if (uploadLabel) {
-                uploadLabel.style.display = "";
+                uploadLabel.style.display = "none";
             }
+
+            updateThumbnailInfoFromExisting();
+
+            return;
+        }
+
+        // صفحة إنشاء المنتج: إزالة الصورة وإظهار مربع الرفع
+        if (thumbnailInput) {
+            thumbnailInput.value = "";
+            delete thumbnailInput.dataset.hasInitialImage;
+        }
+
+        if (thumbnailImage) {
+            thumbnailImage.src = "";
+        }
+
+        if (thumbnailPreviewBox) {
+            thumbnailPreviewBox.style.display = "none";
+        }
+
+        if (uploadLabel) {
+            uploadLabel.style.display = "";
+        }
     }
 
     // ============================================================

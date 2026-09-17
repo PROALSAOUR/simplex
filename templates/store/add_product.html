@@ -33,7 +33,7 @@
 
         <div class="sections">
 
-            <details class="details">
+            <details class="details" open>
 
                 <summary class="details-header">
 
@@ -50,9 +50,7 @@
                             <label for="name">{{  form.name.label }}<span class="required">*</span></label>
                             <div class="input">
                                 <input id="name" name="name" type="text" placeholder="ادخل اسم المنتج ..." value="{{ form.name.value|default:'' }}" autocomplete="off" required>
-                                {% if form.name.errors %}
-                                    <i class="fa-solid fa-circle-exclamation error-icon"></i>
-                                {% endif %}
+                                <i class="fa-solid fa-circle-exclamation error-icon"></i>
                             </div>
                             {% if form.name.errors %}
                                 <span class="help-text"> {{ form.name.errors.0 }} </span>
@@ -62,17 +60,7 @@
                             
                         </div>
                         
-                        <div class="field checkbox-field  {% if form.is_visible.errors %}has-error{% endif %}">
-                            <div class="checkbox-control">
-                                <label for="is_visible">{{  form.is_visible.label }}</label>
-                                <input type="checkbox" name="is_visible" id="is_visible" {% if form.is_visible.value %}checked{% endif %}>
-                            </div>
-                            {% if form.is_visible.errors %}
-                                <span class="help-text"> {{ form.is_visible.errors.0 }} </span>
-                            {% else %}
-                                <span class="help-text">{{ form.is_visible.help_text }}</span>
-                            {% endif %}
-                        </div>
+                
 
                         <div class="field {% if form.type.errors %}has-error{% endif %}">
                             <div class="select-control">
@@ -149,7 +137,7 @@
 
             </details>
 
-            <details class="details">
+            <details class="details" open>
 
                 <summary class="details-header">
 
@@ -418,7 +406,7 @@
 
             </details>
 
-            <details class="details">
+            <details class="details" open>
 
                 <summary class="details-header">
 
@@ -434,10 +422,8 @@
                         <div class="field {% if form.purchase_price.errors %}has-error{% endif %}">
                             <label for="purchase_price"> {{  form.purchase_price.label }} <span class="required">*</span></label>
                             <div class="input">
-                                <input name="purchase_price" id="purchase_price" type="text" placeholder="..." value="{{ form.purchase_price.value|unlocalize|default:'' }}" inputmode="decimal" autocomplete="off" required><span class="currency">د.ل</span>
-                                {% if form.purchase_price.errors %}
-                                    <i class="fa-solid fa-circle-exclamation error-icon"></i>
-                                {% endif %}
+                                <input name="purchase_price" id="purchase_price" type="text" placeholder="..."  value="{{ form.purchase_price.value|default_if_none:'' }}" inputmode="decimal" autocomplete="off" required><span class="currency">د.ل</span>
+                                <i class="fa-solid fa-circle-exclamation error-icon"></i>
                             </div>
                             {% if form.purchase_price.errors %}
                                 <span class="help-text"> {{ form.purchase_price.errors.0 }} </span>
@@ -449,10 +435,8 @@
                         <div id="price_field" class="field {% if form.price.errors %}has-error{% endif %}">
                             <label for="price">سعر البيع <span class="required">*</span></label>
                             <div class="input">
-                                <input name="price" id="price" type="text" placeholder="..." value="{{ form.price.value|unlocalize|default:'' }}" inputmode="decimal" autocomplete="off" required><span class="currency">د.ل</span>
-                                {% if form.price.errors %}
-                                    <i class="fa-solid fa-circle-exclamation error-icon"></i>
-                                {% endif %}
+                                <input name="price" id="price" type="text" placeholder="..."  value="{{ form.price.value|default_if_none:'' }}" inputmode="decimal" autocomplete="off" required><span class="currency">د.ل</span>
+                                <i class="fa-solid fa-circle-exclamation error-icon"></i>
                             </div>
                             {% if form.price.errors %}
                                 <span class="help-text"> {{ form.price.errors.0 }} </span>
@@ -480,7 +464,7 @@
                         <div id="offer_price_field" class="field {% if form.offer_price.errors %}has-error{% endif %}" >
                             <label for="offer_price">{{ form.offer_price.label }}<span class="required">*</span></label>
                             <div class="input">
-                                <input id="offer_price" name="offer_price" type="text" placeholder="..." value="{{ form.offer_price.value|unlocalize|default:'' }}" inputmode="decimal" autocomplete="off" ><span class="currency">د.ل</span>
+                                <input id="offer_price" name="offer_price" type="text" placeholder="..."  value="{{ form.price.offer_price|default_if_none:'' }}" inputmode="decimal" autocomplete="off" ><span class="currency">د.ل</span>
                             </div>
                             {% if form.offer_price.errors %}
                                 <span class="help-text"> {{ form.offer_price.errors.0 }}</span>
@@ -536,7 +520,7 @@
 
             </details>
 
-            <details class="details">
+            <details class="details" open>
 
                 <summary class="details-header">
 
