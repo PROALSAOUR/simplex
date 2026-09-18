@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'store',
     'accounts',
     'orders',
+    'invoices',
     
     "django_ckeditor_5",
     "django_celery_beat",
@@ -260,7 +261,7 @@ CELERY_ENABLE_UTC = False
 
 CELERY_BEAT_SCHEDULE = {
     'create-monthly-invoices': {
-        'task': 'management.tasks.create_monthly_invoices',
+        'task': 'invoices.tasks.create_monthly_invoices',
         'schedule': crontab(
             minute=5,
             hour=0,
