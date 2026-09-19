@@ -55,6 +55,8 @@
     
     {% block out_container %}{% endblock out_container %}
     
+    {% include "accounts/components/logout_dialog.html" %}
+
     <script src="{% static "js/script.js" %}"></script>
     {% block page_scripts %}{% endblock %}
 
