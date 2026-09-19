@@ -1,8 +1,7 @@
 from django.http import Http404, JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from decimal import Decimal
 from django.db import models as db_models
 from django.db.models import Q, Sum ,F, ExpressionWrapper, DecimalField
 from django.utils.timezone import now
@@ -11,7 +10,8 @@ from accounts.models import Store
 from accounts.validators import get_user_type 
 from accounts.decorators import admin_only 
 from invoices.models import calculate_commission, Invoice
-
+from django.contrib import messages
+from invoices.forms import *
 
 @admin_only
 @login_required(login_url='accounts:log_in')
@@ -136,7 +136,6 @@ def view_invoice(request, rid):
     """الدالة المسؤولة عن صفحة عرض تفاصيل الفاتورة"""
     
     invoice = get_object_or_404(Invoice, id=rid)
-    
     store = invoice.store
     
     user_type = get_user_type(request.user)    
@@ -158,54 +157,65 @@ def view_invoice(request, rid):
 @admin_only
 @require_POST
 def edit_invoice(request, rid):
-    """
-    الدالة المسؤولة عن تعديل بيانات الفاتورة   
-    يمكن فقط للإدارة الوصول اليها 
-    يمكن تعديل الملاحظات دائما لكن لايمكن تعديل الحالة او الخصم الا ان كانت الحالة قبل التعديل بإنتظار الدفع
-    """
-    
+    # التحقق من النموذج وتعديل الفاتورة ثم إعادة النتيجة بصيغة JSON
+
     invoice = get_object_or_404(Invoice, id=rid)
-    status = request.POST.get('status')
-    notes = request.POST.get('notes')
-    discount = Decimal(request.POST.get('discount', '0'))
-    have_discount = request.POST.get("have_discount")
-    
-    #  مهما كانت الحالة السابقة الملاحظات دائماً تتحدث
-    invoice.notes = notes
-    
-    #  السماح بتعديل الحالة والخصم فقط إذا كانت الحالة الحالية بإنتظار الدفع
-    if invoice.status == "pending":
-        valid_statuses = [choice[0] for choice in Invoice.STATUS_CHOICES]
-        if status in valid_statuses:
-            invoice.status = status
-        else:
+
+    if "discount" in request.POST:
+
+        form = InvoiceDiscountForm(
+            request.POST,
+            commission_value=invoice.commission_value,
+        )
+
+        if not form.is_valid():
             return JsonResponse({
-                "status": "error",
-                "message": "يرجى اختيار حالة من ضمن الخيارات",
-            })
+                "success": False,
+                "errors": {
+                    "discount": form.errors["discount"][0]
+                }
+            }, status=400)
 
-        if have_discount: # تحقق ان المستخدم يريد انشاء او تعديل خصم ام لا
-            # يجب التحقق ان قيمة الخصم اقل من او تساوي قيمة العمولة المطلوبة واكبر من الصفر
-            if 0 <= discount <= invoice.commission_value :
-                invoice.discount = discount
-            else:
-                return JsonResponse({
-                    "status": "error",
-                    "message": "يرجى ادخال قيمة خصم صالحة, يجب ان تكون قيمة الخصم اكبر من صفر او اصغر من قيمة العمولة ",
-                })
+        if invoice.status != "pending":
+            return JsonResponse({
+                "success": False,
+                "errors": {
+                    "discount": (
+                        "لا يمكن تعديل الخصم إلا عندما تكون حالة"
+                        "الفاتورة بانتظار الدفع."
+                    )
+                }
+            }, status=400)
 
+        invoice.discount = form.cleaned_data["discount"]
+        invoice.save()
 
-    invoice.save()
+    elif "status" in request.POST:
+
+        form = InvoiceStatusForm(request.POST)
+
+        if not form.is_valid():
+            return JsonResponse({
+                "success": False,
+                "errors": {
+                    "status": form.errors["status"][0]
+                }
+            }, status=400)
+
+        invoice.status = form.cleaned_data["status"]
+        invoice.save()
+
+    else:
+        return JsonResponse({
+            "success": False,
+            "message": "لم يتم تحديد البيانات المراد تعديلها."
+        }, status=400)
+
     return JsonResponse({
-        "status": "success",
+        "success": True,
         "message": "تم التعديل بنجاح",
-        "invoice_status": invoice.get_status_display(),
-        "notes": invoice.notes,
-        "commission_value": str(invoice.commission_value),
-        "final_value": str(invoice.final_value),
-        "discount": str(invoice.discount),
     })
-    
+
 @login_required(login_url='accounts:log_in')
 def store_statistics(request, sid):
     """

@@ -1,0 +1,438 @@
+{% extends "partials/base.html" %}
+{% load static %}
+{% load l10n %}
+
+
+{% comment %} Page Head {% endcomment %}
+{% block page_head %}
+    <link rel="stylesheet" href="{% static "css/invoices.css" %} ">         
+    <link rel="stylesheet" href="{% static "css/tables.css" %} ">   
+    <link rel="stylesheet" href="{% static "css/details.css" %} ">
+    <link rel="stylesheet" href="{% static "css/fields.css" %} ">
+    <link rel="stylesheet" href="{% static "css/transactions.css" %} ">
+    
+{% endblock page_head %}
+
+{% comment %} Page Content {% endcomment %}
+{% block content %}
+        
+        
+    <div class="section-header">
+        <div class="section-content">
+            <div class="section-icon bill">
+                <i class="fa-solid fa-wallet "></i>
+            </div>
+            <div class="section-details">
+                <h1> الإدارة المالية </h1>
+            </div>
+        </div>
+        <button class="back-btn" id="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i> </button>
+    </div>
+
+    <details class="details" open>
+
+        <summary class="details-header" >
+            <h4 class="details-title" >تفاصيل الفاتورة </h4>
+            <span class="toggle"> <i class="fa-solid fa-chevron-up"></i> </span>
+        </summary>
+
+
+        <!-- قائمة العرض -->
+        <ul class="details-list">
+
+            {% if USER_TYPE == "admin" %}
+                <li class="details-item">
+
+                    <div class="details-label">
+                        تعديل حالة الفاتورة 
+                    </div>
+
+                    <button class="edit-btn"> تعديل </button>
+                </li>
+            {% endif %}
+
+            <!-- المتجر صاحب الفاتورة -->
+            <a href="#change-later" class="details-item ">
+                <div class="details-icon red"><i class="fa-solid fa-shop"></i></div>
+
+                <div class="details-label">
+                    المتجر
+                </div>
+
+                <div class="details-value">
+                    {{invoice.store}}
+                </div>
+            </a>
+
+            <!-- شهر الفاتورة -->
+            <li class="details-item ">
+                <div class="details-icon green"><i class="fa-regular fa-clock"></i></div>
+
+                <div class="details-label">
+                    فاتورة شهر
+                </div>
+
+                <div class="details-value">
+                    {{ invoice.billing_year }}/{{  invoice.billing_month }}
+                </div>
+            </li>
+
+            <!-- حالة الدفع -->
+            <li class="details-item">
+                <div class="details-icon purple"><i class="fa-solid fa-square-check"></i></div>
+
+                <div class="details-label">
+                    الحالة 
+                </div>
+
+                <div class="details-value">
+                    <span class="status-value {% if invoice.status == "paid" %} green {% elif  invoice.status == "cancelled" %} red {% else %} yellow {% endif %} " >
+                        {{ invoice.get_status_display }}
+                    </span>
+                </div>
+            </li>
+
+            <!-- الرقم التسلسلي -->
+            <li class="details-item">
+                <div class="details-icon blue"><i class="fa-solid fa-receipt"></i></div>
+
+                <div class="details-label">
+                    رقم الفاتورة
+                </div>
+
+                <div class="details-value">
+                    {{ invoice.invoice_number }}
+                </div>
+            </li>
+
+
+            <!-- تاريخ الإنشاء -->
+            <li class="details-item">
+                <div class="details-icon purple"><i class="fa-regular fa-calendar-days"></i></div>
+
+                <div class="details-label">
+                    تاريخ إنشاء الفاتورة
+                </div>
+
+                <div class="details-value date">
+                    {{ invoice.created_at|date:"j F Y - l g:iA" }}
+                </div>
+            </li>
+
+            <!-- تاريخ الدفع -->
+            {% if invoice.paid_at %}
+                <li class="details-item">
+                    <div class="details-icon green"><i class="fa-solid fa-calendar-check"></i></div>
+                    
+                    <div class="details-label">
+                        تاريخ سداد القيمة
+                    </div>
+                    
+                    <div class="details-value date">
+                        {{ invoice.paid_at|date:"j F Y - l g:iA" }}
+                    </div>
+                </li>
+            {% endif %}
+
+        </ul>
+
+        {% if USER_TYPE == "admin" %}
+            <!-- قائمة التعديل -->
+            <ul class="details-list">
+                <li class="details-item">
+
+                    <div class="details-label">
+                        تعديل حالة الفاتورة 
+                    </div>
+                    <button class="edit-btn"> إلغاء </button>
+                </li>
+                
+                <li class="details-item">
+                    
+                    <form id="invoice_status_form" class="details-form" method="POST" action="{% url 'invoices:edit_invoice' invoice.id %}" >
+                        {% csrf_token %}
+                        <div class="fields-container">
+                            
+                            <div class="field">
+                                <div class="select-control">
+                                    <label for="status">حالة الدفع</label>
+                                    
+                                    <div class="js-custom-select">
+                                        <select id="status" name="status">
+                                            {% for value, label in invoice.STATUS_CHOICES %}
+                                                <option value="{{ value }}"
+                                                    {% if invoice.status == value %}selected{% endif %}>
+                                                    {{ label }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <span class="help-text">
+                                    . عند تسليم المنتج للزبون، غيّر الحالة إلى تم التسليم ليتم تحديث إجمالي المبيعات والإحصائيات . إذا قام الزبون بإلغاء الطلب ، فغيّر الحالة إلى تم الإلغاء.
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="form-btns">
+                            <button type="reset" class="btn">اعادة تعيين</button>
+                            <button type="submit" class="btn save-btn">حفظ</button>
+                        </div>
+
+                    </form>
+                </li>
+            </ul>
+        {% endif %}
+
+    </details>
+
+    <details class="details" open>
+
+        <summary class="details-header" >
+            <h4 class="details-title">قيمة الفاتورة  </h4>
+            <span class="toggle"> <i class="fa-solid fa-chevron-up"></i> </span>
+        </summary>
+
+        <!-- قائمة العرض -->
+        <ul class="details-list">
+
+            {% if USER_TYPE == "admin" %}
+                <li class="details-item">
+
+                    <div class="details-label">
+                        تعديل القيمة 
+                    </div>
+
+                    <button class="edit-btn"> تعديل </button>
+                </li>
+            {% endif %}
+
+            <!-- إجمالي المبيعات -->
+            <li class="details-item">
+                <div class="details-icon green"><i class="fa-solid fa-arrow-trend-up"></i></div>
+
+                <div class="details-label">
+                    إجمالي المبيعات
+                </div>
+
+                <div class="details-value ">
+                    {{ invoice.total_sales }}
+                    <span class="currency" >د.ل</span>
+                </div>
+            </li>
+            
+            <!-- نسبة العمولة -->
+            <li class="details-item">
+                <div class="details-icon red"><i class="fa-solid fa-percent"></i></div>
+                
+                <div class="details-label">
+                    نسبة العمولة
+                </div>
+                
+                <div class="details-value">
+                    {{ invoice.commission_rate }}
+                    <span class="currency" >%</span>
+                </div>
+            </li>
+            
+            <!-- قيمة العمولة -->
+            <li class="details-item">
+                <div class="details-icon yellow"><i class="fa-solid fa-coins"></i></div>
+
+                <div class="details-label">
+                    قيمة العمولة 
+                </div>
+
+                <div class="details-value">
+                    {{ invoice.commission_value }}
+                    <span class="currency" >د.ل</span>
+                </div>
+            </li>
+
+            {% if invoice.discount  %}
+                <!-- قيمة الخصم -->
+                <li class="details-item">
+                    <div class="details-icon red"><i class="fa-solid fa-tag"></i></div>
+
+                    <div class="details-label">
+                        الخصم
+                    </div>
+
+                    <div class="details-value">
+                        {{ invoice.discount }}
+                        <span class="currency" >د.ل</span>
+                    </div>
+                </li>
+
+                <!-- القيمة بعد الخصم -->
+                <li class="details-item">
+                    <div class="details-icon yellow"><i class="fa-solid fa-dollar-sign"></i></div>
+
+                    <div class="details-label">
+                        القيمة بعد الخصم 
+                    </div>
+
+                    <div class="details-value">
+                        {{ invoice.final_value }} 
+                        <span class="currency" >د.ل</span>
+                    </div>
+                </li>
+            {% endif %}
+
+
+        </ul>
+
+        <!-- قائمة التعديل -->
+        <ul  class="details-list">
+            <li class="details-item">
+                <div class="details-label">
+                    تعديل القيمة 
+                </div>
+                <button class="edit-btn"> إلغاء </button>
+            </li>
+
+            <li class="details-item">
+                <span class="help-text"> يمكنك اضافة خصم لتعديل قيمة الفاتورة، سيتم احتساب القيمة بعد الخصم تلقائيا </span>                
+            </li>
+            
+            <li class="details-item">
+                
+                <form class="details-form" id="invoice_discount_form" method="POST" action="{% url 'invoices:edit_invoice' invoice.id %}">
+                    {% csrf_token %}
+
+                    <div class="fields-container">
+
+                        <div class="invoice-values">
+
+                            <!-- القيمة الأصلية -->
+                            <div class="invoice-value-box" id="original-value-box">
+                                <div class="details-icon blue">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </div>
+
+                                <div class="invoice-value-content">
+                                    <span class="details-label">القيمة الأصلية</span>
+
+                                    <div class="details-value" id="original-value">
+                                        {{ invoice.commission_value }}
+                                        <span class="currency">د.ل</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- القيمة بعد الخصم -->
+                            <div class="invoice-value-box" id="after-discount-box"> 
+                                <div class="details-icon green">
+                                    <i class="fa-solid fa-wallet"></i>
+                                </div>
+
+                                <div class="invoice-value-content">
+                                    <span class="details-label">القيمة بعد الخصم</span>
+
+                                    <div class="details-value" id="after-discount-value">
+                                        {% if invoice.discount %}
+                                            {{ invoice.final_value }}
+                                        {% else %}
+                                            ----
+                                        {% endif %}
+                                        <span class="currency">د.ل</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        
+                        <!-- قيمة الخصم -->
+                        <div class="field " >
+                            <label for="discount-input">قيمة الخصم </label>
+                            <div class="input">
+                                <input name="discount" id="discount-input" type="text" placeholder="..."  inputmode="decimal" max="{{ invoice.commission_value }}" value={{ discount.value|default:invoice.discount|unlocalize }} >
+                                <span class="currency">د.ل</span>
+                            </div>
+                            <span class="help-text">ادخل القيمة التي تريد خصمها من القيمة الاصلية</span>
+                        </div>
+
+                    </div>
+
+                    <div class="form-btns">
+                        <button type="reset" class="btn">اعادة تعيين</button>
+                        <button type="submit" class="btn save-btn">حفظ</button>
+                    </div>
+
+                </form>
+            </li>
+
+        </ul>
+
+    </details>    
+
+    <div class="details-table">
+        <div class="title-wrapper">
+            <h4 > <i class="fa-solid fa-cart-shopping primary-cl"></i> الطلبات المشمولة بالفاتورة </h4>
+        </div>
+    
+        <div class="table-wrap">
+            {% if orders %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>رقم الطلب</th>
+                            <th>اسم المستلم</th>
+                            <th>القيمة</th>
+                            <th>تاريخ التسليم</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders  %}
+                            <tr id="item-row-{{ item.id }}" data-view-url="{% url "orders:view_order" order.id %}" >
+                                <td >#{{ order.serial_number }}</td>
+                                <td >{{ order.customer_name }}</td>
+                                <td >{{ order.total_selling_price }}<span class="currency">د.ل</span></td>
+                                <td >{{ order.delivery_date|date:"l d M" }}</td>
+                                <td>
+                                    <a href="{% url "orders:view_order" order.id %}" class="view-btn" aria-label="عرض">
+                                        عرض
+                                        <i class="fa-solid fa-eye"></i> 
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                                
+                    </tbody>
+                    <tfoot>
+                        
+                    </tfoot>
+                </table>
+            {% else %}
+                <div class="message-container">
+                    <div class="message">
+                        <div class="message-image">
+                            <img src=" {% static "images/empty.png" %} " alt="لا يوجد نتائج" width="100" height="80" >
+                        </div>
+                        <h2 class="message-title" > هذه الفاتورة خالية !</h2>
+                        <p class="message-content">
+                            {% comment %} #change-later اكتب شرح مفصل {% endcomment %}
+                            يبدوا انه  ليس لديك  أي فواتير بعد 
+                        </p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <a href="{% url "invoices:store_invoices" invoice.store.id %}" class="redirect-btn"> العودة الى الإدارة المالية <i class="fa-solid fa-arrow-left-long"></i> </a>
+                
+{% endblock content %}
+
+{% comment %} Page Scripts {% endcomment %}
+{% block page_scripts %}
+    <script src="{% static "js/details.js" %}"></script>
+    <script src="{% static "js/fields.js" %}"></script>
+    <script src="{% static "js/tables.js" %}"></script>
+    {% if USER_TYPE == "admin" %}
+        <script src="{% static "js/transactions.js" %}"></script>
+        <script src="{% static "js/invoices/invoice.js" %}"></script>
+    {% endif %}
+{% endblock %}

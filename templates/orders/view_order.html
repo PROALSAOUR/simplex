@@ -339,7 +339,7 @@
             </summary>
 
             {% comment %} عند النقر على زر التعديل يتم اظهار قائمة التعديل و اخفاء قائمة العرض  {% endcomment %}
-            <ul id="customer-list" class="details-list">
+            <ul class="details-list">
 
                 <!-- تعديل بيانات الزبون -->
                 <li class="details-item">
@@ -403,10 +403,9 @@
                 </li>
 
             </ul>
-
             
             {% comment %} فورم تعديل بيانات الزبون  {% endcomment %}
-            <ul id="customer-form"  class="details-list {% if customer_form.errors %}has-error{% endif %}" >
+            <ul class="details-list {% if customer_form.errors %}has-error{% endif %}" >
 
                 <li class="details-item">
 
@@ -596,8 +595,8 @@
     <script src="{% static "js/tables.js" %}"></script>
     <script src="{% static "js/fields.js" %}"></script>
     <script src="{% static "js/details.js" %}"></script>
+    <script src="{% static "js/transactions.js" %}"></script>
     {% if can_edit %}
-        <script src="{% static "js/orders/edit_order.js" %}"></script>
         <script src="{% static "js/orders/search_products.js" %}"></script>
     {% endif %}
 {% endblock %}

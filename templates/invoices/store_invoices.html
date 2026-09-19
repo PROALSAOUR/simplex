@@ -1,0 +1,152 @@
+{% extends "partials/base.html" %}
+{% load static %}
+
+{% comment %} Page Head {% endcomment %}
+{% block page_head %}
+    <link rel="stylesheet" href="{% static "css/invoices.css" %} ">         
+    <link rel="stylesheet" href="{% static "css/tables.css" %} ">   
+    <link rel="stylesheet" href="{% static "css/details.css" %} ">
+    <link rel="stylesheet" href="{% static "css/transactions.css" %} ">
+    
+{% endblock page_head %}
+
+{% comment %} Page Content {% endcomment %}
+{% block content %}
+        
+    <div class="section-header">
+        <div class="section-content">
+            <div class="section-icon bill">
+                <i class="fa-solid fa-wallet "></i>
+            </div>
+            <div class="section-details">
+                <h1> الإدارة المالية</h1>
+            </div>
+        </div>
+        <button class="back-btn" id="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i> </button>
+    </div>
+    
+    <div class="invoice-banner">
+        <div class="banner-accent"></div>
+        <div class="banner-text">
+            <p class="banner-title">متجر الأناقة</p>
+            <p class="banner-desc">هنا يمكنك متابعة المبيعات والعمولة المستحقة عليك لهذا الشهر.</p>
+        </div>
+        <div class="banner-icon">
+            <img src="{% static "images/invoice.png" %}" alt="ايقونة الفواتير " width="200" height="200">
+        </div>
+    </div>
+
+    <div class="status-box">
+
+        <div class="status-header">
+            <div class="status-title">
+                <span>فاتورة هذا الشهر &#128197;</span>
+            </div>
+        </div>
+        
+        <div class="status-cards">
+        
+            <div class="status-card green">
+                <div class="card-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                <div class="card-text">
+                    <p class="card-label">إجمالي المبيعات</p>
+                    <p class="card-note">هذا الشهر</p>
+                    <p class="card-value"> {{ total_sales }}<span class="currency" > د.ل </span></p>
+                </div>
+            </div>
+        
+            <div class="status-card blue">
+            <div class="card-icon"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+            <div class="card-text">
+                <p class="card-label">المستحق هذا الشهر</p>
+                <p class="card-note">يتم احتسابه تلقائياً من المبيعات</p>
+                <p class="card-value"> {{ commission }} <span class="currency" > د.ل </span> </p>
+            </div>
+            </div>
+        
+        </div>
+        
+        <div class="notice status-note"> 
+            <div class="notice-icon">
+                <i class="fa-solid fa-circle-exclamation"></i>
+            </div>
+            <div class="notice-content">
+                <p class="notice-text">
+                    سيتم إنشاء الفاتورة تلقائياً في نهاية الشهر بناءً على إجمالي المبيعات.
+                </p>
+            </div>
+        </div>
+        
+    </div>
+
+    <div class="details-table">
+        <div class="title-wrapper">
+            <h4> <i class="fa-solid fa-file-invoice-dollar primary-cl"></i> سجل الفواتير </h4>    
+        </div>
+        
+        <div class="table-wrap">
+            {% if invoices %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>رقم الفاتورة</th>
+                            <th>الشهر</th>
+                            <th>تاريخ الانشاء</th>
+                            <th>الحالة</th>
+                            <th>القيمة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invoice in invoices %}
+                            <tr id="item-row-{{ item.id }}" data-view-url="{% url "invoices:view_invoice" invoice.id %}">
+                                <td>{{ invoice.invoice_number }}</td>
+                                <td>{{ invoice.billing_year }}/{{  invoice.billing_month }}</td>
+                                <td>{{ invoice.created_at|date:"d M Y"  }}</td>
+                                <td><span class="cl-span {% if invoice.status == paid %} complete {% elif invoice.status == cancelled %} cancel {% else %} pending {% endif %}">{{ invoice.get_status_display }}</span> </td>
+                                <td >{{ invoice.final_value }}<span class="currency">د.ل</span></td>
+                                <td>
+                                    <a href="{% url "invoices:view_invoice" invoice.id %}" class="view-btn" aria-label="عرض">
+                                        عرض
+                                        <i class="fa-solid fa-eye"></i> 
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}                            
+                    </tbody>
+                    <tfoot>
+                        
+                    </tfoot>
+                </table>
+            {% else %}
+                <div class="message-container">
+                    <div class="message">
+                        <div class="message-image">
+                            <img src=" {% static "images/empty.png" %} " alt="لا يوجد نتائج" width="100" height="80" >
+                        </div>
+                        <h2 class="message-title" >لا توجد لديك فواتير بعد !</h2>
+                        <p class="message-content">
+                            {% comment %} #change-later اكتب شرح مفصل {% endcomment %}
+                            يبدوا انه  ليس لديك  أي فواتير بعد 
+                        </p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    {% if USER_TYPE == "vendor" %}
+        <a href="{% url 'store:vendors_dashboard' %}" class="redirect-btn"> العودة الى لوحة التحكم <i class="fa-solid fa-arrow-left-long"></i> </a>
+    {% else %}
+        <a href="{% url 'invoices:all_stores_invoices' %}" class="redirect-btn"> العودة الى ادارة الفواتير <i class="fa-solid fa-arrow-left-long"></i> </a>
+    {% endif %}
+        
+{% endblock content %}
+
+
+
+{% comment %} Page Scripts {% endcomment %}
+{% block page_scripts %}
+    <script src="{% static "js/tables.js" %}"></script>
+{% endblock %}
