@@ -129,14 +129,16 @@ class StoreRegisterForm(forms.ModelForm):
 # نموذج تسجيل الدخول
 class LoginForm(forms.Form):
     username = forms.CharField(
-        label="اسم المستخدم",
+        label="المعرف",
+        help_text="ادخل المعرف الذي استخدمته عند انشاء حسابك",
         error_messages={
-            'required': 'اسم المستخدم مطلوب',
+            'required': 'المعرف مطلوب',
         }
     )
 
     password = forms.CharField(
         label="كلمة المرور",
+        help_text="أدخل كلمة السر الخاصة بك",
         widget=forms.PasswordInput,
         error_messages={
             'required': 'كلمة المرور مطلوبة',

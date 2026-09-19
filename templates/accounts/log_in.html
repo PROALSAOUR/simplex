@@ -1,48 +1,96 @@
-{% comment %} صفحة تسجيل الدخول  {% endcomment %} 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <style>
-        .container {
-            text-align: center;
-            direction: rtl;
-            padding: 50px;
-            height: 100vh;
-            font-size: 24px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <p>هذه صفحة تسجيل الدخول</p>
-        <form method="POST">
+{% extends "accounts/partials/log_base.html" %}
+{% load static %}
+
+
+{% block content %}
+<div class="content">
+
+    <div class="sign-card">
+        
+        <div class="logo">
+            <img src="{% static "images/d-long-logo.png" %}" alt="شعار الموقع" width="120" height="40" >
+        </div>
+
+        <div class="card-title">
+            <h1>مرحبا بك مجدداً</h1>
+            <p>سجل الدخول للمتابعة</p>
+        </div>
+
+        <form class="card-fields" method="post">
             {% csrf_token %}
 
             {% if form.non_field_errors %}
-                <div style="color:red;">
+                <div class="field-errors">
                     {{ form.non_field_errors }}
                 </div>
             {% endif %}
-            {% for field in form %}
-                <div>
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
 
-                    {% if field.errors %}
-                        <div style="color:red; font-size: 14px;">
-                            {{ field.errors }}
-                        </div>
-                    {% endif %}
+            <div class="field {% if form.username.errors %}has-error{% endif %}">
+                <label for="username">{{ form.username.label }}</label>
+                <div class="input">
+                    <input id="username" name="username" type="text" placeholder="ادخل المعرف الخاص بك ..." autocomplete="off" >
+                    <i class="fa-solid fa-at"></i>
                 </div>
+                {% if form.username.errors %}
+                    <span class="help-text"> {{ form.username.errors.0 }} </span>
+                {% else %}
+                    <span class="help-text">{{ form.username.help_text }}</span>
+                {% endif %}
+            
+            </div>
 
-            {% endfor %}
+            <div class="field {% if form.password.errors %}has-error{% endif %} ">
+                <label for="password">{{ form.password.label }}</label>
+                <div class="input">
+                    <input id="password" name="password" type="password" placeholder="ادخل كلمة السر الخاصة بك ..."  autocomplete="on">
+                    <i class="fa-solid fa-unlock-keyhole"></i>
+                </div>
+                {% if form.password.errors %}
+                    <span class="help-text"> {{ form.password.errors.0 }} </span>
+                {% endif %}
+                <a class="help-text primary-cl">نسيت كلمة السر؟</a>
+            </div>
 
-            <button type="submit">تسجيل الدخول</button>
+            <button type="submit" class="primary-btn" >تسجيل الدخول</button>
+            <a href="{% url "accounts:sign_up" %}" class="card-redirect"> ليس لديك حساب؟ <span class="primary-cl" > إنشاء حساب </span> </a>
+
         </form>
+
+        <span class="card-note"> بياناتك محمية و آمنة  <i class="fa-solid fa-shield-halved"></i> </span> 
+
     </div>
+
+    <div class="features-card">
+        <div class="image">
+            <img src="{% static "images/log-in.png" %}" alt="تسجيل الدخول" width="300" height="240" >
+        </div>
+
+        <div class="card-title">
+            <h1>إدارة متجرك بكل <span class="primary-cl" >سهولة</span></h1>
+            <p>سوف نساعدك على إدارة منتجاتك وطلباتك وتطوير متجرك من مكان واحد.</p>
+        </div>
+
+        <div class="card-icons">
+
+            <div class="icon">
+                <i class="fa-regular fa-clock primary-cl"></i>
+                <span>سريع وسهل</span>
+            </div>
+
+            <div class="icon">
+                <i class="fa-solid fa-chart-column primary-cl"></i>
+                <span>تقارير دقيقة</span>
+            </div>
+
+            <div class="icon">
+                <i class="fa-solid fa-shield-halved primary-cl"></i>
+                <span>آمن و موثوق</span>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
     
-</body>
-</html>
+{% endblock content %}

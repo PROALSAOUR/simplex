@@ -1,0 +1,83 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark-mode">
+<head>
+    <title>Simplex</title>
+    <!--   ايقونة الموقع  -->
+    <link rel="shortcut icon" href="{% static "images/sq-logo.png" %}" type="image/x-icon">
+
+    <!-- الميتا  -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+
+    <!-- ملفات css -->
+    <link rel="stylesheet" href="{% static "css/normalize.css" %}">                               
+    <link rel="stylesheet" href="{% static "css/style.css" %}">                               
+    <link rel="stylesheet" href="{% static "css/basic.css" %}">   
+    <link rel="stylesheet" href="{% static "css/fields.css" %} ">         
+    <link rel="stylesheet" href="{% static "css/accounts.css" %}">   
+
+    <style>
+        {% comment %} ادراج صور خلفية صفحات التسجيل {% endcomment %}
+        :root {
+            --back-image: url("{% static 'images/back.png' %}");
+        }
+    </style>
+    
+    <!-- الايقونات  -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"> 
+
+    <!-- الخطوط المستخدمة بالتصميم -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
+    
+</head>
+<body class="sign-page" >
+
+    <main class="container">
+        {% block content %}{% endblock content %}
+
+        <!-- Start Footer -->
+        <footer>
+            <div class="links">
+                <a href="#" class="link-btn" >من نحن</a>
+                <a href="#" class="link-btn" >الشروط والخصوصية</a>
+                <a href="#" class="link-btn" >تواصل معنا</a>
+            </div>
+            <div class="footer-copyright">
+                جميع الحقوق محفوظة لمنصة سيمبليكس
+                <br>
+                © 2026 SIMPLEX.
+            </div>
+        </footer>
+        <!-- End Footer -->
+
+        <!-- Start Toast -->
+        {% include "common/toast.html" %}
+        <!-- End Toast -->
+    
+    </main>
+
+    
+    <script src="{% static "js/script.js" %}"></script>
+    <script src="{% static "js/fields.js" %}"></script>
+
+    {% if messages %}
+        {% for message in messages %}
+            {% if "success" in message.tags %}
+                <script>
+                    showToast('success-toast', "{{ message|escapejs }}");
+                </script>
+            {% elif "error" in message.tags %}
+                <script>
+                    showToast('failed-toast', "{{ message|escapejs }}");
+                </script>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+</body>
+</html>

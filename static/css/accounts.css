@@ -203,7 +203,7 @@ section {
     Sign Page Section 
 ═══════════════════════════════════════════ */
 .sign-page {
-    background-image: url("/images/back.png");
+    background-image: var(--back-image);
     background-size: cover;
 }
 .sign-page .container {
