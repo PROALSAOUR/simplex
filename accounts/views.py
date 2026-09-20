@@ -10,7 +10,6 @@ from accounts.validators import validate_username, get_redirect_url_for_user,  g
 from accounts.decorators import vendor_only 
 
 @login_required(login_url='accounts:log_in') 
-@vendor_only
 def account_details(request):
     """
     الدالة المسؤولة عن عرض الصفحة التي  تحتوي على بيانات الحساب الخاص بالبائع 
@@ -24,7 +23,6 @@ def account_details(request):
     return render(request, 'accounts/account_details.html', context)
 
 @login_required(login_url='accounts:log_in') 
-@vendor_only
 @require_POST
 def edit_account_details(request):
     """

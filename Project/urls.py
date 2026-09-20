@@ -31,7 +31,7 @@ urlpatterns = [
     path('invoices/', include('invoices.urls')),
     path('orders/', include('orders.urls')),
     path('account/', include('accounts.urls')),
-    path('management/', include('management.urls')),
+    path('admins/', include('admins.urls')),
     path('ckeditor5/', include('django_ckeditor_5.urls')),
 ]
 

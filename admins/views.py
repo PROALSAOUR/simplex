@@ -10,9 +10,9 @@ from orders.models import Order
 
 @login_required(login_url='accounts:log_in')
 @admin_only
-def admins_dashboard(request):
+def dashboard(request):
     """عرض لوحة التحكم الخاصة بالادارة"""
-    return render(request, 'management/dashboard.html')
+    return render(request, 'admins/dashboard.html')
 
 @login_required(login_url='accounts:log_in')
 @admin_only
@@ -60,7 +60,7 @@ def show_stores(request):
         'search': search,
         'selected_sort':   selected_sort,
     }
-    return render(request, 'management/show_stores.html', context)
+    return render(request, 'admins/show_stores.html', context)
 
 @login_required(login_url='accounts:log_in')
 @admin_only
@@ -70,7 +70,7 @@ def store_list(request, sid):
     context = {
         'store': store,
     }
-    return render(request, 'management/store_list.html', context)
+    return render(request, 'admins/store_list.html', context)
 
 @login_required(login_url='accounts:log_in')
 @admin_only
@@ -87,7 +87,7 @@ def review_center(request):
         'orders': orders,
         'invoices': invoices,
     }
-    return render(request, 'management/review_center.html', context)
+    return render(request, 'admins/review_center.html', context)
 
 @login_required(login_url='accounts:log_in')
 @admin_only
@@ -128,7 +128,7 @@ def stores_to_review(request):
         'search': search,
         'selected_sort':   selected_sort,
     }
-    return render(request, 'management/stores_to_review.html', context)
+    return render(request, 'admins/stores_to_review.html', context)
 
 @login_required(login_url='accounts:log_in')
 @admin_only
@@ -170,7 +170,7 @@ def products_to_review(request):
         'search': search,
         'selected_sort':   selected_sort,
     }
-    return render(request, 'management/products_to_review.html', context)
+    return render(request, 'admins/products_to_review.html', context)
 
 @login_required(login_url='accounts:log_in')
 @admin_only
@@ -216,7 +216,7 @@ def orders_to_review(request):
         'search': search,
         'selected_sort':   selected_sort,
     }
-    return render(request, 'management/orders_to_review.html', context)
+    return render(request, 'admins/orders_to_review.html', context)
 
 @login_required(login_url='accounts:log_in')
 @admin_only
@@ -258,4 +258,4 @@ def invoices_to_review(request):
         'search': search,
         'selected_sort':   selected_sort,
     }
-    return render(request, 'management/invoices_to_review.html', context)
+    return render(request, 'admins/invoices_to_review.html', context)

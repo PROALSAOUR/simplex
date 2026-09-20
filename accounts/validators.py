@@ -73,7 +73,7 @@ def get_redirect_url_for_user(user):
         return 'store:vendors_dashboard'
 
     elif user_profile.user_type == 'admin':
-        return 'management:admins_dashboard'
+        return 'admins:dashboard'
 
     return None
         

@@ -94,7 +94,7 @@ def all_stores_invoices(request):
         'selected_sort':   selected_sort,
     }
     
-    return render(request, 'management/billing_management.html', context)
+    return render(request, 'admins/billing_management.html', context)
 
 @login_required(login_url='accounts:log_in')
 def store_invoices(request, sid):
@@ -230,4 +230,4 @@ def store_statistics(request, sid):
     context = {
         'store': store,
     }
-    return render(request, 'management/store_statistics.html', context)
+    return render(request, 'admins/store_statistics.html', context)

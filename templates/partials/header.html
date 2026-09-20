@@ -51,7 +51,7 @@
                     <li><a class="menu-link link-btn" href=""><i class="fa-solid fa-chart-line"></i><p> الإحصائيات </p> </a></li>
                     <li><a class="menu-link link-btn" href="{% url "invoices:store_invoices" STORE_ID %}"><i class="fa-solid fa-wallet"></i><p> المالية </p> </a></li>
                 {% else %}
-                    <li><a class="menu-link active  link-btn" href="{% url 'management:admins_dashboard' %}"><i class="fa-solid fa-home"></i><p> الرئيسية </p></a></li>
+                    <li><a class="menu-link active  link-btn" href="{% url 'admins:dashboard' %}"><i class="fa-solid fa-home"></i><p> الرئيسية </p></a></li>
                 {% endif %}
             </ul>
             
