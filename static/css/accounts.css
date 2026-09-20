@@ -182,6 +182,9 @@ section {
     -ms-border-radius: 5px;
     -o-border-radius: 5px;
 }
+.panel-content.social .field .input a {
+    margin-right: 10px;
+}
 .panel-content.social .field label i.facebook {
     background-color: #1877F2;
 }

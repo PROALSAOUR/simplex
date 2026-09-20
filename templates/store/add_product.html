@@ -64,17 +64,9 @@
 
                         <div class="field {% if form.type.errors %}has-error{% endif %}">
                             <div class="select-control">
-                                <label for="type"> {{ form.type.label }} </label>
-                        
+                                <label for="{{ form.type.id_for_label }}"> {{ form.type.label }} </label>
                                 <div class="js-custom-select">
-                                    <select id="type" name="type" required>
-                                            {% for value, label in form.type.field.choices %}
-                                                <option value="{{ value }}"
-                                                    {% if form.type.value == value %}selected{% endif %}>
-                                                    {{ label }}
-                                                </option>
-                                            {% endfor %}
-                                    </select>
+                                    {{ form.type }}
                                 </div>
                             </div>
                             {% if form.type.errors %}
@@ -86,19 +78,12 @@
 
                         <div class="field {% if form.gender.errors %}has-error{% endif %}">
                             <div class="select-control">
-                                <label for="gender">
+                                <label for="{{ form.gender.id_for_label }}">
                                     {{ form.gender.label }}
                                 </label>
 
                                 <div class="js-custom-select">
-                                    <select id="gender" name="gender" required>
-                                        {% for value, label in form.gender.field.choices %}
-                                            <option value="{{ value }}"
-                                                {% if form.gender.value == value %}selected{% endif %}>
-                                                {{ label }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
+                                    {{ form.gender }}
                                 </div>
                             </div>
 
@@ -451,7 +436,7 @@
                         
                         <div id="offer_checkbox_field" class="field checkbox-field {% if form.offer.errors %}has-error{% endif %}">
                             <div class="checkbox-control">
-                                <label >{{ form.offer.label }}</label>
+                                <label for="offer" >{{ form.offer.label }}</label>
                                 <input type="checkbox" name="offer" id="offer" {% if form.offer.value %}checked{% endif %} >
                             </div>
                             {% if form.offer.errors %}

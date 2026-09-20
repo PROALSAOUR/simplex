@@ -9,18 +9,6 @@ from accounts.forms import *
 from accounts.validators import validate_username, get_redirect_url_for_user,  get_user_type 
 from accounts.decorators import vendor_only 
 
-@login_required(login_url='accounts:log_in') #تمنع الوصول تلقائيًا لأي مستخدم غير مسجل دخول، وتعيد توجيهه إلى صفحة التسجيل   
-@vendor_only
-def account_list(request):
-    """
-    الدالة المسؤولة عن عرض الصفحة التي  تحتوي على قائمة الصفحات الخاصة بالحساب 
-    يمكن فقط للبائعين الدخول اليها 
-    """
-    context = {
-        "store": request.user.userprofile.store
-    }
-    return render(request, 'accounts/account_list.html', context) 
-
 @login_required(login_url='accounts:log_in') 
 @vendor_only
 def account_details(request):
@@ -69,119 +57,83 @@ def edit_account_details(request):
         "name": userprofile.name,
         "username": user.username
     })
-        
+
 @login_required(login_url='accounts:log_in')
 def store_details(request, sid):
-    """
-    الدالة المسؤولة عن عرض الصفحة التي  تحتوي على بيانات المتجر المرتبط بالبائع 
-    """
+    # عرض بيانات المتجر أو حفظ جميع تعديلاته من نموذج واحد
     store = get_object_or_404(Store, id=sid)
+
     user_type = get_user_type(request.user)
-    # تحقق ان كان المستخدم بائع ان المتجر الذي يريد تعديله هو متجره
-    if user_type == 'vendor' and store.owner != request.user: # لو البائع يحاول الوصول لمتجر ليس له علاقة به
+
+    # منع البائع من الوصول إلى متجر ليس تابعًا له
+    if user_type == 'vendor' and store.owner != request.user:
         raise Http404("المتجر غير موجود")
-    
+
+    if request.method == "POST":
+
+        if user_type == "admin":
+            form = StoreAdminUpdateForm(
+                request.POST,
+                request.FILES,
+                instance=store
+            )
+        else:
+            form = StoreUpdateForm(
+                request.POST,
+                request.FILES,
+                instance=store
+            )
+
+        if form.is_valid():
+            form.save()
+
+            return JsonResponse({
+                "status": "success",
+                "message": "تم حفظ تعديلات المتجر بنجاح",
+
+                "name": store.name,
+                "location": store.location,
+                "store_status": store.get_status_display(),
+                "check_orders": store.get_check_orders_display(),
+
+                "facebook": store.facebook,
+                "instagram": store.instagram,
+                "tiktok": store.tiktok,
+
+                "phone_number1": store.phone_number1,
+                "telegram": store.telegram,
+
+                "logo_url": store.logo.url if store.logo else "",
+            })
+
+        errors = {
+            field: [str(error) for error in error_list]
+            for field, error_list in form.errors.items()
+        }
+
+        return JsonResponse({
+            "status": "error",
+            "errors": errors
+        })
+
+    # GET
     if user_type == "admin":
-        store_basic_form = StoreAdminBasicForm(instance=store)
-        store_social_form = StoreAdminSocialForm(instance=store)
+        form = StoreAdminUpdateForm(instance=store)
     else:
-        store_basic_form =  StoreBasicForm(instance=store)
-        store_social_form = StoreSocialForm(instance=store)
-        
+        form = StoreUpdateForm(instance=store)
+
     context = {
-        'store': store,
-        'basic_form': store_basic_form,
-        'social_form': store_social_form,
+        "store": store,
+        "form": form,
+        "USER_TYPE": user_type,
     }
-    return render(request, 'accounts/store_details.html', context)
 
-@login_required(login_url='accounts:log_in')
-@require_POST
-def edit_store_basic(request, sid):
-    """
-    الدالة المسؤولة عن تعديل بيانات المتجر الاساسية وهي الاسم والموقع 
-    """
-    user_type = get_user_type(request.user)    
-    store = get_object_or_404(Store, id=sid)
-    
-    # تحقق ان كان المستخدم بائع ان المتجر الذي يريد تعديله هو متجره
-    if user_type == 'vendor' and store.owner != request.user: # لو البائع يحاول الوصول لمتجر ليس له علاقة به
-        raise Http404("المتجر غير موجود")
-    
-    if user_type == "admin":
-        form = StoreAdminBasicForm(request.POST, instance=store)
-    else:
-        form =  StoreBasicForm(request.POST, instance=store)
-    if form.is_valid():
-        form.save()
-        return JsonResponse({
-            "status": "success",
-            "message": "تم إجراء التعديل بنجاح",
-            "name": store.name,
-            "location": store.location,
-            "store_status": store.get_status_display(),
-            "check_orders": store.get_check_orders_display()
-        })
-    else:
-        errors = {field: [str(error) for error in error_list] for field, error_list in form.errors.items()}
-        return JsonResponse({"status": "error", "errors": errors})
-        
-@login_required(login_url='accounts:log_in')
-@require_POST
-def edit_store_social(request, sid):
-    """
-    الدالة المسؤولة عن تعديل حسابات المتجر الاجتماعية  
-    """
-    user_type = get_user_type(request.user)    
-    store = get_object_or_404(Store, id=sid)
-    
-    # تحقق ان كان المستخدم بائع ان المتجر الذي يريد تعديله هو متجره
-    if user_type == 'vendor' and store.owner != request.user: # لو البائع يحاول الوصول لمتجر ليس له علاقة به
-        raise Http404("المتجر غير موجود")
-    
-    if user_type == "admin":
-        form = StoreAdminSocialForm(request.POST, instance=store)
-    else:
-        form =  StoreSocialForm(request.POST, instance=store)
-    if form.is_valid():
-        form.save()
-        return JsonResponse({
-            "status": "success",
-            "message": "تم إجراء التعديل بنجاح",
-            "telegram": store.telegram,
-            "phone_number1": store.phone_number1,
-            "facebook": store.facebook,
-            "instagram": store.instagram,
-            "tiktok": store.tiktok
-        })
-    else:
-        errors = {field: [str(error) for error in error_list] for field, error_list in form.errors.items()}
-        return JsonResponse({"status": "error", "errors": errors})
+    return render(
+        request,
+        "accounts/store_details.html",
+        context
+    )
 
-@login_required(login_url='accounts:log_in')
-@require_POST
-def edit_store_logo(request, sid):
-    """
-    الدالة المسؤولة عن تعديل لوجو المتجر  
-    """
-    user_type = get_user_type(request.user)    
-    store = get_object_or_404(Store, id=sid)
-    # تحقق ان كان المستخدم بائع ان المتجر الذي يريد تعديله هو متجره
-    if user_type == 'vendor' and store.owner != request.user: # لو البائع يحاول الوصول لمتجر ليس له علاقة به
-        raise Http404("المتجر غير موجود")
-    
-    form = StoreLogoForm(request.POST, request.FILES, instance=store)
-    if form.is_valid():
-        form.save()
-        return JsonResponse({
-            "status": "success",
-            "message": "تم تحديث لوجو المتجر بنجاح",
-            "logo_url": store.logo.url
-        })
-    else:
-        errors = {field: [str(error) for error in error_list] for field, error_list in form.errors.items()}
-        return JsonResponse({"status": "error", "errors": errors})
-    
 def sign_up(request):
     """الدالة المسؤولة عن صفحة انشاء حساب جديد للبائعين"""
 

@@ -1,0 +1,364 @@
+{% extends "partials/base.html" %}
+{% load static %}      
+
+{% comment %} Page Head {% endcomment %}
+{% block page_head %}
+    <link rel="stylesheet" href="{% static "css/fields.css" %} ">
+    <link rel="stylesheet" href="{% static "css/details.css" %} ">
+    <link rel="stylesheet" href="{% static "css/accounts.css" %} ">
+
+{% endblock page_head %}
+
+{% comment %} Page Content {% endcomment %}
+{% block content %}
+
+    <!-- رأس القسم -->
+    <div class="section-header">
+        <div class="section-content">
+            <div class="section-icon store">
+                <i class="fa-solid fa-shop"></i>
+            </div>
+            <div class="section-details">
+                <h1>إعدادات المتجر</h1>
+                <p> قم بتحديث بيانات متجرك بسهولة.</p>
+            </div>
+        </div>
+        <button class="back-btn" id="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i> </button>
+        
+    </div>
+
+    <form id="store_form" method="POST" enctype="multipart/form-data" action="{% url 'accounts:store_details' store.id %}" >
+        {% csrf_token %}
+        <nav>
+            <div class="nav-btns">
+                <button type="submit"  class="save-btn">حفظ</button>
+                <button type="reset" class="reset" >اعادة تعيين</button>
+            </div>
+        </nav>
+        
+        <div class="store-status">
+            <h3> <i class="fa-solid fa-calendar-check primary-cl"></i> حالة المتجر :</h3> <span class="{% if store.status == "active" %}complete {% elif store.status == "inactive" %} cancel {% else %} pending {% endif %}" > ● {{ store.get_status_display }}</span>
+        </div>
+
+        <div  class="settings-panel">
+            <div class="panel-header">
+                <div class="panel-heading">
+                    <i class="panel-icon fa-solid fa-shop"></i>
+                    <div class="panel-title">
+                        <h2>تفاصيل المتجر</h2>
+                        <p>الاسم، المدينة {% if USER_TYPE == 'admin' %}، الحالة{% endif %}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-content grid">
+                <div class="fields-container">
+
+                    <div class="field {% if form.name.errors %}has-error{% endif %}">
+                        <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+                        <div class="input">
+                            {{ form.name }}
+                            <i class="fa-solid fa-shop"></i>
+                        </div>
+                        {% if form.name.errors %}
+                            <span class="help-text"> {{ form.name.errors.0 }} </span>
+                        {% else %}
+                            <span class="help-text">{{ form.name.help_text }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="field {% if form.location.errors %}has-error{% endif %}">
+                        <label for="{{ form.location.id_for_label }}"> {{ form.location.label }} </label>
+                        <div class="input">
+                            {{ form.location }}
+                            <i class="fa-solid fa-location-dot"></i>
+                        </div>
+                        {% if form.location.errors %}
+                            <span class="help-text"> {{ form.location.errors.0 }} </span>
+                        {% else %}
+                            <span class="help-text">{{ form.location.help_text }}</span>
+                        {% endif %}
+                    </div>
+
+                </div>
+                {% if USER_TYPE == 'admin' %}
+                    <div class="fields-container">
+
+                        <div class="field">
+                            <div class="select-control">
+                                <label for="status">حالة المتجر </label>
+                        
+                                <div class="js-custom-select">
+                                    {{ form.status }}
+                                </div>
+                            </div>
+                            {% if form.status.errors %}
+                                <span class="help-text"> {{ form.status.errors.0 }}</span>
+                            {% else %}
+                                <span class="help-text">{{ form.status.help_text }}</span>
+                            {% endif %}
+                        </div>
+
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div  class="settings-panel">
+            <div class="panel-header">
+                <div class="panel-heading">
+                    <i class="panel-icon fa-solid fa-camera-retro"></i>
+                    <div class="panel-title">
+                        <h2>شعار المتجر</h2>
+                        <p>اللوجو الخاص بالمتجر</p>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-content">
+                <div class="fields-container">
+                    <div class="field image-field {% if form.logo.errors %}has-error{% endif %}">
+                        {% if form.logo.errors %}
+                            <span class="help-text">
+                                {{ form.logo.errors.0 }}
+                            </span>
+                        {% else %}
+                            <span class="help-text">
+                                {{ form.logo.help_text }}
+                            </span>
+                        {% endif %}
+
+                        <!-- المعاينة -->
+                        <div class="preview_box" id="logo_preview_box" >
+
+                            <div class="image-item" draggable="false" >
+
+                                <div class="image-details">
+
+                                    <img
+                                        id="logo_preview"
+                                        class="image-preview main-image"
+                                        src="{{ store.logo.url }}"
+                                        alt="شعار المتجر"
+                                        width="50"
+                                        height="50"
+                                    >
+
+                                    <div class="image-info">
+                                        <p id="image-size">
+                                            الحجم:
+                                        </p>
+
+                                        <p  id="image-type">
+                                            النوع:
+                                        </p>
+                                    </div>
+
+                                </div>
+
+
+                                <button
+                                    type="button"
+                                    class="image-btn replace-btn"
+                                    id="replace_logo_btn"
+                                >
+                                    استبدال
+                                </button>
+
+                            </div>
+
+                        </div>
+                        
+                        <input
+                            type="file"
+                            name="logo"
+                            id="id_logo"
+                            accept="image/*"
+                            hidden
+                        >
+                    
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-panel">
+            <div class="panel-header">
+                <div class="panel-heading">
+                    <i class="panel-icon fa-solid fa-list-check"></i>
+                    <div class="panel-title">
+                        <h2>إعدادات الطلبات </h2>
+                        <p>تحقق من الطلبات</p>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-content">
+                <div class="fields-container">
+
+                    <div class="field checkbox-field {% if form.check_orders.errors %}has-error{% endif %}">
+                        <div class="checkbox-control">
+                            <label for="{{ form.check_orders.id_for_label }}">{{ form.check_orders.label }}</label>
+                            <input type="checkbox" name="check_orders" id="id_check_orders" checked>
+                        </div>
+                        {% if form.check_orders.errors %}
+                            <span class="help-text"> {{ form.check_orders.errors.0 }} </span>
+                        {% else %}
+                            <span class="help-text">{{ form.check_orders.help_text }}</span>
+                        {% endif %}
+                            
+                    </div>
+
+                </div>
+            
+            </div>
+        
+        </div>
+
+        <div class="settings-panel">
+
+            <div class="panel-header">
+                <div class="panel-heading">
+                    <i class="panel-icon fa-solid fa-share-nodes"></i>
+                    <div class="panel-title">
+                        <h2>حسابات المتجر</h2>
+                        <p>إدارة حساباتك على وسائل التواصل.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-content grid social">
+                <div class="fields-container">
+
+                    <div class="field">
+
+                        <label for="{{ form.facebook.id_for_label }}">
+                            <i class="fa-brands fa-facebook-f facebook"></i>
+                            فيسبوك
+                        </label>
+                        <div class="input">
+                            {{ form.facebook }}
+                            <a
+                                id="facebook_link"
+                                href="#"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="field">
+
+                        <label for="{{ form.tiktok.id_for_label }}">
+                            <i class="fa-brands fa-tiktok tiktok"></i>
+                            تيكتوك
+                        </label>
+
+                        <div class="input">
+
+                            {{ form.tiktok }}
+
+                            <a
+                                id="tiktok_link"
+                                href="#"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                    <div class="field">
+
+                        <label for="{{ form.instagram.id_for_label }}">
+                            <i class="fa-brands fa-instagram instagram"></i>
+                            انستاجرام
+                        </label>
+
+                        <div class="input">
+
+                            {{ form.instagram }}
+
+                            <a
+                                id="instagram_link"
+                                href="#"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+                {% if USER_TYPE == 'admin' %}
+                    <div class="fields-container">
+
+                        <div class="field">
+
+                            <label for="{{ form.telegram.id_for_label }}">
+                                <i class="fa-brands fa-telegram telegram"></i>
+                                تيليجرام
+                            </label>
+
+                            <div class="input">
+
+                                {{ form.telegram }}
+
+                                <a
+                                    id="telegram_link"
+                                    href="#"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                        <div class="field">
+
+                            <label for="{{ form.phone_number1.id_for_label }}">
+                                <i class="fa-solid fa-phone-volume phone-call"></i>
+                                رقم الهاتف
+                            </label>
+
+                            <div class="input">
+
+                                {{ form.phone_number1 }}
+
+                                <a
+                                    id="phone_link"
+                                    href="#"
+                                    target="_blank"
+                                >
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                </a>
+
+                            </div>
+                        </div>
+
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+
+    </form>
+
+{% endblock content %}
+
+
+{% comment %} Page Scripts {% endcomment %}
+{% block page_scripts %}
+    <script src="{% static "js/fields.js" %}"></script>
+    <script src="{% static "js/accounts/validators.js" %}"></script>
+    <script src="{% static "js/accounts/edit_store.js" %}"></script>
+
+{% endblock %}

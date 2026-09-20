@@ -1,0 +1,119 @@
+{% extends "partials/base.html" %}
+{% load static %}      
+{% load l10n %}
+
+{% comment %} Page Head {% endcomment %}
+{% block page_head %}
+    <link rel="stylesheet" href="{% static "css/fields.css" %} ">
+    <link rel="stylesheet" href="{% static "css/details.css" %} ">
+    <link rel="stylesheet" href="{% static "css/accounts.css" %} ">
+
+{% endblock page_head %}
+
+{% comment %} Page Content {% endcomment %}
+{% block content %}
+
+    <section >
+
+        <!-- رأس القسم -->
+        <div class="section-header">
+            <div class="section-content">
+                <div class="section-icon store">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <div class="section-details">
+                    <h1>إعدادات الحساب</h1>
+                    <p> قم بتحديث بيانات حسابك بسهولة.</p>
+                </div>
+            </div>
+            <button class="back-btn" id="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i> </button>
+        </div>
+        
+        <form id="edit_account_form" method="POST" action="{% url 'accounts:edit_account_details' %}" data-current-user-id="{{ request.user.id }}" data-check-url="{% url 'accounts:check_username' %}">
+            {% csrf_token %}
+            <nav>
+                <div class="nav-btns">
+                    <button type="submit"  class="save-btn">حفظ</button>
+                    <button type="reset" class="reset" >الغاء</button>
+                </div>
+            </nav>
+            
+            <div  class="settings-panel">
+                <div class="panel-header">
+                    <div class="panel-heading">
+                        <i class="panel-icon fa-solid fa-user"></i>
+                        <div class="panel-title">
+                            <h2>تفاصيل الحساب</h2>
+                            <p>الاسم، المعرف. </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-content ">
+                    <div class="fields-container">
+
+                        <div id="field-errors" class="field-errors hidden"></div>
+
+                        <div class="field">
+                            <label for="name">اسم المستخدم </label>
+                            <div class="input">
+                                <input id="name" name="name" type="text" placeholder="ادخل اسم المستخدم ..." value="{{ userprofile.name }}" autocomplete="off">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <span class="help-text">نص المساعدة هنا نص المساعدة هنا</span>
+                        </div>
+
+                        <div class="field">
+                            <label for="username">المعرف</label>
+                            <div class="input">
+                                <input id="username" name="username"  type="text" placeholder="ادخل اسم المتجر ..." value="{{ userprofile.user.username }}" autocomplete="off">
+                                <i class="fa-solid fa-at"></i>
+                            </div>
+                            <span id="username-feedback" class="help-text">نص المساعدة هنا نص المساعدة هنا</span>
+                        </div>
+
+                    </div>
+            
+                </div>
+            </div>
+
+            <div  class="settings-panel">
+                <div class="panel-header">
+                    <div class="panel-heading">
+                        <i class="panel-icon fa-solid fa-lock"></i>
+                        <div class="panel-title">
+                            <h2>كلمة السر</h2>
+                            <p>بإمكانك تغيير كلمة السر. </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-content ">
+                    <div class="fields-container">
+
+                        <div class="field">
+                            <label for="password">كلمة السر </label>
+                            <div class="input">
+                                <input id="password" name="password" type="password" placeholder="******" autocomplete="off" >
+                            </div>
+                            <span class="help-text">نص المساعدة هنا نص المساعدة هنا</span>
+                        </div>
+
+                    </div>
+            
+                </div>
+            </div>
+
+        </form>
+
+    </section>
+
+{% endblock content %}
+
+
+{% comment %} Page Scripts {% endcomment %}
+{% block page_scripts %}
+    <script src="{% static "js/fields.js" %}"></script>
+    <script src="{% static "js/accounts/validators.js" %}"></script>
+    <script src="{% static "js/accounts/edit_account.js" %}"></script>
+
+{% endblock %}

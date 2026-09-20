@@ -276,7 +276,7 @@ document.addEventListener("DOMContentLoaded", function () {
 // التحكم بظهور/إخفاء حقل سبب الرفض وفقا لحالة المنتج
 function setupRejectedCause() {
     // إظهار سبب الرفض فقط عندما تكون حالة المنتج "مرفوض"
-    const status = document.getElementById("status");
+    const status = document.getElementById("id_status");
     const rejectedCause = document.getElementById("rejected_cause");
 
     if (!status || !rejectedCause) return;

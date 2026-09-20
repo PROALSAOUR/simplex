@@ -145,84 +145,102 @@ class LoginForm(forms.Form):
         }
     )
 
-# نموذج تعديل بيانات المتجر الاساسية
-class StoreBasicForm(forms.ModelForm):
+# نموذج تعديل جميع بيانات المتجر من نموذج واحد
+class StoreUpdateForm(forms.ModelForm):
+    check_orders = forms.BooleanField(
+        required=False,
+        label=Store._meta.get_field('check_orders').verbose_name,
+        help_text=Store._meta.get_field('check_orders').help_text,
+    )
     class Meta:
         model = Store
-        fields = ['name', 'location', 'check_orders']
-        
+        fields = [
+            'name',
+            'location',
+            'logo',
+            'check_orders',
+            'facebook',
+            'instagram',
+            'tiktok',
+        ]
+
     def clean_name(self):
+        # التحقق من صحة اسم المتجر
         store_name = self.cleaned_data["name"].strip()
 
         if store_name.isdigit():
             raise ValidationError("اسم المتجر لا يجب أن يكون رقماً فقط.")
 
         if len(store_name) < 3:
-            raise ValidationError("اسم المتجر  يجب أن يكون 3 أحرف أو أكثر.")
+            raise ValidationError("اسم المتجر يجب أن يكون 3 أحرف أو أكثر.")
 
         return store_name
-    
+
     def clean_location(self):
+        # التحقق من صحة موقع المتجر
         location = self.cleaned_data["location"].strip()
 
         if location.isdigit():
             raise ValidationError("موقع المتجر لا يجب أن يكون رقماً فقط.")
 
         if len(location) < 3:
-            raise ValidationError("موقع المتجر  يجب أن يكون 3 أحرف أو أكثر.")
+            raise ValidationError("موقع المتجر يجب أن يكون 3 أحرف أو أكثر.")
 
         return location
 
-# نموذج تحديث بيانات المتجر الاساسية عن طريق الادارة
-class StoreAdminBasicForm(StoreBasicForm):
-    """فورم خاصة بالمسؤول يرث حقول المتجر من الفورم الاساسي و يحتوي ايضا على الحقول الإضافية الخاصة بحالة المتجر """
-    class Meta(StoreBasicForm.Meta):
-        fields = StoreBasicForm.Meta.fields + [
+    def clean_logo(self):
+        # ضغط والتحقق من صورة شعار المتجر
+        logo = self.cleaned_data.get("logo")
+
+        # إذا لم يرفع المستخدم صورة جديدة نحتفظ بالصورة الحالية
+        if not logo:
+            return self.instance.logo
+
+        compressed_logo = compress_image(logo)
+
+        if not validate_image_file(compressed_logo):
+            raise ValidationError("الصورة غير صالحة أو حجمها كبير.")
+
+        return compressed_logo
+
+    def clean_check_orders(self):
+            # تحويل قيمة checkbox إلى True أو False بشكل صحيح
+            value = self.cleaned_data.get('check_orders')
+    
+            return bool(value)
+            
+    
+
+class StoreAdminUpdateForm(StoreUpdateForm):
+    class Meta(StoreUpdateForm.Meta):
+        # نموذج الإدارة يحتوي أيضًا على حالة المتجر ورقم الهاتف والتليجرام
+        fields = StoreUpdateForm.Meta.fields + [
             'status',
+            'telegram',
+            'phone_number1',
         ]
-        
-# نموذج تحديث حسابات المتجر الاجتماعية
-class StoreSocialForm(forms.ModelForm):
-    class Meta:
-        model = Store
-        fields = ['facebook', 'instagram', 'tiktok']
-        
-# نموذج تحديث حسابات المتجر الاجتماعية عن طريق الادارة
-class StoreAdminSocialForm(StoreSocialForm):
-    """فورم خاصة بالمسؤول يرث حقول المتجر الاجتماعية من الفورم الاساسي و يحتوي ايضا على الحقول الإضافية الخاصة بتيليجرام ورقم المتجر """
-    class Meta(StoreSocialForm.Meta):
-        fields = StoreSocialForm.Meta.fields + [
-            'telegram', 'phone_number1',
-        ]
-        
+
     def clean_phone_number1(self):
+        # التحقق من رقم الهاتف وعدم تكراره في متجر آخر
         phone_number1 = self.cleaned_data.get('phone_number1')
+
         if not phone_number1:
             return phone_number1
-        
-        phone_number1 = validate_phone_number(phone_number1)
-        # التحقق مما إذا كان الرقم مسجلاً لأحد المتاجر مسبقًا (استثناء المتجر الحالي)
-        existing_stores = Store.objects.filter(phone_number1=phone_number1)
-        if self.instance.pk:  # إذا كان التعديل على متجر موجود
-            existing_stores = existing_stores.exclude(pk=self.instance.pk)
-        
-        if existing_stores.exists():
-            raise ValidationError("رقم الهاتف مستخدم بالفعل. يرجى التواصل مع الدعم الفني في حال كنت متأكداً انك لم تسجل به مسبقاً لحل المشكلة.")
-        return phone_number1
-        
-# نموذج تحديث لوجو المتجر 
-class StoreLogoForm(forms.ModelForm):
-    class Meta:
-        model = Store
-        fields = ['logo']
 
-    def clean_logo(self):
-        logo = self.cleaned_data.get("logo")
-        if not logo:
-            return logo 
-        
-        compressed_logo = compress_image(logo)
-        if not validate_image_file(compressed_logo):
-            raise ValidationError("الصورة غير صالحة أو حجمها كبير")
-        return compressed_logo
-        
+        phone_number1 = validate_phone_number(phone_number1)
+
+        existing_stores = Store.objects.filter(
+            phone_number1=phone_number1
+        )
+
+        if self.instance.pk:
+            existing_stores = existing_stores.exclude(
+                pk=self.instance.pk
+            )
+
+        if existing_stores.exists():
+            raise ValidationError(
+                "رقم الهاتف مستخدم بالفعل. يرجى التواصل مع الدعم الفني في حال كنت متأكداً أن الرقم غير مسجل مسبقاً."
+            )
+
+        return phone_number1        

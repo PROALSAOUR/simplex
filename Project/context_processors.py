@@ -12,6 +12,15 @@ def global_data(request):
             and request.user.userprofile.store
             else None
         ),
+        
+        "STORE_NAME": (
+            request.user.userprofile.store.name
+            if request.user.is_authenticated
+            and hasattr(request.user, 'userprofile')
+            and request.user.userprofile.user_type == 'vendor'
+            and request.user.userprofile.store
+            else None
+        ),
 
         "USER_TYPE": (
             request.user.userprofile.user_type

@@ -29,7 +29,7 @@
                     <div class="store-logo">
                         <img src="{% static "images/store-logo.png" %}" alt="Store Logo" width="40" height="40"  draggable="false">
                     </div>
-                    <span>اسم المتجر</span>
+                    <span>{{ STORE_NAME }}</span>
                 </a>
             {% endif %}
             
@@ -74,16 +74,18 @@
             <i class="fa-regular fa-user" aria-hidden="true"></i>
         </button>
 
-        <div id="account-menu"   class="account-menu small-menu">
-            <a href="#" class="menu-link">
+        <div id="account-menu" class="account-menu small-menu">
+            <a href="{% url "accounts:account_details" %}" class="menu-link">
                 إعدادات الحساب
             <i class="fa-solid fa-user-pen"></i>
             </a>
 
-            <a href="/accounts/store-details.html" class="menu-link">
-                إعدادات المتجر
-                <i class="fa-solid fa-shop"></i>
-            </a>
+            {% if USER_TYPE == "vendor" %}
+                <a href="{% url "accounts:store_details" STORE_ID %}" class="menu-link">
+                    إعدادات المتجر
+                    <i class="fa-solid fa-shop"></i>
+                </a>
+            {% endif %}
 
             <button
                 type="button"
