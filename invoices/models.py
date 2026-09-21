@@ -6,12 +6,25 @@ from decimal import Decimal
 class Invoice(models.Model):
     invoice_number = models.CharField(max_length=30, unique=True, verbose_name='رقم الفاتورة', null=True, blank=True)
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='invoices', verbose_name='المتجر')
+    notes = models.TextField( blank=True, verbose_name='ملاحظات')
     
-    # معلومات الفترة
+    STATUS_CHOICES = [
+        ('pending', 'بانتظار الدفع'),
+        ('paid', 'مدفوعة'),
+        ('cancelled', 'ملغاة'),
+    ]
+    
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending'
+    )
+    
+    # حقول الفترة
     billing_year = models.PositiveIntegerField(verbose_name='السنة')
     billing_month = models.PositiveIntegerField(verbose_name='الشهر')
     
-    # بيانات الحساب
+    # حقول القيمة 
     total_sales = models.DecimalField(
         max_digits=12,
         decimal_places=2,
@@ -39,22 +52,10 @@ class Invoice(models.Model):
         verbose_name='الخصم'
     )
     
-    STATUS_CHOICES = [
-        ('pending', 'بانتظار الدفع'),
-        ('paid', 'مدفوعة'),
-        ('cancelled', 'ملغاة'),
-    ]
-    
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default='pending'
-    )
-    
+    #  حقول التاريخ
     paid_at = models.DateTimeField( null=True, blank=True, verbose_name='تاريخ الدفع')
-    notes = models.TextField( blank=True, verbose_name='ملاحظات')
-
     created_at = models.DateTimeField( auto_now_add=True , verbose_name='تاريخ الإنشاء')
+    updated_at = models.DateTimeField( auto_now=True , verbose_name='تاريخ التعديل')
 
     def __str__(self):
         return f"{self.invoice_number} - {self.store.name}"

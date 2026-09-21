@@ -1,0 +1,356 @@
+{% extends "partials/base.html" %}
+{% load static %}
+
+{% comment %} Page Head {% endcomment %}
+{% block page_head %}
+    <link rel="stylesheet" href="{% static "css/tables.css" %} ">                            
+{% endblock page_head %}
+
+
+{% comment %} Page Content {% endcomment %}
+{% block content %}
+
+<section class="">
+
+    
+    <!-- رأس القسم -->
+    <div class="section-header">
+        <div class="section-content">
+            <div class="section-icon bill">
+                <i class="fa-solid fa-wallet "></i>
+            </div>
+            <div class="section-details">
+                <h1>جميع الفواتير</h1>
+                <p> عرض وإدارة جميع الفواتير في المنصة.</p>
+            </div>
+        </div>
+
+    </div>
+        
+    {% if has_invoices %}
+        <div class="data-content">
+
+            <form method="GET" autocomplete="off" id="search-form">
+
+                <!-- ══ TOP BAR ══════════════════════════════════════════ -->
+                <div class="toolbar">
+
+                    <!-- Search -->
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" name="search" class="search-input" value="{{ search }}" 
+                            placeholder="ابحث عن طريق رقم الفاتورة او اسم المتجر" 
+                        >
+                        <button type="submit">بحث</button>
+                    </div>
+
+                    <div class="search-btns">
+                        
+                        <!-- Filter toggle -->
+                        <button type="button" onclick="toggleMenu(this, '.filter-panel')" class="filter-btn toolbar-btn ">
+                            <i class="fa-solid fa-sliders"></i>
+                        </button>
+                        
+                        <!-- Sort dropdown -->
+                        <div class="sort-wrap">
+                            <button type="button" onclick="toggleMenu(this, '.sort-menu', true)" class="sort-btn toolbar-btn" >
+                                <i class="fa-solid fa-arrow-down-wide-short"></i>
+                                <span>ترتيب</span>
+                            </button>
+                            
+                            <div class="sort-menu small-menu" id="sort-menu"> <!-- open -->
+                                {% with sorts=sort_options %}
+                                    {% comment %} حسب تاريخ الانشاء {% endcomment %}
+                                    <button type="button" class="menu-link {% if selected_sort == '-created_at' %}selected{% endif %}" onclick="applySort('-created_at')">
+                                        <i class="fa-regular fa-clock"></i>
+                                        الأحدث أولاً
+                                    </button>
+
+                                    <button type="button" class="menu-link {% if selected_sort == 'created_at' %}selected{% endif %}" onclick="applySort('created_at')">
+                                        <i class="fa-regular fa-clock"></i>
+                                        الأقدم أولاً
+                                    </button>
+
+                                    {% comment %} حسب تاريخ التعديل {% endcomment %}
+                                    <button type="button" class="menu-link {% if selected_sort == '-updated_at' %}selected{% endif %}" onclick="applySort('-updated_at')">
+                                        <i class="fa-regular fa-clock"></i>
+                                        الأحدث تعديلاً 
+                                    </button>
+
+                                    <button type="button" class="menu-link {% if selected_sort == 'updated_at' %}selected{% endif %}" onclick="applySort('updated_at')">
+                                        <i class="fa-regular fa-clock"></i>
+                                        الأقدم تعديلاً 
+                                    </button>
+
+                                    {% comment %} حسب تاريخ الدفع {% endcomment %}
+                                    <button type="button" class="menu-link {% if selected_sort == '-paid_at' %}selected{% endif %}" onclick="applySort('-paid_at')">
+                                        <i class="fa-regular fa-clock"></i>
+                                        الأحدث دفعاً 
+                                    </button>
+
+                                    <button type="button" class="menu-link {% if selected_sort == 'paid_at' %}selected{% endif %}" onclick="applySort('paid_at')">
+                                        <i class="fa-regular fa-clock"></i>
+                                        الأقدم دفعاً 
+                                    </button>
+
+                                    {% comment %} حسب  القيمة {% endcomment %}
+
+                                    <button type="button" class="menu-link {% if selected_sort == 'final_value' %}selected{% endif %}" onclick="applySort('final_value')">
+                                        <i class="fa-solid fa-arrow-down-1-9"></i>
+                                        الأقل قيمة اولاً
+                                    </button>
+
+                                    <button type="button" class="menu-link {% if selected_sort == '-final_value' %}selected{% endif %}" onclick="applySort('-final_value')">
+                                        <i class="fa-solid fa-arrow-up-1-9"></i>
+                                        الأعلى قيمة اولاً
+                                    </button>
+                                {% endwith %}
+                                <!-- hidden sort input -->
+                                <input type="hidden" name="sort" id="sort-input" value="{{ selected_sort }}">
+
+                            </div>
+                            
+                        </div>
+
+                    </div>
+                        
+                    </div>
+
+                <!-- ══ FILTER PANEL ═════════════════════════════════════ -->
+                <div class="panel filter-panel {% if selected_status or final_value_min or final_value_max %}open{% endif %}">
+                    <div class="filter-grid">
+
+                        <div class="field">
+                            <label>حالة الدفع</label>
+                            <select name="status" >
+                                <option value="">الكل</option>
+                                <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>بانتظار الدفع</option>
+                                <option value="paid" {% if selected_status == 'paid' %}selected{% endif %}>مدفوعة</option>
+                                <option value="cancelled" {% if selected_status == 'cancelled' %}selected{% endif %}>ملغي</option>
+                            </select>
+                        </div>
+
+                        
+                        <div class="field">
+                            <label> قيمة الفاتورة</label>
+                            <div class="price-row">
+                                <input type="number" name="final_value_min"  placeholder="من" min="0" value="{{ final_value_min }}">
+                                <span>—</span>
+                                <input type="number" name="final_value_max"  placeholder="إلى" min="0" value="{{ final_value_max }}">
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="panel-actions filter-actions">
+                        <a href="{% url 'admins:all_invoices' %}" class="filter-btn action-btn link-btn" >مسح الكل</a>
+                        <button type="submit" class="action-btn link-btn">
+                            تطبيق
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+
+            <!-- ══ Data Summary ═════════════════════════════════════════ -->
+            <div class="data-summary">
+                <span class="count">
+                    إجمالي الفواتير: <strong >{{ page_obj.paginator.count }}</strong> فاتورة
+                    &nbsp;·&nbsp; الصفحة <strong>{{ page_obj.number }}</strong> من <strong>{{ page_obj.paginator.num_pages }}</strong>
+                </span>
+
+                <!-- Active filter chips -->
+                {% if selected_status %}
+                    <button class="chip" onclick="clearParam('status')">
+                        <i class="fa-solid fa-xmark"></i>
+                        الحالة: {{ selected_status_display  }}
+                    </button>
+                {% endif %}
+                
+                {% if final_value_min or final_value_max %}
+                    <button class="chip" onclick="clearParam('final_value_min;final_value_max')">
+                        <i class="fa-solid fa-xmark"></i>
+                        القيمة: {{ final_value_min|default:"0" }} — {{ final_value_max|default:"∞" }}
+                    </button>
+                {% endif %}
+                {% if search %}
+                    <button class="chip" onclick="clearParam('search')">
+                        <i class="fa-solid fa-xmark"></i>
+                        بحث: "{{ search }}"
+                    </button>
+                {% endif %}
+
+            </div>
+
+            <!-- ══ TABLE ═════════════════════════════════════════════ -->
+            
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>رقم الفاتورة </th>
+                            <th>المتجر</th>
+                            <th>الشهر</th>
+                            <th>القيمة</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    {% if page_obj %}
+                        <tbody>
+                            {% for invoice in page_obj %}
+                                <tr data-view-url="{% url 'invoices:view_invoice' invoice.id %}">                                    
+                                    <td>{{ invoice.invoice_number }}</td>
+                                    <td>{{ invoice.store }}</td>
+
+                                    <td>{{ invoice.billing_month }}/ {{ invoice.billing_year }}</td>
+
+                                    <td class="price-cell">
+                                        <div class="price-wrapper">
+                                            <span class="new-price">
+                                                {{ invoice.final_value }}
+                                            </span>
+                                            <span class="currency">د.ل</span>
+                                        </div>
+                                    </td>    
+
+                                    <td>
+                                        <div>
+                                            {% if invoice.status == "paid" %}
+                                                <i class="fa-solid fa-check complete"></i>
+                                            {% elif invoice.status == "pending" %}
+                                                <i class="fa-solid fa-hourglass-half pending"></i>
+                                            {% else %}
+                                                <i class="fa-solid fa-times cancel"></i>
+                                            {% endif %}
+                                            <span>{{ invoice.get_status_display }}</span>
+                                        </div>
+                                    </td>   
+
+                                    <td>
+                                        <div>
+                                            <i class="fa-regular fa-eye view-icon"></i>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+            
+                        </tbody>                
+                    {% endif %}
+                </table>
+
+                {% if not page_obj %}
+                    <div class="message">
+                        <div class="message-image">
+                            <img src="{% static "images/no-search-result.png" %}" alt="" width="100" height="80" >
+                        </div>
+                        <h2 class="message-title" >لم يتم العثور على اي فواتير موافقة</h2>
+                        <p class="message-content">
+                            لم نجد اي فاتورة تطابق بحثك，
+                            جرب تغيير كلمات البحث او تعديل الفلاتر 
+                            ثم حاول مرة اخرى
+                        </p>
+                        <a href="{% url 'admins:all_invoices' %}" class="message-btn link-btn" >مسح البحث <i class="fa-solid fa-arrows-rotate"></i></a>
+                    </div>
+                {% endif %}
+
+            </div>
+
+            <!-- ══ PAGINATION ════════════════════════════════════════ -->
+                    
+            <div class="pagination">
+
+                <!-- معلومات النتائج -->
+                {% if page_obj %}
+                    <div class="pagination-info">
+                        عرض <strong>{{ page_obj.start_index }}</strong>
+                        إلى <strong>{{ page_obj.end_index }}</strong>
+                        من <strong>{{ page_obj.paginator.count }}</strong>
+                    </div>
+                {% endif %}
+
+                {% if page_obj.paginator.num_pages > 1 %}
+                    <!-- أزرار الصفحات -->
+                    <div class="pagination-controls">
+
+                        <!-- الصفحة السابقة -->
+                        {% if page_obj.has_previous %}
+                            <button
+                                type="button"
+                                class="page-btn"
+                                aria-label="الصفحة السابقة"
+                                onclick="window.location.href='?{{ query_string }}&page={{ page_obj.previous_page_number }}'"
+                            >
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        {% else %}
+                            <button
+                                type="button"
+                                class="page-btn disabled"
+                                aria-label="الصفحة السابقة"
+                                disabled
+                            >
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        {% endif %}
+
+                        <!-- رقم الصفحة -->
+                        <div class="page-indicator">
+                            <strong>{{ page_obj.number }}</strong>
+                            <span>/</span>
+                            <span>{{ page_obj.paginator.num_pages }}</span>
+                        </div>
+
+                        <!-- الصفحة التالية -->
+                        {% if page_obj.has_next %}
+                            <button
+                                type="button"
+                                class="page-btn"
+                                aria-label="الصفحة التالية"
+                                onclick="window.location.href='?{{ query_string }}&page={{ page_obj.next_page_number }}'"
+                            >
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                        {% else %}
+                            <button
+                                type="button"
+                                class="page-btn disabled"
+                                aria-label="الصفحة التالية"
+                                disabled
+                            >
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                        {% endif %}
+
+                    </div>
+                {% endif %}
+
+            </div>
+
+        </div>
+    {% else %}
+        <div class="data-content">
+            <div class="message-container">
+                <div class="message">
+                    <div class="message-image">
+                        <img src=" {% static "images/empty.png" %} " alt="لايوجد نتائج" width="100" height="80" >
+                    </div>
+                    <h2 class="message-title" >لا توجد أي فواتير  !</h2>
+                    <p class="message-content">
+                        يبدوا ان المنصة لا تحتوي على أي فواتير بعد ، 
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    {% endif %}
+    
+        
+</section>
+{% endblock content %}
+
+{% comment %} Page Scripts {% endcomment %}
+{% block page_scripts %}
+    <script src="{% static "js/tables.js" %}"></script>
+{% endblock %}

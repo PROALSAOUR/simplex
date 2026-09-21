@@ -506,11 +506,12 @@ table .cl-span.cancel {
 }
 @media (min-width:500px) {
     .table-wrap .td-actions {
-        /* font-size: 14px; */
         width: 30px;
     }
 }
-
+.table-wrap td .view-icon {
+    color: var(--blue-color);
+}
 /* ═══════════════════════════════════════════
     Table Row Action Menu
 ═══════════════════════════════════════════ */

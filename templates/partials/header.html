@@ -51,7 +51,10 @@
                     <li><a class="menu-link link-btn" href=""><i class="fa-solid fa-chart-line"></i><p> الإحصائيات </p> </a></li>
                     <li><a class="menu-link link-btn" href="{% url "invoices:store_invoices" STORE_ID %}"><i class="fa-solid fa-wallet"></i><p> المالية </p> </a></li>
                 {% else %}
-                    <li><a class="menu-link active  link-btn" href="{% url 'admins:dashboard' %}"><i class="fa-solid fa-home"></i><p> الرئيسية </p></a></li>
+                    <li><a class="menu-link link-btn" href="{% url 'admins:dashboard' %}"><i class="fa-solid fa-home"></i><p> لوحة التحكم </p></a></li>
+                    <li><a class="menu-link link-btn" href="{% url "admins:all_stores" %}"><i class="fa-solid fa-shop"></i><p>  جميع المتاجر  </p> </a></li>
+                    <li><a class="menu-link link-btn" href="{% url "admins:all_orders" %}"><i class="fa-solid fa-cart-shopping"></i><p>  جميع الطلبات  </p> </a></li>
+                    <li><a class="menu-link link-btn" href="{% url "admins:all_invoices" %}"><i class="fa-solid fa-wallet"></i><p> جميع الفواتير </p> </a></li>
                 {% endif %}
             </ul>
             

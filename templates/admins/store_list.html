@@ -1,0 +1,111 @@
+{% extends "partials/base.html" %}
+{% load static %}      
+
+{% block page_head %}
+    <link rel="stylesheet" href="{% static "css/admins.css" %} ">
+{% endblock page_head %}
+
+{% block content %}
+
+    <!-- رأس القسم -->
+    <div class="section-header">
+        <div class="section-content">
+            <div class="section-icon store">
+                <i class="fa-solid fa-shop "></i>
+            </div>
+            <div class="section-details">
+                <h1> قائمة المتجر  </h1>
+                <p> {{ store.name }}</p>
+            </div>
+        </div>
+        <button class="back-btn" id="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i> </button>
+    </div>
+
+    <!-- Menu -->
+    <div class="menu-list">
+
+        <!-- تفاصيل المتجر -->
+        <a href="{% url "accounts:store_details" store.id %}" class="menu-item link-btn" >
+            <span class="menu-icon red">
+                <i class="fa-solid fa-shop"></i>
+            </span>
+            <span class="menu-body">
+            <h2>الإعدادات والتفاصيل</h2>
+            <p>عرض وتعديل تفاصيل المتجر </p>
+            </span>
+            <span class="menu-arrow">
+                <i class="fa-solid fa-chevron-left"></i>
+            </span>
+        </a>
+
+        <!-- طلبات المتجر -->
+        <a href="{% url "orders:store_orders" store.id %}" class="menu-item link-btn" >
+            <span class="menu-icon purple">
+                <i class="fa-solid fa-cart-shopping"></i>
+            </span>
+            <span class="menu-body">
+            <h2>الطلبات</h2>
+            <p>عرض وتعديل طلبات المتجر</p>
+            </span>
+            <span class="menu-arrow">
+                <i class="fa-solid fa-chevron-left"></i>
+            </span>
+        </a>
+
+        <!-- منتجات المتجر -->
+        <a href="{% url "store:store_products" store.id %}" class="menu-item link-btn" >
+            <span class="menu-icon blue">
+                <i class="fa-solid fa-box-open"></i>
+            </span>
+            <span class="menu-body">
+            <h2>المنتجات</h2>
+            <p>عرض وتعديل منتجات المتجر </p>
+            </span>
+            <span class="menu-arrow">
+                <i class="fa-solid fa-chevron-left"></i>
+            </span>
+        </a>
+
+        <!-- فواتير المتجر -->
+        <a href="{% url "invoices:store_invoices" store.id %}" class="menu-item link-btn" >
+            <span class="menu-icon yellow">
+                <i class="fa-solid fa-wallet"></i>
+            </span>
+            <span class="menu-body">
+            <h2>الإدارة المالية</h2>
+            <p>عرض وتعديل فواتير المتجر </p>
+            </span>
+            <span class="menu-arrow">
+                <i class="fa-solid fa-chevron-left"></i>
+            </span>
+        </a>
+
+        <!-- إحصائيات المتجر -->
+        <a class="menu-item link-btn" >
+            <span class="menu-icon green">
+                <i class="fa-solid fa-chart-line"></i>
+            </span>
+            <span class="menu-body">
+            <h2>الإحصائيات</h2>
+            <p>عرض  إحصائيات المتجر </p>
+            </span>
+            <span class="menu-arrow">
+                <i class="fa-solid fa-chevron-left"></i>
+            </span>
+        </a>
+
+    </div>
+
+    <div class="notice">
+        <div class="notice-icon">
+            <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div class="notice-content">
+            <strong class="notice-title" >  ملاحظة!</strong>
+            <p class="notice-text">
+                يمكنك الضغط على أي بطاقة أعلاه للدخول إلى القسم المطلوب مباشرة. إذا احتجت للمساعدة، تواصل مع فريق الدعم
+            </p>
+        </div>
+    </div>
+
+{% endblock content %}

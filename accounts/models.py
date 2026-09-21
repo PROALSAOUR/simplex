@@ -22,8 +22,6 @@ Store
 └── owner -> User
 """
 
-# ===== لاتنسى تساوي ========
-# 👉 Middleware يمنع أي شخص يدخل الصفحة الخطأ
 
 class UserProfile(models.Model):
     USER_TYPES = [

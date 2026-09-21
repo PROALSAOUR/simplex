@@ -1,100 +1,15 @@
 from django.http import Http404, JsonResponse
-from django.shortcuts import redirect, render, get_object_or_404
+from django.shortcuts import  render, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-from django.db import models as db_models
-from django.db.models import Q, Sum ,F, ExpressionWrapper, DecimalField
+from django.db.models import Sum
 from django.utils.timezone import now
 from django.views.decorators.http import require_POST
 from accounts.models import Store
 from accounts.validators import get_user_type 
 from accounts.decorators import admin_only 
 from invoices.models import calculate_commission, Invoice
-from django.contrib import messages
+
 from invoices.forms import *
-
-@admin_only
-@login_required(login_url='accounts:log_in')
-def all_stores_invoices(request):
-    """
-    عرض جميع الفواتير الخاصة بجميع المتاجر
-    وهي صفحة خاصة بالإدارة فقط    
-    """
-    
-    invoices = Invoice.objects.all()
-    invoices = invoices.annotate(
-        final_value_db=ExpressionWrapper(
-            F('commission_value') - F('discount'),
-            output_field=DecimalField(max_digits=12, decimal_places=2)
-        )
-    )
-    # ── فلترة ──────────────────────────────────────────
-    status = request.GET.get('status')
-    valid_statuses = [choice[0] for choice in Invoice.STATUS_CHOICES]
-    if status in valid_statuses :
-        invoices = invoices.filter(status=status)
-
-    final_value_min = request.GET.get('final_value_min')
-    final_value_max = request.GET.get('final_value_max')
-
-    if final_value_min:
-        try:
-            invoices = invoices.filter(
-                db_models.Q(final_value_db__gte=float(final_value_min))
-            )
-        except ValueError:
-            pass
-
-    if final_value_max:
-        try:
-            invoices = invoices.filter(
-                db_models.Q(final_value_db__lte=float(final_value_max))
-            )
-        except ValueError:
-            pass
-
-    search = request.GET.get('search', '').strip()
-    if search:
-        invoices = invoices.filter( 
-            Q(invoice_number__icontains=search) |
-            Q(store__name__icontains=search)
-        )
-    # ── ترتيب ──────────────────────────────────────────
-    VALID_SORTS = {
-        '-created_at': '-created_at',   # الأحدث أولاً
-        'created_at':  'created_at',    # الأقدم أولاً
-        '-paid_at': '-paid_at',   # الأحدث دفعاً أولاً
-        'paid_at':  'paid_at',    # الأقدم دفعاً أولاً
-        'final_value':    'final_value_db',        # الأرخص أولاً
-        '-final_value':   '-final_value_db',       # الأغلى أولاً
-    }
-    selected_sort = request.GET.get('sort', '-created_at')
-    order_by = VALID_SORTS.get(selected_sort, '-created_at')
-    invoices = invoices.order_by(order_by)
-    # ── Pagination ──────────────────────────────────────
-    paginator = Paginator(invoices, 20)
-    page_number = request.GET.get('page')
-    try:
-        page_obj = paginator.page(page_number if page_number else 1)
-    except Exception:
-        page_obj = paginator.page(1)
-
-    query_params = request.GET.copy()
-    query_params.pop('page', None)
-    query_string = query_params.urlencode()  
-
-    context = {
-        'page_obj': page_obj,
-        'query_string': query_string,
-        # قيم الفلاتر للحفاظ عليها في الـ form
-        'selected_status': status or '',
-        'final_value_min': request.GET.get('final_value_min', ''),
-        'final_value_max': request.GET.get('final_value_max', ''),
-        'search': search,
-        'selected_sort':   selected_sort,
-    }
-    
-    return render(request, 'admins/billing_management.html', context)
 
 @login_required(login_url='accounts:log_in')
 def store_invoices(request, sid):

@@ -49,20 +49,20 @@
 
                     <button class="edit-btn"> تعديل </button>
                 </li>
+            
+                <!-- المتجر صاحب الفاتورة -->
+                <a href="{% url "accounts:store_details" invoice.store.id %}" class="details-item ">
+                    <div class="details-icon red"><i class="fa-solid fa-shop"></i></div>
+
+                    <div class="details-label">
+                        المتجر
+                    </div>
+
+                    <div class="details-value">
+                        {{invoice.store}}
+                    </div>
+                </a>
             {% endif %}
-
-            <!-- المتجر صاحب الفاتورة -->
-            <a href="#change-later" class="details-item ">
-                <div class="details-icon red"><i class="fa-solid fa-shop"></i></div>
-
-                <div class="details-label">
-                    المتجر
-                </div>
-
-                <div class="details-value">
-                    {{invoice.store}}
-                </div>
-            </a>
 
             <!-- شهر الفاتورة -->
             <li class="details-item ">

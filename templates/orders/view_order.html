@@ -106,7 +106,7 @@
                 </li>
 
                 {% if USER_TYPE  == "admin" %}
-                    <a class="details-item" href="#change-later">
+                    <a class="details-item" href="{% url "accounts:store_details" order.store.id %}">
                         <div class="details-icon red"><i class="fa-solid fa-shop"></i></div>
                         
                         <div class="details-label">
@@ -119,17 +119,20 @@
                     </a>
 
                     <!-- الفاتورة (خاص بالادارة فقط) -->
-                    <a class="details-item" href="#change-later">
-                        <div class="details-icon yellow"><i class="fa-solid fa-receipt"></i></div>
-                        
-                        <div class="details-label">
-                            رقم الفاتورة
-                        </div>
-                        
-                        <div class="details-value">
-                            #{{ order.invoice_number }}
-                        </div>
-                    </a>
+                    {% if order.invoice %}
+                        <a class="details-item"  href="{% url "invoices:view_invoice" order.invoice.id %}">
+                            <div class="details-icon yellow"><i class="fa-solid fa-receipt"></i></div>
+                            
+                            <div class="details-label">
+                                رقم الفاتورة
+                            </div>
+                            
+                            <div class="details-value">
+                                #{{ order.invoice.invoice_number }}
+                            </div>
+                        </a>
+                    {% endif %}
+                    
                 {% endif %}
 
                 <!-- تاريخ الطلب -->

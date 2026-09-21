@@ -1,0 +1,252 @@
+{% extends "partials/base.html" %}
+{% load static %}
+
+{% comment %} Page Head {% endcomment %}
+{% block page_head %}
+    <link rel="stylesheet" href="{% static "css/tables.css" %} ">                            
+    <link rel="stylesheet" href="{% static "css/dashboard.css" %}"> 
+{% endblock page_head %}
+
+{% comment %} Page Content {% endcomment %}
+{% block content %}
+
+    <section class="dashboard-overview">
+
+        <!-- رأس القسم -->
+        <div class="section-header">
+            <div class="section-content">
+                
+                <div class="section-details">
+                    <h1>مرحبا {{ user_name }} 👋</h1>
+                    <p>  القي نظرة عامة على Simplex  </p>
+                </div>
+            </div>
+
+
+        </div>
+
+        <!-- بطاقات الإحصائيات -->
+        <div class="stats-grid">
+
+            <!-- متاجر -->
+            <a href="{% url "admins:stores_to_review" %}" class="stat-card">
+                <div class="card-content">
+                    <div class="card-details">
+                        <span class="card-title"> المتاجر</span>
+                        <strong class="card-value">{{ stores_to_review }}</strong>
+                    </div>
+                    <div class="card-icon stores">
+                        <i class="fa-solid fa-shop"></i>
+                    </div>
+                </div>
+                <span class="stat-change">
+                    في انتظار المراجعة
+                </span>
+            </a>
+
+            <!-- الطلبات -->
+            <a href="{% url "admins:orders_to_review" %}" class="stat-card">
+                <div class="card-content">
+                    <div class="card-details">
+                        <span class="card-title">الطلبات</span>
+                        <strong class="card-value">{{ orders_to_review }}</strong>
+                    </div>
+                    <div class="card-icon orders">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                    </div>
+                </div>
+                <span class="stat-change">
+                    في انتظار التحقق
+                </span>
+            </a>
+            
+            <!-- المنتجات -->
+            <a href="{% url "admins:products_to_review" %}" class="stat-card">
+                <div class="card-content">
+                    <div class="card-details">
+                        <span class="card-title">المنتجات</span>
+                        <strong class="card-value">{{ products_to_review }}</strong>
+                    </div>
+                    <div class="card-icon products">
+                        <i class="fa-solid fa-box-open"></i>
+                    </div>
+                </div>
+                <span class="stat-change">
+                    في انتظار المراجعة
+                </span>
+            </a>
+
+            <!-- الفواتير -->
+            <a href="{% url "admins:invoices_to_review" %}"  class="stat-card">
+                <div class="card-content">
+                    <div class="card-details">
+                        <span class="card-title">الفواتير</span>
+                        <strong class="card-value">{{ invoices_to_review }}</strong>
+                    </div>
+                    <div class="card-icon views">
+                        <i class="fa-solid fa-coins"></i>
+                    </div>
+                </div>
+                <span class="stat-change">
+                    في انتظار الدفع
+                </span>
+            </a>
+
+        </div>
+
+        <div class="dashboard-content">
+            <!-- قسم احدث المتاجر -->
+            <div class="last-items">
+                <div class="content-header">
+                    <h4>احدث المتاجر</h4>
+                    <a href="{% url "admins:all_stores" %}">عرض الكل</a>
+                </div>
+                <div class="table-wrap">
+                    <table>                    
+                        <tbody>
+                            <tr>
+                                <td>100012</td>
+                                <td >عبدالله سعد</td>
+                                <td>منذ 4 ساعات</td>
+                                <td ><span class="cl-span complete">تم التسليم</span></td>
+                            </tr>
+                            <tr>
+                                <td>2022</td>
+                                <td >عبد الرحمن مصلح العمامي</td>
+                                <td>منذ 6 ساعات</td>
+                                <td ><span class="cl-span cancel">تم الإلغاء</span></td>
+                            </tr>
+                            <tr>
+                                <td>100014</td>
+                                <td >احمد خالد</td>
+                                <td>منذ 4 ايام</td>
+                                <td ><span class="cl-span pending">جاري المعالجة</span></td>
+                            </tr>
+                            <tr>
+                                <td>100014</td>
+                                <td >احمد خالد</td>
+                                <td>منذ 2 اسبوع</td>
+                                <td ><span class="cl-span cancel">تم الإلغاء</span></td>
+                            </tr>
+                            <tr>
+                                <td>113010</td>
+                                <td >سارة خالد</td>
+                                <td>منذ 1 اشهر</td>
+                                <td ><span class="cl-span complete">تم التسليم</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- قسم منحنى المبيعات -->
+            <div class="sales-chart">
+                <div class="content-header">
+                    <h4>نظرة عامة على المبيعات</h4>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="salesChart"></canvas>
+                </div>
+
+            </div>
+
+            <!-- قسم احدث الطلبات -->
+            <div class="last-items">
+                <div class="content-header">
+                    <h4>احدث الطلبات</h4>
+                    <a href="{% url "admins:all_orders" %}">عرض الكل</a>
+                </div>
+                <div class="table-wrap">
+                    <table>                    
+                        <tbody>
+                            <tr>
+                                <td>100012</td>
+                                <td >عبدالله سعد</td>
+                                <td>منذ 4 ساعات</td>
+                                <td ><span class="cl-span complete">تم التسليم</span></td>
+                            </tr>
+                            <tr>
+                                <td>2022</td>
+                                <td >عبد الرحمن مصلح العمامي</td>
+                                <td>منذ 6 ساعات</td>
+                                <td ><span class="cl-span cancel">تم الإلغاء</span></td>
+                            </tr>
+                            <tr>
+                                <td>100014</td>
+                                <td >احمد خالد</td>
+                                <td>منذ 4 ايام</td>
+                                <td ><span class="cl-span pending">جاري المعالجة</span></td>
+                            </tr>
+                            <tr>
+                                <td>100014</td>
+                                <td >احمد خالد</td>
+                                <td>منذ 2 اسبوع</td>
+                                <td ><span class="cl-span cancel">تم الإلغاء</span></td>
+                            </tr>
+                            <tr>
+                                <td>113010</td>
+                                <td >سارة خالد</td>
+                                <td>منذ 1 اشهر</td>
+                                <td ><span class="cl-span complete">تم التسليم</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- قسم احدث الفواتير -->
+            <div class="last-items">
+                <div class="content-header">
+                    <h4>احدث الفواتير</h4>
+                    <a href="{% url "admins:all_invoices" %}">عرض الكل</a>
+                </div>
+                <div class="table-wrap">
+                    <table>                    
+                        <tbody>
+                            <tr>
+                                <td>100012</td>
+                                <td >عبدالله سعد</td>
+                                <td>منذ 4 ساعات</td>
+                                <td ><span class="cl-span complete">تم التسليم</span></td>
+                            </tr>
+                            <tr>
+                                <td>2022</td>
+                                <td >عبد الرحمن مصلح العمامي</td>
+                                <td>منذ 6 ساعات</td>
+                                <td ><span class="cl-span cancel">تم الإلغاء</span></td>
+                            </tr>
+                            <tr>
+                                <td>100014</td>
+                                <td >احمد خالد</td>
+                                <td>منذ 4 ايام</td>
+                                <td ><span class="cl-span pending">جاري المعالجة</span></td>
+                            </tr>
+                            <tr>
+                                <td>100014</td>
+                                <td >احمد خالد</td>
+                                <td>منذ 2 اسبوع</td>
+                                <td ><span class="cl-span cancel">تم الإلغاء</span></td>
+                            </tr>
+                            <tr>
+                                <td>113010</td>
+                                <td >سارة خالد</td>
+                                <td>منذ 1 اشهر</td>
+                                <td ><span class="cl-span complete">تم التسليم</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+{% endblock content %}
+
+{% comment %} Page Scripts {% endcomment %}
+{% block page_scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static "js/dashboard.js" %}"></script>
+{% endblock %}

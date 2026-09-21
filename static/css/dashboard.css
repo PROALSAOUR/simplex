@@ -183,7 +183,7 @@
 /* ═══════════════════════════════════════════
     Last Orders & Sales Chart 
 ═══════════════════════════════════════════ */
-.last-orders , .sales-chart  {
+.last-items , .sales-chart  {
     margin: 10px 0;
     padding: 10px;
     background-color: var(--secondary-background);
@@ -219,27 +219,27 @@
 /* ═══════════════════════════════════════════
     Last Orders Section Only
 ═══════════════════════════════════════════ */
-.last-orders .table-wrap {
+.last-items .table-wrap {
     border: none;
 }
-.last-orders .table-wrap tr {
+.last-items .table-wrap tr {
     background-color: inherit !important;
 }
-.last-orders .table-wrap td {
+.last-items .table-wrap td {
     border-bottom: none !important;
 }
-.last-orders .table-wrap td:first-of-type {
+.last-items .table-wrap td:first-of-type {
     font-weight: 700;
     color: var(--main-text-color);
 } 
-.last-orders .table-wrap td:not(first-of-type) {
+.last-items .table-wrap td:not(first-of-type) {
     color: var(--gray-color);
 } 
 /* ===== Blocked Orders Message ===== */
-.last-orders .message-container {
+.last-items .message-container {
     border: none;
 }
-.last-orders .message .message-alert , .last-orders .message  .message-note {
+.last-items .message .message-alert , .last-items .message  .message-note {
     display: none;
 }
 /* ═══════════════════════════════════════════
