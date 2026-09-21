@@ -64,7 +64,7 @@ class Store(models.Model):
     name = models.CharField(max_length=30 , verbose_name="اسم المتجر", help_text="قم بإدخال اسم المتجر")
     
     STATUS_CHOICES = [
-        ('pending', 'قيد  المراجعة'), 
+        ('pending', 'جاري المراجعة'), 
         ('active', 'مُفعل'), 
         ('inactive', 'غير مُفعل')
     ]

@@ -29,7 +29,7 @@
         <div class="stats-grid">
 
             <!-- متاجر -->
-            <a href="{% url "admins:stores_to_review" %}" class="stat-card">
+            <a href="{% url "admins:all_stores" %}?status=pending" class="stat-card">
                 <div class="card-content">
                     <div class="card-details">
                         <span class="card-title"> المتاجر</span>
@@ -45,7 +45,7 @@
             </a>
 
             <!-- الطلبات -->
-            <a href="{% url "admins:orders_to_review" %}" class="stat-card">
+            <a href="{% url "admins:all_orders" %}?verification_status=checking" class="stat-card">
                 <div class="card-content">
                     <div class="card-details">
                         <span class="card-title">الطلبات</span>
@@ -61,7 +61,7 @@
             </a>
             
             <!-- المنتجات -->
-            <a href="{% url "admins:products_to_review" %}" class="stat-card">
+            <a href="{% url "admins:all_products" %}?status=checking" class="stat-card">
                 <div class="card-content">
                     <div class="card-details">
                         <span class="card-title">المنتجات</span>
@@ -77,7 +77,7 @@
             </a>
 
             <!-- الفواتير -->
-            <a href="{% url "admins:invoices_to_review" %}"  class="stat-card">
+            <a href="{% url "admins:all_invoices" %}?status=pending" class="stat-card">
                 <div class="card-content">
                     <div class="card-details">
                         <span class="card-title">الفواتير</span>

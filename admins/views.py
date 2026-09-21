@@ -238,8 +238,8 @@ def all_invoices(request):
         'final_value':    'final_value_db',   # الأرخص أولاً
         '-final_value':   '-final_value_db',  # الأغلى أولاً
     }
-    selected_sort = request.GET.get('sort', '-created_at')
-    order_by = VALID_SORTS.get(selected_sort, '-created_at')
+    selected_sort = request.GET.get('sort', '-updated_at')
+    order_by = VALID_SORTS.get(selected_sort, '-updated_at')
     invoices = invoices.order_by(order_by)
     # ── Pagination ──────────────────────────────────────
     paginator = Paginator(invoices, 20)
@@ -269,62 +269,66 @@ def all_invoices(request):
 
 @login_required(login_url='accounts:log_in')
 @admin_only
-def store_list(request, sid):
-    """عرض صفحة القائمة التي تحتوي على روابط الى تفاصيل المتجر و طلباته ومنتجاته و احصائياته"""
-    store = get_object_or_404(Store, id=sid)
-    context = {
-        'store': store,
-    }
-    return render(request, 'admins/store_list.html', context)
-
-@login_required(login_url='accounts:log_in')
-@admin_only
-def stores_to_review(request):
-    """عرض صفحة تحتوي على جميع المتاجر التي تنتظر المراجعة"""
-    stores = Store.objects.filter(status='pending').order_by('-updated_at')
-    # ── فلترة ──────────────────────────────────────────
-    search = request.GET.get('search', '').strip()
-    if search:
-        filters = Q(name__icontains=search) | Q(phone_number1__icontains=search)
-        stores = stores.filter(filters)
-    # ── ترتيب ──────────────────────────────────────────
-    VALID_SORTS = {
-        '-created_at': '-created_at',   # الأحدث أولاً
-        'created_at':  'created_at',    # الأقدم أولاً
-        '-updated_at': '-updated_at',    # الأحدث تعديلاً أولاً
-        'updated_at': 'updated_at',     # الأقدم تعديلاً أولاً
-    }
-    selected_sort = request.GET.get('sort', '-created_at')
-    order_by = VALID_SORTS.get(selected_sort, '-created_at')
-    stores = stores.order_by(order_by)
-    # ── Pagination ──────────────────────────────────────
-    paginator = Paginator(stores, 20)
-    page_number = request.GET.get('page')
-    try:
-        page_obj = paginator.page(page_number if page_number else 1)
-    except Exception:
-        page_obj = paginator.page(1)
-
-    # ── نبني query string بدون page لاستخدامه في روابط الباجنيتور ──
-    query_params = request.GET.copy()
-    query_params.pop('page', None)
-    query_string = query_params.urlencode()  
-
-    context = {
-        'page_obj': page_obj,
-        'query_string': query_string,
-        'search': search,
-        'selected_sort':   selected_sort,
-    }
-    return render(request, 'admins/review/stores_to_review.html', context)
-
-@login_required(login_url='accounts:log_in')
-@admin_only
-def products_to_review(request):
-    """عرض صفحة تحتوي على جميع المنتجات التي تنتظر المراجعة"""
+def all_products(request):
+    """ صفحة تحتوي على جميع المنتجات """
     
-    products = Product.objects.filter(status='checking').order_by('-updated_at')
+    products = Product.objects.all()    
+    has_products = products.exists()
+    
+    # ── تحويل الـ choices لقواميس (value -> label) لتسهيل الاستخدام ──
+    status_dict = dict(Product.STATUS_CHOICES)
+    type_dict = dict(Product.TYPE_CHOICES)
+    gender_dict = dict(Product.GENDER_CHOICES)
+
     # ── فلترة ──────────────────────────────────────────
+    status = request.GET.get('status')
+    #change-later استبعد حالة قيد المراجعة من الخيارات كي لا يراها المستخدم
+    valid_statuses = [choice[0] for choice in Product.STATUS_CHOICES]
+    if status in valid_statuses:
+        products = products.filter(status=status)
+
+    product_type = request.GET.get('type')
+    valid_types = [choice[0] for choice in Product.TYPE_CHOICES]
+    if product_type in valid_types:
+        products = products.filter(type=product_type)
+
+    gender = request.GET.get('gender')
+    valid_genders =  [choice[0] for choice in Product.GENDER_CHOICES]
+    if gender in valid_genders:
+        products = products.filter(gender=gender)
+
+    is_visible = request.GET.get('is_visible')
+    if is_visible == 'true':
+        products = products.filter(is_visible=True)
+    elif is_visible == 'false':
+        products = products.filter(is_visible=False)
+
+    offer = request.GET.get('offer')
+    if offer == 'true':
+        products = products.filter(offer=True)
+    elif offer == 'false':
+        products = products.filter(offer=False)
+
+    price_min = request.GET.get('price_min')
+    price_max = request.GET.get('price_max')
+
+    if price_min:
+        try:
+            products = products.filter(
+                db_models.Q(offer=True, offer_price__gte=float(price_min)) |
+                db_models.Q(offer=False, price__gte=float(price_min))
+            )
+        except ValueError:
+            pass
+
+    if price_max:
+        try:
+            products = products.filter(
+                db_models.Q(offer=True, offer_price__lte=float(price_max)) |
+                db_models.Q(offer=False, price__lte=float(price_max))
+            )
+        except ValueError:
+            pass
 
     search = request.GET.get('search', '').strip()
     if search:
@@ -335,58 +339,16 @@ def products_to_review(request):
         'upload_at':  'upload_at',    # الأقدم أولاً
         '-updated_at': '-updated_at',    # الأحدث تعديلاً أولاً
         'updated_at': 'updated_at',     # الأقدم تعديلاً أولاً
+        'name':       'name',         # أبجدياً تصاعدي
+        '-name':      '-name',        # أبجدياً تنازلي
+        'price':      'price',        # الأرخص أولاً
+        '-price':     '-price',       # الأغلى أولاً
     }
     selected_sort = request.GET.get('sort', '-upload_at')
     order_by = VALID_SORTS.get(selected_sort, '-upload_at')
     products = products.order_by(order_by)
     # ── Pagination ──────────────────────────────────────
-    paginator = Paginator(products, 20)
-    page_number = request.GET.get('page')
-    try:
-        page_obj = paginator.page(page_number if page_number else 1)
-    except Exception:
-        page_obj = paginator.page(1)
-
-    # ── نبني query string بدون page لاستخدامه في روابط الباجنيتور ──
-    query_params = request.GET.copy()
-    query_params.pop('page', None)
-    query_string = query_params.urlencode()  # مثال: status=approved&gender=male
-
-    context = {
-        'page_obj': page_obj,
-        'query_string': query_string,
-        'search': search,
-        'selected_sort':   selected_sort,
-    }
-    return render(request, 'admins/review/products_to_review.html', context)
-
-@login_required(login_url='accounts:log_in')
-@admin_only
-def orders_to_review(request):
-    """عرض صفحة تحتوي على جميع الطلبات التي تنتظر المراجعة"""
-    orders = Order.objects.filter(verification_status='checking').order_by('-updated_at')
-    # ── فلترة ──────────────────────────────────────────
-
-    search = request.GET.get('search', '').strip()
-    if search:
-        filters = Q(customer_name__icontains=search)
-
-        if search.isdigit():
-            filters |= Q(serial_number=int(search)) | Q(customer_phone__icontains=search)
-
-        orders = orders.filter(filters)
-    # ── ترتيب ──────────────────────────────────────────
-    VALID_SORTS = {
-        '-order_date': '-order_date',   # الأحدث أولاً
-        'order_date':  'order_date',    # الأقدم أولاً
-        '-updated_at': '-updated_at',    # الأحدث تعديلاً أولاً
-        'updated_at': 'updated_at',     # الأقدم تعديلاً أولاً
-    }
-    selected_sort = request.GET.get('sort', '-order_date')
-    order_by = VALID_SORTS.get(selected_sort, '-order_date')
-    orders = orders.order_by(order_by)
-    # ── Pagination ──────────────────────────────────────
-    paginator = Paginator(orders, 20)
+    paginator = Paginator(products, 12)
     page_number = request.GET.get('page')
     try:
         page_obj = paginator.page(page_number if page_number else 1)
@@ -399,51 +361,32 @@ def orders_to_review(request):
     query_string = query_params.urlencode()  
 
     context = {
+        "has_products": has_products,
         'page_obj': page_obj,
         'query_string': query_string,
+        # قيم الفلاتر للحفاظ عليها في الـ form
+        'selected_status': status or '',
+        'selected_status_display': status_dict.get(status, status), 
+        'selected_type': product_type or '',
+        'selected_type_display': type_dict.get(product_type, product_type),
+        'selected_gender': gender or '',
+        'selected_gender_display': gender_dict.get(gender, gender),
+        'selected_is_visible': is_visible or '',
+        'selected_offer': offer or '',
+        'price_min': request.GET.get('price_min', ''),
+        'price_max': request.GET.get('price_max', ''),
         'search': search,
         'selected_sort':   selected_sort,
     }
-    return render(request, 'admins/review/orders_to_review.html', context)
+    return render(request, 'admins/all_products.html', context)
 
 @login_required(login_url='accounts:log_in')
 @admin_only
-def invoices_to_review(request):
-    """عرض صفحة تحتوي على جميع الفواتير التي تنتظر الدفع"""
-    invoices = Invoice.objects.filter(status='pending').order_by('-created_at')
-    # ── فلترة ──────────────────────────────────────────
-
-    search = request.GET.get('search', '').strip()
-    if search:
-        filters = Q(invoice_number__contains=search)
-
-        invoices = invoices.filter(filters)
-
-    # ── ترتيب ──────────────────────────────────────────
-    VALID_SORTS = {
-        '-created_at': '-created_at',   # الأحدث أولاً
-        'created_at':  'created_at',    # الأقدم أولاً
-    }
-    selected_sort = request.GET.get('sort', '-created_at')
-    order_by = VALID_SORTS.get(selected_sort, '-created_at')
-    invoices = invoices.order_by(order_by)
-    # ── Pagination ──────────────────────────────────────
-    paginator = Paginator(invoices, 20)
-    page_number = request.GET.get('page')
-    try:
-        page_obj = paginator.page(page_number if page_number else 1)
-    except Exception:
-        page_obj = paginator.page(1)
-
-    # ── نبني query string بدون page لاستخدامه في روابط الباجنيتور ──
-    query_params = request.GET.copy()
-    query_params.pop('page', None)
-    query_string = query_params.urlencode()  
-
+def store_list(request, sid):
+    """عرض صفحة القائمة التي تحتوي على روابط الى تفاصيل المتجر و طلباته ومنتجاته و احصائياته"""
+    store = get_object_or_404(Store, id=sid)
     context = {
-        'page_obj': page_obj,
-        'query_string': query_string,
-        'search': search,
-        'selected_sort':   selected_sort,
+        'store': store,
     }
-    return render(request, 'admins/review/invoices_to_review.html', context)
+    return render(request, 'admins/store_list.html', context)
+

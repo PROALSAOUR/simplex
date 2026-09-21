@@ -7,11 +7,9 @@ urlpatterns = [
     path('', dashboard, name='dashboard'),
     path('all/stores/', all_stores, name='all_stores'),
     path('all/orders/', all_orders, name='all_orders'),
+    path('all/products/', all_products, name='all_products'),
     path('all/invoices/', all_invoices, name='all_invoices'),
     path('store-list/<int:sid>/', store_list, name='store_list'),
     
-    path('review/stores/', stores_to_review, name='stores_to_review'),
-    path('review/products/', products_to_review, name='products_to_review'),
-    path('review/orders/', orders_to_review, name='orders_to_review'),
-    path('review/invoices/', invoices_to_review, name='invoices_to_review'),
+
 ]

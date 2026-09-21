@@ -53,6 +53,7 @@
                 {% else %}
                     <li><a class="menu-link link-btn" href="{% url 'admins:dashboard' %}"><i class="fa-solid fa-home"></i><p> لوحة التحكم </p></a></li>
                     <li><a class="menu-link link-btn" href="{% url "admins:all_stores" %}"><i class="fa-solid fa-shop"></i><p>  جميع المتاجر  </p> </a></li>
+                    <li><a class="menu-link link-btn" href="{% url "admins:all_products" %}"><i class="fa-solid fa-box-open"></i><p>  جميع المنتجات  </p> </a></li>
                     <li><a class="menu-link link-btn" href="{% url "admins:all_orders" %}"><i class="fa-solid fa-cart-shopping"></i><p>  جميع الطلبات  </p> </a></li>
                     <li><a class="menu-link link-btn" href="{% url "admins:all_invoices" %}"><i class="fa-solid fa-wallet"></i><p> جميع الفواتير </p> </a></li>
                 {% endif %}
