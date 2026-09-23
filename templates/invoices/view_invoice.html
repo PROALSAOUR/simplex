@@ -283,86 +283,88 @@
         </ul>
 
         <!-- قائمة التعديل -->
-        <ul  class="details-list">
-            <li class="details-item">
-                <div class="details-label">
-                    تعديل القيمة 
-                </div>
-                <button class="edit-btn"> إلغاء </button>
-            </li>
+        {% if USER_TYPE == "admin" %}
+            <ul  class="details-list">
+                <li class="details-item">
+                    <div class="details-label">
+                        تعديل القيمة 
+                    </div>
+                    <button class="edit-btn"> إلغاء </button>
+                </li>
 
-            <li class="details-item">
-                <span class="help-text"> يمكنك اضافة خصم لتعديل قيمة الفاتورة، سيتم احتساب القيمة بعد الخصم تلقائيا </span>                
-            </li>
-            
-            <li class="details-item">
+                <li class="details-item">
+                    <span class="help-text"> يمكنك اضافة خصم لتعديل قيمة الفاتورة، سيتم احتساب القيمة بعد الخصم تلقائيا </span>                
+                </li>
                 
-                <form class="details-form" id="invoice_discount_form" method="POST" action="{% url 'invoices:edit_invoice' invoice.id %}">
-                    {% csrf_token %}
+                <li class="details-item">
+                    
+                    <form class="details-form" id="invoice_discount_form" method="POST" action="{% url 'invoices:edit_invoice' invoice.id %}">
+                        {% csrf_token %}
 
-                    <div class="fields-container">
+                        <div class="fields-container">
 
-                        <div class="invoice-values">
+                            <div class="invoice-values">
 
-                            <!-- القيمة الأصلية -->
-                            <div class="invoice-value-box" id="original-value-box">
-                                <div class="details-icon blue">
-                                    <i class="fa-solid fa-file-invoice"></i>
-                                </div>
+                                <!-- القيمة الأصلية -->
+                                <div class="invoice-value-box" id="original-value-box">
+                                    <div class="details-icon blue">
+                                        <i class="fa-solid fa-file-invoice"></i>
+                                    </div>
 
-                                <div class="invoice-value-content">
-                                    <span class="details-label">القيمة الأصلية</span>
+                                    <div class="invoice-value-content">
+                                        <span class="details-label">القيمة الأصلية</span>
 
-                                    <div class="details-value" id="original-value">
-                                        {{ invoice.commission_value }}
-                                        <span class="currency">د.ل</span>
+                                        <div class="details-value" id="original-value">
+                                            {{ invoice.commission_value }}
+                                            <span class="currency">د.ل</span>
+                                        </div>
                                     </div>
                                 </div>
+
+                                <!-- القيمة بعد الخصم -->
+                                <div class="invoice-value-box" id="after-discount-box"> 
+                                    <div class="details-icon green">
+                                        <i class="fa-solid fa-wallet"></i>
+                                    </div>
+
+                                    <div class="invoice-value-content">
+                                        <span class="details-label">القيمة بعد الخصم</span>
+
+                                        <div class="details-value" id="after-discount-value">
+                                            {% if invoice.discount %}
+                                                {{ invoice.final_value }}
+                                            {% else %}
+                                                ----
+                                            {% endif %}
+                                            <span class="currency">د.ل</span>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
-
-                            <!-- القيمة بعد الخصم -->
-                            <div class="invoice-value-box" id="after-discount-box"> 
-                                <div class="details-icon green">
-                                    <i class="fa-solid fa-wallet"></i>
+                            
+                            <!-- قيمة الخصم -->
+                            <div class="field " >
+                                <label for="discount-input">قيمة الخصم </label>
+                                <div class="input">
+                                    <input name="discount" id="discount-input" type="text" placeholder="..."  inputmode="decimal" max="{{ invoice.commission_value }}" value={{ discount.value|default:invoice.discount|unlocalize }} >
+                                    <span class="currency">د.ل</span>
                                 </div>
-
-                                <div class="invoice-value-content">
-                                    <span class="details-label">القيمة بعد الخصم</span>
-
-                                    <div class="details-value" id="after-discount-value">
-                                        {% if invoice.discount %}
-                                            {{ invoice.final_value }}
-                                        {% else %}
-                                            ----
-                                        {% endif %}
-                                        <span class="currency">د.ل</span>
-                                    </div>
-                                </div>
+                                <span class="help-text">ادخل القيمة التي تريد خصمها من القيمة الاصلية</span>
                             </div>
 
                         </div>
-                        
-                        <!-- قيمة الخصم -->
-                        <div class="field " >
-                            <label for="discount-input">قيمة الخصم </label>
-                            <div class="input">
-                                <input name="discount" id="discount-input" type="text" placeholder="..."  inputmode="decimal" max="{{ invoice.commission_value }}" value={{ discount.value|default:invoice.discount|unlocalize }} >
-                                <span class="currency">د.ل</span>
-                            </div>
-                            <span class="help-text">ادخل القيمة التي تريد خصمها من القيمة الاصلية</span>
+
+                        <div class="form-btns">
+                            <button type="reset" class="btn">اعادة تعيين</button>
+                            <button type="submit" class="btn save-btn">حفظ</button>
                         </div>
 
-                    </div>
+                    </form>
+                </li>
 
-                    <div class="form-btns">
-                        <button type="reset" class="btn">اعادة تعيين</button>
-                        <button type="submit" class="btn save-btn">حفظ</button>
-                    </div>
-
-                </form>
-            </li>
-
-        </ul>
+            </ul>
+        {% endif %}
 
     </details>    
 

@@ -97,7 +97,7 @@ setupDeleteOrderItem();
 // أكواد ودوال إضافة عنصر إلى الطلب
 
 function addOrderItem(button) {
-    // إضافة المنتج المحدد إلى الطلب وإرسال بياناته إلى الخادم
+    // إضافة المنتج المحدد إلى الطلب وإظهار أخطاء النموذج داخل البطاقة
 
     const card = button.closest(".product-card");
 
@@ -137,6 +137,14 @@ function addOrderItem(button) {
         ".qty-input"
     );
 
+    const errorsContainer = card.querySelector(".field-errors");
+
+    // إخفاء الأخطاء السابقة
+    if (errorsContainer) {
+        errorsContainer.textContent = "";
+        errorsContainer.classList.add("hidden");
+    }
+
     if (!productInput || !colorInput || !quantityInput) {
         showToast(
             "failed-toast",
@@ -154,6 +162,10 @@ function addOrderItem(button) {
     const sizeInput = sizeGroup
         ? sizeGroup.querySelector("input[type='radio']:checked")
         : null;
+
+    const sizeId = sizeInput && !sizeInput.dataset.unifiedSize
+    ? sizeInput.value
+    : "";
 
     const formData = new FormData();
 
@@ -174,7 +186,7 @@ function addOrderItem(button) {
 
     formData.append(
         "size_id",
-        sizeInput ? sizeInput.value : ""
+        sizeId
     );
 
     formData.append(
@@ -189,58 +201,79 @@ function addOrderItem(button) {
         },
         body: formData,
     })
-        .then(function (response) {
-            if (!response.ok) {
-                throw new Error(
-                    "حدث خطأ أثناء تنفيذ الطلب."
-                );
-            }
-
-            return response.json();
-        })
-        .then(function (data) {
-
-            if (!data.success) {
-                showToast(
-                    "failed-toast",
-                    data.message
-                );
-
-                return;
-            }
-
-            // إضافة الصف الجديد إلى جدول المنتجات
-            appendTableRow(data.item_html);
-
-            // تحديث إجماليات الطلب
-            updateOrderTotals(data.order_totals);
-
-            // تحديث إجمالي الكمية والسعر داخل الجدول
-            updateTableTotals();
-
-            // اغلاق بانل اضافة منتج 
-            closeAddItemPanel();
-
-            // إظهار رسالة النجاح
-            showToast(
-                "success-toast",
-                data.message
+    .then(function (response) {
+        if (!response.ok) {
+            throw new Error(
+                "حدث خطأ أثناء تنفيذ الطلب."
             );
+        }
 
-            // إغلاق بطاقة المنتج بعد إضافته
-            card.open = false;
+        return response.json();
+    })
+    .then(function (data) {
 
-            // إعادة الكمية إلى القيمة الافتراضية
-            quantityInput.value = 1;
-        })
-        .catch(function (error) {
-            console.error(error);
+        if (!data.success) {
+
+            // عرض الأخطاء داخل بطاقة المنتج
+            if (errorsContainer && data.errors) {
+
+                const errorMessages = [];
+
+                Object.values(data.errors).forEach(function (errors) {
+                    errors.forEach(function (error) {
+                        errorMessages.push(error);
+                    });
+                });
+
+                if (errorMessages.length) {
+                    errorsContainer.innerHTML = errorMessages
+                        .map(error => `<div>${error}</div>`)
+                        .join("");
+
+                    errorsContainer.classList.remove("hidden");
+                }
+            }
 
             showToast(
                 "failed-toast",
-                "حدث خطأ أثناء إضافة المنتج، يرجى المحاولة مرة أخرى."
+                data.message
             );
-        });
+
+            return;
+        }
+
+        // إضافة الصف الجديد إلى جدول المنتجات
+        appendTableRow(data.item_html);
+
+        // تحديث إجماليات الطلب
+        updateOrderTotals(data.order_totals);
+
+        // تحديث إجمالي الكمية والسعر داخل الجدول
+        updateTableTotals();
+
+        // اغلاق بانل إضافة منتج
+        closeAddItemPanel();
+
+        // إظهار رسالة النجاح
+        showToast(
+            "success-toast",
+            data.message
+        );
+
+        // إغلاق بطاقة المنتج بعد إضافته
+        card.open = false;
+
+        // إعادة الكمية إلى القيمة الافتراضية
+        quantityInput.value = 1;
+    })
+    .catch(function (error) {
+        console.error(error);
+
+        showToast(
+            "failed-toast",
+            "حدث خطأ أثناء إضافة المنتج، يرجى المحاولة مرة أخرى."
+        );
+    });
 }
 
 function appendTableRow(itemHtml) {

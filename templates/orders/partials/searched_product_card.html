@@ -26,6 +26,9 @@
 
         <div class="product-options">
 
+            {% comment %} سيتم عرض الاخطاء هنا {% endcomment %}
+            <div class="field-errors hidden" ></div>
+             
             {% if product.available_colors %}
 
                 <!-- المعرف -->
@@ -61,8 +64,7 @@
                     </div>
 
                 </div>
-
-
+                
                 <!-- المقاسات -->
                 <div class="product-option">
 
@@ -98,6 +100,29 @@
                                             </label>
 
                                         {% endfor %}
+
+                                    </div>
+
+                                {% else %}
+
+                                    <div class="size-group" data-color-id="{{ color.id }}">
+
+                                        <label class="option-value">
+
+                                            <input
+                                                type="radio"
+                                                data-unified-size="true"
+                                                checked
+                                                aria-hidden="true"
+                                            >
+
+                                            <span>
+                                                مقاس موحد
+                                                <i class="fa-solid fa-circle-check"></i>
+                                            </span>
+
+                                        </label>
+
 
                                     </div>
 
@@ -152,7 +177,7 @@
 
                     <button
                         type="button"
-                        class="add-product-btn"
+                        class="add-btn"
                         onclick="addOrderItem(this)"
                     >
                         إضافة الى الطلب
@@ -163,7 +188,7 @@
 
                     <button
                         type="button"
-                        class="add-cart-btn"
+                        class="add-btn"
                     >
                         إضافة إلى السلة
                         <i class="fa-solid fa-plus"></i>

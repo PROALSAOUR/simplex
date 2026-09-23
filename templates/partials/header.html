@@ -25,9 +25,9 @@
             </div>
 
             {% if  USER_TYPE == "vendor" %}
-                <a class="store-part">
+                <a href="{% url "accounts:store_details" STORE_ID %}" class="store-part">
                     <div class="store-logo">
-                        <img src="{% static "images/store-logo.png" %}" alt="Store Logo" width="40" height="40"  draggable="false">
+                        <img src="{{ STORE_LOGO }}" alt="Store Logo" width="40" height="40"  draggable="false">
                     </div>
                     <span>{{ STORE_NAME }}</span>
                 </a>

@@ -1,33 +1,5 @@
 {% load static %}
 
-{% comment %} #change-later ديالوج اضافة منتج الى الطلب {% endcomment %}
-<dialog id="add_items"> 
-    <form id="add_items_form" method="POST" data-url="{% url 'orders:add_order_item' order.id %}">
-        {% csrf_token %}
-
-        <div class="logo-image">
-            <img src=" {% static "images/d-long-logo.png" %} " alt="logo" width="120" height="80"  draggable="false">
-        </div>
-
-        <div class="dialog-content">
-            <h3 class="dialog-title"> تحذير </h3>
-            <div id="errors" style="color:red; display:none;"> سيتم عرض الاخطاء هنا </div>
-            <p>ابحث عن المنتج مباشرة ثم اختره لإضافة عنصر جديد للطلب.</p>
-            <input type="search" id="product-search" placeholder="ابحث عن منتج..." autocomplete="off" data-search-url="{% url "orders:search_products" oid=order.id %}">
-
-            <div id="search-results"  data-product-button-type="add-to-order">
-                <!-- سيتم عرض نتائج البحث هنا -->            
-            </div>
-
-        </div>
-
-        <div class="dialog-actions">
-            <button type="button" onclick="add_items.close()">تراجع</button>
-        </div>
-        
-    </form>
-</dialog>
-
 {% comment %} ديالوج حذف منتج من الطلب {% endcomment %}
 <dialog id='delete_order_item_dialog' > 
     <form id="delete_order_items_form" method="POST" data-url="{% url 'orders:delete_order_item' 0 %}">
@@ -54,4 +26,3 @@
     </form>
 </dialog>
 
-<script src="{% static "js/orders/edit_order_items.js" %}"></script>

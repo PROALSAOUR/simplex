@@ -103,7 +103,7 @@
                                 <td>{{ invoice.invoice_number }}</td>
                                 <td>{{ invoice.billing_year }}/{{  invoice.billing_month }}</td>
                                 <td>{{ invoice.created_at|date:"d M Y"  }}</td>
-                                <td><span class="cl-span {% if invoice.status == paid %} complete {% elif invoice.status == cancelled %} cancel {% else %} pending {% endif %}">{{ invoice.get_status_display }}</span> </td>
+                                <td><span class="cl-span {% if invoice.status == "paid" %} complete {% elif invoice.status == "cancelled" %} cancel {% else %} pending {% endif %}">{{ invoice.get_status_display }}</span> </td>
                                 <td >{{ invoice.final_value }}<span class="currency">د.ل</span></td>
                                 <td>
                                     <a href="{% url "invoices:view_invoice" invoice.id %}" class="view-btn" aria-label="عرض">

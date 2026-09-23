@@ -123,35 +123,30 @@ def add_order_manually(request):
     """صفحة إنشاء طلب يدوي عن طريق صاحب المتجر"""
     store = request.user.userprofile.store
     
-    order_form = OrderRegisterForm(store=store, is_vendor=True)
-    item_form = OrderItemRegisterForm(store=store)
-    
-    query = request.GET.get("q", "").strip()
-    
-    products = store.products.filter(
-        status="approved", 
-        is_visible=True
-    ).prefetch_related("colors__sizes")
-    
-    if query:
-        products = products.filter(name__icontains=query)
-    else:
-        # عرض أحدث 10 منتجات فقط عند عدم وجود بحث
-        products = products.order_by("-upload_at")[:10]
-    
-    
-    for product in products:
-        product.available_colors = [
-            color for color in product.colors.all()
-            if color.available
-        ]
+    # order_form = OrderRegisterForm(store=store, is_vendor=True)
+    # item_form = OrderItemRegisterForm(store=store)
+    # query = request.GET.get("q", "").strip()
+    # products = store.products.filter(
+    #     status="approved", 
+    #     is_visible=True
+    # ).prefetch_related("colors__sizes")
+    # if query:
+    #     products = products.filter(name__icontains=query)
+    # else:
+    #     # عرض أحدث 10 منتجات فقط عند عدم وجود بحث
+    #     products = products.order_by("-upload_at")[:10]
+    # for product in products:
+    #     product.available_colors = [
+    #         color for color in product.colors.all()
+    #         if color.available
+    #     ]
 
     context = {
         "store": store,
-        "order_form": order_form,
-        "item_form": item_form,
-        "products": products,
-        "query": query,
+        # "order_form": order_form,
+        # "item_form": item_form,
+        # "products": products,
+        # "query": query,
     }
     return render(request, "orders/add_order_manually.html", context)
 
@@ -411,10 +406,8 @@ def add_order_item(request, oid):
             "success": False,
             "status": "force",
             "message": "يرجى تصحيح البيانات.",
-            "errors": {
-                field: [str(error) for error in errors]
-                for field, errors in form.errors.items()
-            },
+            "errors":{ field: [str(error) for error in errors] for field, errors in form.errors.items() }
+            ,
         })
 
     with transaction.atomic():
@@ -492,7 +485,7 @@ def delete_order_item(request, item_id):
         }
     })
     
-def search_products(request, oid):
+def search_products(request, sid):
     
     """دالة البحث عن منتجات يتم استعمالها اثناء البحث عن منتج للإضافته للطلب بصفحة تعديل الطلب"""
 
@@ -504,8 +497,7 @@ def search_products(request, oid):
         "add-to-order"
     )
     
-    order = get_object_or_404(Order, id=oid)
-    store = order.store
+    store = get_object_or_404(Store, id=sid)
     
     products = Product.objects.filter(
         name__icontains=query,

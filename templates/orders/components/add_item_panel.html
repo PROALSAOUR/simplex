@@ -10,7 +10,7 @@
         <div class="search-box">
             <i class="fa-solid fa-magnifying-glass"></i>
             <input type="text" name="search" id="product-search" class="search-input" autocomplete="off"
-                data-search-url="{% url "orders:search_products" oid=order.id %}"
+                data-search-url="{% url "orders:search_products" sid=order.store.id %}"
                 placeholder="ابحث عن طريق اسم المنتج" 
             >
             <button type="submit">بحث</button>

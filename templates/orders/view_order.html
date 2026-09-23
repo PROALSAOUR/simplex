@@ -206,14 +206,10 @@
                                 {% if USER_TYPE == "admin" %}
                                     <div class="field">
                                         <div class="select-control">
-                                            <label for="v-status">حالة التحقق</label>
+                                            <label for="{{ status_form.verification_status.id_for_label }}">حالة التحقق</label>
                                             
                                             <div class="js-custom-select">
-                                                <select id="v-status" name="v-status">
-                                                    <option value="checking">جاري التحقق</option>
-                                                    <option value="approved">طلب حقيقي</option>
-                                                    <option value="rejected">طلب وهمي</option>
-                                                </select>
+                                                {{ status_form.verification_status }}
                                             </div>
                                         </div>
                                         <span class="help-text">
@@ -223,14 +219,10 @@
                                 {% endif %}
                                 <div class="field">
                                     <div class="select-control">
-                                        <label for="status">حالة الطلب</label>
+                                        <label for="{{ status_form.status.id_for_label }}">حالة الطلب</label>
                                         
                                         <div class="js-custom-select">
-                                            <select id="status" name="status" required>
-                                                <option value="processing">قيد المعالجة</option>
-                                                <option value="delivered">تم التسليم</option>
-                                                <option value="canceled">تم الإلغاء</option>
-                                            </select>
+                                            {{ status_form.status }}
                                         </div>
                                     </div>
                                     <span class="help-text">
@@ -522,7 +514,7 @@
             </div>
 
             {% if can_edit %} 
-                {% include "orders/components/add-item-panel.html" %}
+                {% include "orders/components/add_item_panel.html" %}
             {% endif %}
                         
             <div class="table-wrap">
@@ -601,5 +593,6 @@
     <script src="{% static "js/transactions.js" %}"></script>
     {% if can_edit %}
         <script src="{% static "js/orders/search_products.js" %}"></script>
+        <script src="{% static "js/orders/edit_order_items.js" %}"></script>
     {% endif %}
 {% endblock %}

@@ -85,8 +85,9 @@ class OrderItemRegisterForm(forms.ModelForm):
         self.fields["product_size"].queryset = sizes
 
     def clean_product(self):
+        # منع طلب المنتج المرفوض
         product = self.cleaned_data["product"]
-        if product.status != "approved":
+        if product.status == "rejected":
             raise forms.ValidationError(
                 "هذا المنتج غير متاح للطلب حالياً."
             )

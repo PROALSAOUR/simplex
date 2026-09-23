@@ -1,0 +1,61 @@
+{% extends "partials/base.html" %}
+{% load static %}
+
+{% block page_head %}
+    <link rel="stylesheet" href="{% static "css/tables.css" %} ">         
+    <link rel="stylesheet" href="{% static "css/fields.css" %} ">      
+    <link rel="stylesheet" href="{% static "css/orders.css" %} ">         
+
+{% endblock page_head %}
+
+{% block content %}
+
+    <div class="section-header">
+        <div class="section-content">
+            <div class="section-icon order">
+                <i class="fa-solid fa-cart-shopping"></i>
+            </div>
+            <div class="section-details">
+                <h1>إنشاء طلب</h1>
+                <p>أضف المنتجات، ثم أدخل بيانات الزبون لإتمام الطلب.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel add-item-panel open " >
+
+        <div class="panel-header">
+            <h4><i class="fa-regular fa-square-plus primary-cl"></i> إضافة منتج </h4>
+            <p>ابحث عن المنتج الذي تريد إضافته ثم قم بإختياره</p>
+        </div>
+
+        <form id="add_order_items_form" method="POST" data-url="" class="panel-content">
+            {% csrf_token %}
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" name="search" id="product-search" class="search-input" autocomplete="off"
+                    data-search-url="{% url "orders:search_products" sid=store.id %}"
+                    placeholder="ابحث عن طريق اسم المنتج" 
+                >
+                <button type="submit">بحث</button>
+            </div>
+
+            <div class="search-results" id="search-results"  data-product-button-type="add-to-cart">
+                <!-- سيتم عرض نتائج البحث هنا -->    
+                
+            </div>
+
+        </form>
+
+
+    </div>
+
+{% endblock content %}
+
+{% block out_container %}{% endblock out_container %}
+
+{% block page_scripts %}
+
+    <script src="{% static "js/fields.js" %}"></script>
+    <script src="{% static "js/orders/search_products.js" %}"></script>
+{% endblock %}
