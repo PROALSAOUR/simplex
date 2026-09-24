@@ -200,6 +200,7 @@
     gap: 10px;
     font-size: 14px;
     margin-bottom: 10px;
+    user-select: none;
 }
 .cart-section .cs-header i {
     color: var(--primary-color);

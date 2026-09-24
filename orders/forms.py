@@ -6,21 +6,19 @@ from orders.models import Order, OrderItem
 from store.models import Product, ProductColor, ProductSize
 
 
-class OrderRegisterForm(forms.ModelForm):
-    """Customer data form used when creating an order."""
+class OrderCustomerForm(forms.ModelForm):
+    """Customer data form used when creating or editing an order."""
 
     class Meta:
         model = Order
-        fields = ["customer_name", "customer_phone", "customer_location", "note"]
+        fields = ["customer_name", "customer_phone", "customer_location", "note", "free_delivery"]
 
-    def __init__(self, *args, store=None, is_vendor=False, **kwargs):
+    def __init__(self, *args, store=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.store = store
-        self.is_vendor = is_vendor
         self.fields["note"].required = False
+        self.fields["free_delivery"].required = False
 
-        if not is_vendor:
-            self.fields.pop("note")
 
     def clean_customer_phone(self):
         return validate_phone_number(self.cleaned_data["customer_phone"])
@@ -46,7 +44,13 @@ class OrderRegisterForm(forms.ModelForm):
             raise ValidationError("العنوان يجب أن يكون 3 أحرف أو أكثر.")
 
         return customer_location
+        
+    def clean_free_delivery(self):
+        # تحويل قيمة checkbox إلى True أو False بشكل صحيح
+        value = self.cleaned_data.get('free_delivery')
 
+        return bool(value)
+        
 class OrderItemRegisterForm(forms.ModelForm):
     """نموذج عنصر الطلب"""
 
@@ -146,40 +150,6 @@ class OrderItemRegisterForm(forms.ModelForm):
         if commit:
             order_item.save()
         return order_item
-
-class OrderEditCustomerForm(forms.ModelForm):
-    class Meta:
-        model = Order
-        fields = [ "customer_name", "customer_phone", "customer_location", "note"]
-            
-    def clean_customer_phone(self):
-        return validate_phone_number(self.cleaned_data["customer_phone"])
-    
-    def clean_customer_name(self):
-        customer_name = self.cleaned_data["customer_name"].strip()
-
-        if customer_name.isdigit():
-            raise ValidationError("اسم المستلم لا يجب أن يكون رقماً فقط.")
-
-        if len(customer_name) < 4:
-            raise ValidationError("اسم المستلم يجب أن يكون 4 أحرف أو أكثر.")
-
-        return customer_name
-    
-    def clean_customer_location(self):
-        customer_location = self.cleaned_data["customer_location"].strip()
-
-        if customer_location.isdigit():
-            raise ValidationError("العنوان لا يجب أن يكون رقماً فقط.")
-
-        if len(customer_location) < 4:
-            raise ValidationError("العنوان  يجب أن يكون 4 أحرف أو أكثر.")
-
-        return customer_location
-    
-    def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            self.fields["note"].required = False
 
 class OrderEditStatusForm(forms.ModelForm):
     class Meta:

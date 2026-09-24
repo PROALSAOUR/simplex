@@ -108,6 +108,12 @@
             
         </div>
 
+        {% if form.errors %}
+            <div class="field-errors">
+                يرجى تصحيح الأخطاء قبل اعادة حفظ التعديلات.
+            </div>
+        {% endif %}
+
         <div class="cart-section">
             <div class="cs-header">
                 <i class="fa-solid fa-user"></i>
@@ -116,59 +122,87 @@
             <div class="cs-body grid">
                 <div class="fields-container">
 
-                    <div class="field">
-                        <label for="">اسم الزبون</label>
+                    <div class="field {% if form.customer_name.errors %}has-error{% endif %}">
+                        <label for="{{ form.customer_name.id_for_label }}">
+                            {{ form.customer_name.label }}
+                            <span class="required">*</span>
+                        </label>
                         <div class="input">
-                            <input type="text" placeholder="ادخل اسم الزبون الخاص بك ..." >
+                            {{ form.customer_name }}
                             <i class="fa-solid fa-user"></i>
                         </div>
-                        <span class="help-text">نص امدة هنا نص المساعدة هنا</span>
-                    </div>
-                    
-                    <div class="field">
-                        <label for="">رقم الهاتف</label>
-                        <div class="input">
-                            <input type="text" placeholder="ادخل رقم هاتفك  ..." >
-                            <i class="fa-solid fa-phone-volume"></i>
-                        </div>
-                        <span class="help-text">نص امدة هنا نص المساعدة هنا</span>
+                        {% if form.customer_name.errors %}
+                            <span class="help-text"> {{ form.customer_name.errors.0 }} </span>
+                        {% else %}
+                            <span class="help-text">{{ form.customer_name.help_text }}</span>
+                        {% endif %}
+                        
                     </div>
 
-                    <div class="field">
-                        <label for="">موقع الزبون</label>
+                    <div class="field {% if form.customer_phone.errors %}has-error{% endif %}">
+                        <label for="{{ form.customer_phone.id_for_label }}">
+                            {{ form.customer_phone.label }}
+                            <span class="required">*</span>
+                        </label>
                         <div class="input">
-                            <input type="text" placeholder="ادخل اسم الزبون الخاص بك ..." >
+                            {{ form.customer_phone }}
+                            <i class="fa-solid fa-phone-volume"></i>
+                        </div>
+                        {% if form.customer_phone.errors %}
+                            <span class="help-text"> {{ form.customer_phone.errors.0 }} </span>
+                        {% else %}
+                            <span class="help-text">{{ form.customer_phone.help_text }}</span>
+                        {% endif %}
+                        
+                    </div>
+                    
+                    <div class="field {% if form.customer_location.errors %}has-error{% endif %}">
+                        <label for="{{ form.customer_location.id_for_label }}">
+                            {{ form.customer_location.label }}
+                            <span class="required">*</span>
+                        </label>
+                        <div class="input">
+                            {{ form.customer_location }}
                             <i class="fa-solid fa-location-dot"></i>
                         </div>
-                        <span class="help-text">نص امدة هنا نص المساعدة هنا</span>
+                        {% if form.customer_location.errors %}
+                            <span class="help-text"> {{ form.customer_location.errors.0 }} </span>
+                        {% else %}
+                            <span class="help-text">{{ form.customer_location.help_text }}</span>
+                        {% endif %}
+                        
                     </div>
                             
                 </div>
                 <div class="fields-container">
 
-                    <div class="field checkbox-field">
+                    <div class="field checkbox-field  {% if form.free_delivery.errors %}has-error{% endif %}">
                         <div class="checkbox-control">
-                            <label >توصيل مجاني</label>
-                            <input type="checkbox" checked>
+                            <label for="free_delivery">{{  form.free_delivery.label }}</label>
+                            <input type="checkbox" name="free_delivery" id="free_delivery" {% if form.free_delivery.value %}checked{% endif %}>
                         </div>
-                        <span class="help-text">
-                            تفعيل هذا الخيار يجعل المنتج ظاهرًا في المتجر
-                        </span>
+                        {% if form.free_delivery.errors %}
+                            <span class="help-text"> {{ form.free_delivery.errors.0 }} </span>
+                        {% else %}
+                            <span class="help-text">{{ form.free_delivery.help_text }}</span>
+                        {% endif %}
                     </div>
 
-                    <div class="field">
-                        <label for="">ملاحظة اضافية <span class="required">*</span></label>
+                    <div class="field {% if form.note.errors %}has-error{% endif %}">
+                        <label for="note">{{ form.note.label }}</label>
                         <div class="input">
-                            <span class="counter " >  <!-- ضيف كلاس كانسل او كومبليت حسب العدد -->
-                                <span class="current-c">0</span> / <span class="max-c"> 500</span>
+                            <span class="counter" > 
+                                <span class="current-c">0</span>/<span class="max-c"></span>
                             </span>
-                            <textarea  placeholder="ادخل وصف المنتج ..." rows="5" cols="40"  maxlength="10" ></textarea>
-                            <i class="fa-regular fa-note-sticky"></i>
+                            <textarea name="note" id="note"   rows="5" cols="40"  maxlength="500" required >{{ form.note.value|default:'' }}</textarea>
                         </div>
-                        <span class="help-text">نص المساعدة هنا نص المساعدة هنا</span>
+                        {% if form.note.errors %}
+                            <span class="help-text"> {{ form.note.errors.0 }} </span>
+                        {% else %}
+                            <span class="help-text">{{ form.note.help_text }}</span>
+                        {% endif %}
                     </div>
-
-                            
+                    
                 </div>
 
             </div>
@@ -206,5 +240,5 @@
     <script src="{% static "js/fields.js" %}"></script>
     <script src="{% static "js/orders/search_products.js" %}"></script>
     <script src="{% static "js/orders/cart.js" %}"></script>
-    {% comment %} <script src="{% static "js/orders/add_order_manually.js" %}"></script> {% endcomment %}
+    <script src="{% static "js/orders/add_order_manually.js" %}"></script>
 {% endblock %}

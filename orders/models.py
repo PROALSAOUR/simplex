@@ -69,7 +69,7 @@ class Order(models.Model):
     note = CKEditor5Field('ملاحظة', config_name='default', null=True, blank=True, help_text='يمكنك إضافة ملاحظات خاصة بالطلب، مثل تعليمات التوصيل أو طلبات خاصة من الزبون.')
 
     # حقول قيم الطلب
-    free_delivery = models.BooleanField(default=False, verbose_name="قيمة التوصيل" , choices=[(True, "مجاني"), (False, "غير مجاني")], help_text="حدد ما إذا كان هذا الطلب مشمولًا بالتوصيل المجاني أم لا.")
+    free_delivery = models.BooleanField(default=False, verbose_name="توصيل مجاني" , choices=[(True, "مجاني"), (False, "غير مجاني")], help_text="حدد ما إذا كان هذا الطلب مشمولًا بالتوصيل المجاني أم لا.")
     total_purchase_price = models.PositiveIntegerField(verbose_name='إجمالي سعر الشراء', default=0, help_text='إجمالي تكلفة المنتجات في الطلب، محسوبة بناءً على أسعار الشراء لكل منتج والكمية المطلوبة.')
     total_selling_price = models.PositiveIntegerField(verbose_name='إجمالي سعر البيع', default=0, help_text='إجمالي سعر البيع للطلب، محسوبة بناءً على أسعار البيع لكل منتج والكمية المطلوبة.')
     total_profit = models.IntegerField(verbose_name='الربح', default=0, help_text='الربح المحقق من الطلب، محسوبًا كفرق بين إجمالي سعر البيع وإجمالي سعر الشراء.')

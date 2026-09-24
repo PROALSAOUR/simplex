@@ -122,10 +122,11 @@ def store_orders(request, sid):
 def add_order_manually(request):
     """صفحة إنشاء طلب يدوي عن طريق صاحب المتجر"""
     store = request.user.userprofile.store
+    form = OrderCustomerForm()
     
     context = {
         "store": store,
-
+        "form": form,
     }
     return render(request, "orders/add_order_manually.html", context)
 
@@ -154,7 +155,7 @@ def add_order(request):
         hasattr(request.user, 'userprofile') and
         request.user.userprofile.user_type == 'vendor'
     )
-    order_form = OrderRegisterForm(customer_data, is_vendor=is_vendor)
+    order_form = OrderCustomerForm(customer_data, is_vendor=is_vendor)
     item_forms = []
     item_errors = {}
 
@@ -252,7 +253,7 @@ def view_order(request, oid):
     # إنشاء الفورمين بشكل افتراضي
     # --------------------------------------------------
 
-    customer_form = OrderEditCustomerForm(
+    customer_form = OrderCustomerForm(
         instance=order
     )
 
@@ -277,7 +278,7 @@ def view_order(request, oid):
         # تعديل بيانات الزبون
         # ==============================================
         if form_type == "customer":
-            customer_form = OrderEditCustomerForm(
+            customer_form = OrderCustomerForm(
                 request.POST,
                 instance=order
             )
