@@ -21,7 +21,7 @@
         </div>
     </div>
 
-    <div class="panel add-item-panel open " >
+    <div class="panel add-item-panel open ">
 
         <div class="panel-header">
             <h4><i class="fa-regular fa-square-plus primary-cl"></i> إضافة منتج </h4>
@@ -49,49 +49,63 @@
 
     </div>
 
-    <form id="cart_form">
+    <form id="cart_form" hidden>
 
         <div class="cart-section ">
             <div class="cs-header">
                 <i class="fa-solid fa-cart-shopping"></i>
-                <h4>المنتجات في السلة <span>(13)</span></h4>
+                <h4>المنتجات في السلة <span id="cart-count">(0)</span></h4>
             </div>
-            <div class="cs-body">
+            <div class="cs-body" id="cart-items" >
+
+            </div>
+            {% comment %} القالب الخاص ببطاقة عنصر السلة {% endcomment %}
+            <template id="cart-item-template">
                 <div class="cart-item">
 
-                    <img class="item-image" src="/images/deafult.jpg" alt="اسم المنتج">
+                    <img class="item-image" src="{% static "images/deafult.jpg" %}" alt="صورة المنتج">
 
                     <div class="item-info">
-                        <h5>قميص رجالي صيفي أنيق</h5>
+                        <h5 class="item-name"></h5>
 
                         <div class="item-options">
-                            <span>أحمر</span>
-                            <span>XX Large</span>
+                            <span class="item-color"></span>
+                            <span class="item-size"></span>
                         </div>
                     </div>
 
                     <div class="item-quantity">
                         <span>الكمية</span>
-                        <strong>2</strong>
+                        <strong class="item-qty"></strong>
                     </div>
 
                     <div class="item-price">
                         <span>السعر</span>
-                        <strong>50 <span class="currency">د.ل</span></strong>
+                        <strong>
+                            <span class="item-price-value"></span>
+                            <span class="currency">د.ل</span>
+                        </strong>
                     </div>
 
                     <div class="item-total">
                         <span>الإجمالي</span>
-                        <strong>100 <span class="currency">د.ل</span></strong>
+                        <strong>
+                            <span class="item-total-value"></span>
+                            <span class="currency">د.ل</span>
+                        </strong>
                     </div>
 
-                    <button class="remove" type="button" aria-label="حذف المنتج">
+                    <button
+                        class="remove"
+                        type="button"
+                        aria-label="حذف المنتج"
+                    >
                         <i class="fa-solid fa-trash"></i>
                     </button>
 
                 </div>
+            </template>
             
-            </div>
         </div>
 
         <div class="cart-section">
@@ -169,11 +183,11 @@
                 <ul>
                     <li>
                         <p> إجمالي كمية المنتجات </p>
-                        <span>13</span>
+                        <span id="cart-total-qty">0</span>
                     </li>
                     <li>
                         <p>اجمالي سعر المنتجات</p>
-                        <span>150 <span class="currency" >د.ل</span> </span>
+                        <span id="cart-total-price">0<span class="currency" >د.ل</span> </span>
                     </li>
                 </ul>
                 <button class="add-btn">إتمام الطلب <i class="fa-solid fa-cart-plus"></i></button>
@@ -191,4 +205,6 @@
 
     <script src="{% static "js/fields.js" %}"></script>
     <script src="{% static "js/orders/search_products.js" %}"></script>
+    <script src="{% static "js/orders/cart.js" %}"></script>
+    {% comment %} <script src="{% static "js/orders/add_order_manually.js" %}"></script> {% endcomment %}
 {% endblock %}

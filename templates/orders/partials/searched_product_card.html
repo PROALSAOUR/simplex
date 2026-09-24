@@ -1,6 +1,10 @@
 {% for product in products %}
 
-    <details class="product-card" >
+    <details class="product-card" 
+        data-product-id="{{ product.id }}"
+        data-product-name="{{ product.name }}"
+        data-product-price="{{ product.get_price }}" 
+    >
 
         <summary>
 
@@ -111,6 +115,7 @@
 
                                             <input
                                                 type="radio"
+                                                value=""
                                                 data-unified-size="true"
                                                 checked
                                                 aria-hidden="true"
@@ -189,6 +194,7 @@
                     <button
                         type="button"
                         class="add-btn"
+                        onclick="addToCart(this)"
                     >
                         إضافة إلى السلة
                         <i class="fa-solid fa-plus"></i>

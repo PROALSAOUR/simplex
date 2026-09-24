@@ -123,30 +123,9 @@ def add_order_manually(request):
     """صفحة إنشاء طلب يدوي عن طريق صاحب المتجر"""
     store = request.user.userprofile.store
     
-    # order_form = OrderRegisterForm(store=store, is_vendor=True)
-    # item_form = OrderItemRegisterForm(store=store)
-    # query = request.GET.get("q", "").strip()
-    # products = store.products.filter(
-    #     status="approved", 
-    #     is_visible=True
-    # ).prefetch_related("colors__sizes")
-    # if query:
-    #     products = products.filter(name__icontains=query)
-    # else:
-    #     # عرض أحدث 10 منتجات فقط عند عدم وجود بحث
-    #     products = products.order_by("-upload_at")[:10]
-    # for product in products:
-    #     product.available_colors = [
-    #         color for color in product.colors.all()
-    #         if color.available
-    #     ]
-
     context = {
         "store": store,
-        # "order_form": order_form,
-        # "item_form": item_form,
-        # "products": products,
-        # "query": query,
+
     }
     return render(request, "orders/add_order_manually.html", context)
 
