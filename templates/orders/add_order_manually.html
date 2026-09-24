@@ -5,7 +5,6 @@
     <link rel="stylesheet" href="{% static "css/tables.css" %} ">         
     <link rel="stylesheet" href="{% static "css/fields.css" %} ">      
     <link rel="stylesheet" href="{% static "css/orders.css" %} ">         
-
 {% endblock page_head %}
 
 {% block content %}
@@ -49,6 +48,140 @@
 
 
     </div>
+
+    <form id="cart_form">
+
+        <div class="cart-section ">
+            <div class="cs-header">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <h4>المنتجات في السلة <span>(13)</span></h4>
+            </div>
+            <div class="cs-body">
+                <div class="cart-item">
+
+                    <img class="item-image" src="/images/deafult.jpg" alt="اسم المنتج">
+
+                    <div class="item-info">
+                        <h5>قميص رجالي صيفي أنيق</h5>
+
+                        <div class="item-options">
+                            <span>أحمر</span>
+                            <span>XX Large</span>
+                        </div>
+                    </div>
+
+                    <div class="item-quantity">
+                        <span>الكمية</span>
+                        <strong>2</strong>
+                    </div>
+
+                    <div class="item-price">
+                        <span>السعر</span>
+                        <strong>50 <span class="currency">د.ل</span></strong>
+                    </div>
+
+                    <div class="item-total">
+                        <span>الإجمالي</span>
+                        <strong>100 <span class="currency">د.ل</span></strong>
+                    </div>
+
+                    <button class="remove" type="button" aria-label="حذف المنتج">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+
+                </div>
+            
+            </div>
+        </div>
+
+        <div class="cart-section">
+            <div class="cs-header">
+                <i class="fa-solid fa-user"></i>
+                <h4>بيانات الزبون </h4>
+            </div>
+            <div class="cs-body grid">
+                <div class="fields-container">
+
+                    <div class="field">
+                        <label for="">اسم الزبون</label>
+                        <div class="input">
+                            <input type="text" placeholder="ادخل اسم الزبون الخاص بك ..." >
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <span class="help-text">نص امدة هنا نص المساعدة هنا</span>
+                    </div>
+                    
+                    <div class="field">
+                        <label for="">رقم الهاتف</label>
+                        <div class="input">
+                            <input type="text" placeholder="ادخل رقم هاتفك  ..." >
+                            <i class="fa-solid fa-phone-volume"></i>
+                        </div>
+                        <span class="help-text">نص امدة هنا نص المساعدة هنا</span>
+                    </div>
+
+                    <div class="field">
+                        <label for="">موقع الزبون</label>
+                        <div class="input">
+                            <input type="text" placeholder="ادخل اسم الزبون الخاص بك ..." >
+                            <i class="fa-solid fa-location-dot"></i>
+                        </div>
+                        <span class="help-text">نص امدة هنا نص المساعدة هنا</span>
+                    </div>
+                            
+                </div>
+                <div class="fields-container">
+
+                    <div class="field checkbox-field">
+                        <div class="checkbox-control">
+                            <label >توصيل مجاني</label>
+                            <input type="checkbox" checked>
+                        </div>
+                        <span class="help-text">
+                            تفعيل هذا الخيار يجعل المنتج ظاهرًا في المتجر
+                        </span>
+                    </div>
+
+                    <div class="field">
+                        <label for="">ملاحظة اضافية <span class="required">*</span></label>
+                        <div class="input">
+                            <span class="counter " >  <!-- ضيف كلاس كانسل او كومبليت حسب العدد -->
+                                <span class="current-c">0</span> / <span class="max-c"> 500</span>
+                            </span>
+                            <textarea  placeholder="ادخل وصف المنتج ..." rows="5" cols="40"  maxlength="10" ></textarea>
+                            <i class="fa-regular fa-note-sticky"></i>
+                        </div>
+                        <span class="help-text">نص المساعدة هنا نص المساعدة هنا</span>
+                    </div>
+
+                            
+                </div>
+
+            </div>
+        </div>
+
+        <div class="cart-section ">
+            <div class="cs-header">
+                <i class="fa-solid fa-list-check"></i>
+                <h4>ملخص الطلب <span></span></h4>
+            </div>
+            <div class="cs-body">
+                <ul>
+                    <li>
+                        <p> إجمالي كمية المنتجات </p>
+                        <span>13</span>
+                    </li>
+                    <li>
+                        <p>اجمالي سعر المنتجات</p>
+                        <span>150 <span class="currency" >د.ل</span> </span>
+                    </li>
+                </ul>
+                <button class="add-btn">إتمام الطلب <i class="fa-solid fa-cart-plus"></i></button>
+
+            </div>
+        </div>
+
+    </form>
 
 {% endblock content %}
 

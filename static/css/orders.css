@@ -179,3 +179,190 @@
     -ms-border-radius: 5px;
     -o-border-radius: 5px;
 }
+/* ═══════════════════════════════════════════
+    ADD ORDER MANUALLY
+═══════════════════════════════════════════ */
+.cart-section {
+    background-color: var(--secondary-background);
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid var(--seprator-color);
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+
+.cart-section .cs-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+.cart-section .cs-header i {
+    color: var(--primary-color);
+    font-size: calc(1em + 2px);
+}
+.cart-section .cs-header span {
+    opacity: 0.8;
+    font-size: calc(1em - 2px);
+}
+
+.cart-section .cs-body {
+    font-size: 13px;
+}
+@media (min-width:500px) {
+    .cart-section {
+        padding: 20px;
+    }
+    .cart-section .cs-header {
+        font-size: 16px;
+    }
+    .cart-section .cs-body {
+        font-size: 15px;
+    }
+    
+}
+/* قسم المنتجات داخل السلة */
+.cart-item {
+    display: grid;
+    grid-template-columns: 60px minmax(180px, 1fr) auto auto auto 40px;
+    align-items: center;
+    gap: 18px;
+    padding: 14px;
+    margin-bottom: 10px;
+    border: 1px solid var(--seprator-color);
+    border-radius: 12px;
+    background: var(--background-color);
+}
+.cart-item  .item-image {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+.cart-item .item-info {
+    min-width: 0;
+}
+.cart-item .item-info h5 {
+    margin: 0 0 7px;
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.cart-item .item-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.cart-item .item-options span {
+    padding: 3px 8px;
+    border-radius: 6px;
+    background-color: var(--seprator-color);
+    font-size: 12px;
+}
+.cart-item  .item-quantity, .cart-item  .item-price, .cart-item  .item-total {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    white-space: nowrap;
+}
+.cart-item  .item-quantity {
+    text-align: center;
+}
+.cart-item div span {
+    font-size: 11px;
+    opacity: .55;
+}
+.cart-item  div strong {
+    font-size: 14px;
+}
+.cart-item .item-total strong {
+    font-size: 15px;
+}
+.cart-item  .remove {
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--red-color);
+    cursor: pointer;
+    font-size: 14px;
+}
+@media (max-width: 600px) {
+    .cart-item {
+        grid-template-columns: 52px 1fr 36px;
+        gap: 10px 12px;
+        padding: 12px;
+    }
+    .cart-item .item-image {
+        width: 52px;
+        height: 52px;
+    }
+    .cart-item .item-info {
+        align-self: center;
+    }
+    .cart-item  .remove {
+        grid-column: 3;
+        grid-row: 1;
+    }
+    .cart-item div span {
+        font-size: 10px;
+    }
+    .cart-item div strong {
+        font-size: 12px;
+    }
+}
+/* قسم بيانات الزبون */
+.cart-section .cs-body .field {
+    max-width: unset;
+}
+@media (min-width:700px) {
+    .cart-section .cs-body.grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    .cart-section .cs-body.grid .field {
+        max-width: 500px;
+        margin: 10px;
+    }
+}
+/* قسم ملخص الطلب */
+.cart-section .cs-body ul {
+    background-color: var(--background-color);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid var(--seprator-color);
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+.cart-section .cs-body li {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    opacity: 0.7;
+}
+.cart-section .cs-body li:not(:last-of-type) {
+    margin-bottom: 10px;
+}
+.cart-section .cs-body  .add-btn {
+    width: 100%;
+    padding: 10px 15px;
+    background-color: var(--primary-color);
+    color: #fff;
+    font-weight: 700;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
