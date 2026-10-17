@@ -457,7 +457,7 @@
 
             </div>
 
-            <form class="cart_form" id="cart_form" autocomplete="off" data-submit-url="{% url "orders:add_order" %}" data-redirect-url="{% url "store:view_product" product.id %}"  hidden>
+            <form class="cart_form" id="cart_form" autocomplete="off" data-submit-url="{% url "orders:create_order" %}" data-redirect-url="{% url "store:view_product" product.id %}"  hidden>
                 {% csrf_token %}
 
                 <div class="form-title">

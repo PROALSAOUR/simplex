@@ -189,6 +189,7 @@ async function submitOrder(form) {
 
     const data = {
         ...Object.fromEntries(formData.entries()),
+        free_delivery: formData.has("free_delivery"),
         items: cartProducts.map(item => ({
             product_id: item.product_id,
             color_id: item.color_id,

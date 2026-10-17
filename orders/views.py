@@ -132,7 +132,7 @@ def add_order_manually(request):
 
 # هذه الدالة لاتتطلب تسجيل دخول لأنها مخصصة للزبائن
 @require_POST
-def add_order(request):
+def create_order(request):
     """الدالة المسؤولة عن إنشاء طلب عن طريق الزبون أو البائع."""
 
     try:
@@ -149,6 +149,9 @@ def add_order(request):
         "customer_location": data.get("customer_location", ""),
         "note": data.get("note", ""),
     }
+    
+    # الحصول على سعر التوصيل من صفحة انشاء منتج يدوياً
+    free_delivery = data.get("free_delivery", False)
 
     items_data = data.get("items", [])
     order_form = OrderCustomerForm(customer_data)
@@ -214,9 +217,9 @@ def add_order(request):
             order.store = store
             order.serial_number = order.create_serial_number()
 
-            # تحديد حالة التوصيل بناءً على المنتج الأول.
+            # تحديد حالة التوصيل بناءً على المنتج الأول. عندما يكون المشتري زبون
             order.free_delivery = products[0].free_delivery
-
+            
             # التحقق مما إذا كان منشئ الطلب بائعًا.
             is_store_vendor = (
                 request.user.is_authenticated
@@ -227,6 +230,8 @@ def add_order(request):
             if is_store_vendor:
                 # طلب البائع يُعتمد تلقائيًا.
                 order.verification_status = "approved"
+                # تعيين حالة التوصيل وفقًا لإختيار المتجر.
+                order.free_delivery = free_delivery
             else:
                 # تحديد حالة طلب الزبون وفق إعدادات المتجر.
                 order.verification_status = (
@@ -256,8 +261,6 @@ def add_order(request):
         },
         "item_errors": item_errors,
     }, status=400)
-    
-    
     
 @login_required(login_url='accounts:log_in')
 def view_order(request, oid):
