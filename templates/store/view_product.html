@@ -147,7 +147,11 @@
                     </div>
                 </section>
 
-                <section class="product-variants" >
+                <section class="product-variants product-card" 
+                    data-product-id="{{ product.id }}"
+                    data-product-name="{{ product.name }}"
+                    data-product-price="{{ product.get_price }}" 
+                >
 
                     <h3 class="title">
                         الوان المنتج
@@ -310,30 +314,36 @@
                     
                 </section>
 
-                <section class="product-variants cart-section" hidden>
+                <section id="cart" class="product-variants cart-section" hidden>
 
                     <h3 class="title">
                         السلة
                     </h3>
 
                     <div class="cart-items">
-                        <div class="cart-item">
-                            <img src="/images/deafult.jpg" alt="" width="30" height="30">
-                            <span> احمر- xxlarge</span>
-                            <span>3x100</span>
-                            <span>300</span>
-                            <button><i class="fa-solid fa-trash"></i></button>
-                        </div>       
+                        <template id="cart-item-template">
+                            <div class="cart-item">
+                                <img class="item-image" src="{% static "images/deafult.jpg" %}" alt="صورة المنتج" width="30" height="30">
+                                <span> 
+                                    <span class="item-color"></span> - <span class="item-size"></span>
+                                </span>
+                                <span>
+                                    <span class="item-qty"></span>x <span class="item-price"></span>
+                                </span>
+                                <span class="item-total">300</span>
+                                <button><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </template>       
                     </div>
                     <div class="cart-total">
                         <p>الإجمالي:</p>
-                        <span id="cart-total-price">0 <span class="currency" >د.ل</span> </span>
+                        <span class="cart-total-price">0 <span class="currency" >د.ل</span> </span>
                     </div>
 
                     <button
                         type="button"
                         class="add-btn"
-                        onclick="addToCart(this)" 
+                        onclick="" 
                         > 
                         
                         إتمام الطلب
@@ -446,15 +456,16 @@
 
             </div>
 
-            <form class="cart-form" id="cart_form" style="display: none;">
+            <form class="cart-form" id="cart_form"  hidden>
 
                 <div class="form-title">
                     <h3>مراجعة وتأكيد الطلب</h3>
-                    <button class="hide-form" onclick="hideCartForm(this)">
+                    <button class="hide-form">
                         العودة الى المنتج <i class="fa-solid fa-chevron-left"></i>
                     </button>
                 </div>
 
+                {% comment %}
                 <div class="cart-section">
                     <div class="cs-header">
                         <i class="fa-solid fa-cart-shopping"></i>
@@ -463,34 +474,34 @@
 
                     <div class="cart-items">
 
-                        <div id="cart-item-template">
+                        <template id="cart-item-template">
                             <div class="cart-item">
-                                <img src="/images/deafult.jpg" alt="" width="30" height="30">
-                                <span> احمر- xxlarge</span>
-                                <span>2x</span>
-                                <span>300</span>
+                                <img class="item-image" src="{% static "images/deafult.jpg" %}" alt="صورة المنتج" width="30" height="30">
+                                <span> 
+                                    <span class="item-color"></span> - <span class="item-size"></span>
+                                </span>
+                                <span>
+                                    <span class="item-qty"></span>x
+                                </span>
+                                <span class="item-total" >300</span>
                             </div>    
-                            <div class="cart-item">
-                                <img src="/images/deafult.jpg" alt="" width="30" height="30">
-                                <span> احمر- xxlarge</span>
-                                <span>3x</span>
-                                <span>300</span>
-                            </div>
-                        </div>
+                            
+                        </template>
 
                     </div>
 
                     <div class="cart-total">
                         <p>الإجمالي:</p>
-                        <span id="cart-total-price">0 <span class="currency" >د.ل</span> </span>
+                        <span class="cart-total-price">0 <span class="currency" >د.ل</span></span>
                     </div>
         
                     <div class="deleivery-note free"> <!-- free -->
                         <p>ملاحظة:</p>
-                        <span id="cart-total-price">سعر التوصيل  مشمول بإجمالي الفاتورة </span>
+                        <span class="cart-total-price">سعر التوصيل  مشمول بإجمالي الفاتورة </span>
                     </div>
 
                 </div>
+                {% endcomment %}
                 
                 <div class="cart-section">
                     <div class="cs-header">
@@ -591,6 +602,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js"></script>
+    <script src="{% static "js/fields.js" %}" ></script>
     <script src="{% static "js/orders/cart.js" %}" ></script>
     <script src="{% static "js/products/product_variants.js" %}" ></script>
     <script src="{% static "js/products/view-product.js" %}" ></script>

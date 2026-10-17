@@ -90,7 +90,7 @@ function appendCartItem(productCard, index) {
         document.getElementById("cart-item-template");
 
     const cartForm =
-        document.getElementById("cart_form");
+        document.getElementById("cart");
 
     if (!cartItems || !template || !cartForm) return;
 
@@ -277,26 +277,18 @@ function updateCartSummary() {
     }
 
     // تحديث إجمالي الكمية.
-    const cartTotalQty =
-        document.getElementById("cart-total-qty");
-
-    if (cartTotalQty) {
-        cartTotalQty.textContent =
-            totalQuantity;
-    }
+    document.querySelectorAll(".cart-total-qty").forEach(element => {
+        element.textContent = totalQuantity;
+    });
 
     // تحديث إجمالي السعر.
-    const cartTotalPrice =
-        document.getElementById("cart-total-price");
-
-    if (cartTotalPrice) {
-        cartTotalPrice.innerHTML =
-            `${totalPrice}<span class="currency">د.ل</span>`;
-    }
+    document.querySelectorAll(".cart-total-price").forEach(element => {
+        element.innerHTML = `${totalPrice}<span class="currency">د.ل</span>`;
+    });
 
     // إظهار أو إخفاء السلة.
     const cartForm =
-        document.getElementById("cart_form");
+        document.getElementById("cart");
 
     if (cartForm) {
         cartForm.hidden =
