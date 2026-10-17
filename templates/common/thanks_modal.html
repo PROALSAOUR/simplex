@@ -1,7 +1,57 @@
-<div class="order-modal" id="order-modal" aria-live="polite">
-    <div class="order-modal-content">
-        <div class="order-modal-icon">✓</div>
+{% comment %} رسالة الشكر التي تظهر بعد انشاء الطلب بنجاح {% endcomment %}
+
+<style>
+    .thanks-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: var(--secondary-background);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+    }
+    .thanks-modal.show {
+        display: flex;
+    }
+    .thanks-modal-content {
+        font-size: 18px;
+        background: var(--background-color);
+        border-radius: 10px;
+        padding: 40px 32px;
+        text-align: center;
+        max-width: 360px;
+        width: 90%;
+        box-shadow: var(--main-shadow);
+        animation: popIn 0.3s ease;
+    }
+    @keyframes popIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to   { opacity: 1; transform: scale(1); }
+    }
+    .thanks-modal i {
+        color: var(--green-color);
+        font-size: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 10px;
+    }
+    .thanks-modal h3 {
+        margin: 0 0 8px;
+        font-size: 1.2rem;
+    }
+    .thanks-modal p {
+        margin: 0;
+        color: var(--clr-text-muted);
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="thanks-modal" id="thanks-modal" aria-live="polite">
+    <div class="thanks-modal-content">
+        <i class="fa-solid fa-check"></i>
         <h3>شكرا لك</h3>
-        <p id="order-message"></p>
+        {% comment %} #change-later غير النص {% endcomment %}
+        <p> تم انشاء الطلب بنجاح </p>
     </div>
 </div>

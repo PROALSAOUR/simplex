@@ -50,16 +50,21 @@
 
     </div>
 
-    <form id="cart_form" hidden>
+    <form id="cart_form" autocomplete="off" data-submit-url="{% url "orders:add_order" %}" data-redirect-url="{% url "orders:store_orders" STORE_ID %}"  hidden >
+        {% csrf_token %}
 
         <div class="cart-section ">
             <div class="cs-header">
                 <i class="fa-solid fa-cart-shopping"></i>
                 <h4>المنتجات في السلة <span id="cart-count">(0)</span></h4>
             </div>
+
+            <div id="items-errors" class="field-errors" hidden></div>
+
             <div class="cs-body" id="cart-items" >
 
             </div>
+            
             {% comment %} القالب الخاص ببطاقة عنصر السلة {% endcomment %}
             <template id="cart-item-template">
                 <div class="cart-item">
@@ -122,6 +127,8 @@
             </div>
             <div class="cs-body grid">
                 <div class="fields-container">
+
+                    <div id="customer-errors" class="field-errors" hidden></div>
 
                     <div class="field {% if form.customer_name.errors %}has-error{% endif %}">
                         <label for="{{ form.customer_name.id_for_label }}">
@@ -195,7 +202,7 @@
                             <span class="counter" > 
                                 <span class="current-c">0</span>/<span class="max-c"></span>
                             </span>
-                            <textarea name="note" id="note"   rows="5" cols="40"  maxlength="500" required >{{ form.note.value|default:'' }}</textarea>
+                            <textarea name="note" id="note"   rows="5" cols="40"  maxlength="500">{{ form.note.value|default:'' }}</textarea>
                         </div>
                         {% if form.note.errors %}
                             <span class="help-text"> {{ form.note.errors.0 }} </span>
@@ -234,12 +241,16 @@
 
 {% endblock content %}
 
+{% block out_container %}
+    {% include "common/thanks_modal.html" %}
+{% endblock out_container %}
+
 
 {% block page_scripts %}
 
     <script src="{% static "js/fields.js" %}"></script>
     <script src="{% static "js/products/product_variants.js" %}" ></script>
     <script src="{% static "js/orders/search_products.js" %}"></script>
-    <script src="{% static "js/orders/cart.js" %}"></script>
     <script src="{% static "js/orders/add_order_manually.js" %}"></script>
+    <script src="{% static "js/orders/cart.js" %}"></script>
 {% endblock %}

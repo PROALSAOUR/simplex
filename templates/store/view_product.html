@@ -320,21 +320,22 @@
                         السلة
                     </h3>
 
-                    <div class="cart-items">
-                        <template id="cart-item-template">
-                            <div class="cart-item">
-                                <img class="item-image" src="{% static "images/deafult.jpg" %}" alt="صورة المنتج" width="30" height="30">
-                                <span> 
-                                    <span class="item-color"></span> - <span class="item-size"></span>
-                                </span>
-                                <span>
-                                    <span class="item-qty"></span>x <span class="item-price"></span>
-                                </span>
-                                <span class="item-total">300</span>
-                                <button><i class="fa-solid fa-trash"></i></button>
-                            </div>
-                        </template>       
-                    </div>
+                    <template id="cart-item-template">
+                        <div class="cart-item">
+                            <img class="item-image" src="{% static "images/deafult.jpg" %}" alt="صورة المنتج" width="30" height="30">
+                            <span> 
+                                <span class="item-color"></span> - <span class="item-size"></span>
+                            </span>
+                            <span>
+                                <span class="item-qty"></span>x <span class="item-price"></span>
+                            </span>
+                            <span class="item-total">300</span>
+                            <button  type="button" class="remove" aria-label="حذف المنتج" ><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </template>
+
+                    <div class="cart-items"></div>
+
                     <div class="cart-total">
                         <p>الإجمالي:</p>
                         <span class="cart-total-price">0 <span class="currency" >د.ل</span> </span>
@@ -342,9 +343,9 @@
 
                     <button
                         type="button"
+                        id="checkout-button"
                         class="add-btn"
-                        onclick="" 
-                        > 
+                    > 
                         
                         إتمام الطلب
                         <i class="fa-solid fa-truck-fast"></i>
@@ -456,7 +457,8 @@
 
             </div>
 
-            <form class="cart-form" id="cart_form"  hidden>
+            <form class="cart_form" id="cart_form" autocomplete="off" data-submit-url="{% url "orders:add_order" %}" data-redirect-url="{% url "store:view_product" product.id %}"  hidden>
+                {% csrf_token %}
 
                 <div class="form-title">
                     <h3>مراجعة وتأكيد الطلب</h3>
@@ -465,49 +467,48 @@
                     </button>
                 </div>
 
-                {% comment %}
+                
                 <div class="cart-section">
                     <div class="cs-header">
                         <i class="fa-solid fa-cart-shopping"></i>
                         <h4>ملخص الطلب</h4>
                     </div>
 
-                    <div class="cart-items">
+                    <div id="items-errors" class="field-errors" hidden></div>
 
-                        <template id="cart-item-template">
-                            <div class="cart-item">
-                                <img class="item-image" src="{% static "images/deafult.jpg" %}" alt="صورة المنتج" width="30" height="30">
-                                <span> 
-                                    <span class="item-color"></span> - <span class="item-size"></span>
-                                </span>
-                                <span>
-                                    <span class="item-qty"></span>x
-                                </span>
-                                <span class="item-total" >300</span>
-                            </div>    
-                            
-                        </template>
+                    <!-- قالب مستقل لملخص الطلب --> 
+                    <template id="checkout-cart-item-template"> 
+                        <div class="cart-item"> 
+                            <img class="item-image" src="{% static 'images/deafult.jpg' %}" alt="صورة المنتج" width="30" height="30" > 
+                            <span> 
+                                <span class="item-color"></span> - <span class="item-size"></span> 
+                            </span>
+                            <span> <span class="item-qty"></span>x </span>
+                            <span class="item-total"></span>
+                        </div> 
+                    </template>
 
-                    </div>
+                    <div class="cart-items" id="checkout-cart-items"></div>
 
                     <div class="cart-total">
                         <p>الإجمالي:</p>
                         <span class="cart-total-price">0 <span class="currency" >د.ل</span></span>
                     </div>
         
-                    <div class="deleivery-note free"> <!-- free -->
+                    <div class="deleivery-note free"> <!-- free اذا كان التوصيل مجاني والا شيله -->
                         <p>ملاحظة:</p>
-                        <span class="cart-total-price">سعر التوصيل  مشمول بإجمالي الفاتورة </span>
+                        <span>سعر التوصيل  مشمول بإجمالي الفاتورة </span>
                     </div>
 
                 </div>
-                {% endcomment %}
                 
                 <div class="cart-section">
                     <div class="cs-header">
                         <i class="fa-solid fa-user"></i>
                         <h4>بياناتك</h4>
                     </div>
+
+                    <div id="customer-errors" class="field-errors" hidden></div>
                     
                     <div class="field">
                         <label for="id_customer_name">
@@ -515,7 +516,7 @@
                             <span class="required">*</span>
                         </label>
                         <div class="input">
-                            <input type="text" name="customer_name" maxlength="20" required="" aria-describedby="id_customer_name_helptext" id="id_customer_name">
+                            <input type="text" name="customer_name" maxlength="20" required aria-describedby="id_customer_name_helptext" id="id_customer_name">
                             <i class="fa-solid fa-user"></i>
                         </div>
                         
@@ -529,7 +530,7 @@
                             <span class="required">*</span>
                         </label>
                         <div class="input">
-                            <input type="text" name="customer_phone" maxlength="15" required="" aria-describedby="id_customer_phone_helptext" id="id_customer_phone">
+                            <input type="text" name="customer_phone" maxlength="15" required aria-describedby="id_customer_phone_helptext" id="id_customer_phone">
                             <i class="fa-solid fa-phone-volume"></i>
                         </div>
                         
@@ -543,7 +544,7 @@
                             <span class="required">*</span>
                         </label>
                         <div class="input">
-                            <input type="text" name="customer_location" maxlength="100" required="" aria-describedby="id_customer_location_helptext" id="id_customer_location">
+                            <input type="text" name="customer_location" maxlength="100" required aria-describedby="id_customer_location_helptext" id="id_customer_location">
                             <i class="fa-solid fa-location-dot"></i>
                         </div>
                         
@@ -561,7 +562,7 @@
                     <div class="field hidden" id="note-field" > 
                         <label for="note">ملاحظة</label>
                         <div class="input">
-                            <textarea name="note" id="note" rows="5" cols="40" maxlength="500" required=""></textarea>
+                            <textarea name="note" id="note" rows="5" cols="40" maxlength="500" ></textarea>
                         </div>
                         
                         <span class="help-text">يمكنك إضافة ملاحظات خاصة بالطلب، مثل تعليمات التوصيل أو طلبات خاصة من الزبون.</span>
@@ -571,7 +572,7 @@
                 </div>
 
                 <div class="form-submit">
-                    <button class="add-btn">تأكيد الطلب <i class="fa-solid fa-cart-plus"></i></button>
+                    <button type="submit" class="add-btn">تأكيد الطلب <i class="fa-solid fa-cart-plus"></i></button>
                     <span>الدفع عند الاستلام  <i class="fa-solid fa-hand-holding-dollar"></i>  </span>
                 </div>
 
@@ -601,6 +602,7 @@
 
     </footer>
 
+    {% include "common/thanks_modal.html" %}
     <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js"></script>
     <script src="{% static "js/fields.js" %}" ></script>
     <script src="{% static "js/orders/cart.js" %}" ></script>

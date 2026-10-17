@@ -162,3 +162,164 @@ showNote.addEventListener("change", function () {
 const product = document.getElementById("product-options");
 setupProductSizes(product);
 // =========================================================================
+// دوال السلة
+// (تعمل  مع ملف cart.js)
+
+// عرض السلة المصغرة وملخص الطلب في صفحة بيع المنتج.
+function renderCart() {
+    // الحصول على عناصر السلة المصغرة وقالبها.
+    const cartSection = document.getElementById("cart");
+    const cartItems = document.querySelector("#cart .cart-items");
+    const cartTemplate = document.getElementById("cart-item-template");
+
+    // الحصول على عناصر ملخص الطلب وقالبها.
+    const checkoutItems = document.getElementById("checkout-cart-items");
+    const checkoutTemplate = document.getElementById(
+        "checkout-cart-item-template"
+    );
+
+    // التحقق من وجود العناصر المطلوبة.
+    if (
+        !cartSection ||
+        !cartItems ||
+        !cartTemplate ||
+        !checkoutItems ||
+        !checkoutTemplate
+    ) {
+        return;
+    }
+
+    // إفراغ الحاويتين دون حذف القوالب.
+    cartItems.replaceChildren();
+    checkoutItems.replaceChildren();
+
+    // إعادة بناء السلة المصغرة وملخص الطلب.
+    cartProducts.forEach((item, index) => {
+        // إنشاء بطاقة للسلة المصغرة.
+        const cartFragment = cartTemplate.content.cloneNode(true);
+        const cartItem = cartFragment.querySelector(".cart-item");
+
+        cartItem.querySelector(".item-image").src = item.product_image;
+        cartItem.querySelector(".item-image").alt = item.product_name;
+
+        cartItem.querySelector(".item-color").textContent = item.color_name;
+        cartItem.querySelector(".item-size").textContent = item.size_name;
+        cartItem.querySelector(".item-qty").textContent = item.qty;
+        cartItem.querySelector(".item-price").textContent = item.product_price;
+
+        cartItem.querySelector(".item-total").textContent =
+            item.product_price * item.qty;
+
+        // حذف العنصر المحدد من السلة.
+        cartItem.querySelector(".remove").addEventListener("click", () => {
+            removeCartItem(index);
+        });
+
+        cartItems.appendChild(cartFragment);
+
+        // إنشاء بطاقة مستقلة لملخص الطلب.
+        const checkoutFragment = checkoutTemplate.content.cloneNode(true);
+        const checkoutItem = checkoutFragment.querySelector(".cart-item");
+
+        checkoutItem.querySelector(".item-image").src = item.product_image;
+        checkoutItem.querySelector(".item-image").alt = item.product_name;
+
+        checkoutItem.querySelector(".item-color").textContent = item.color_name;
+        checkoutItem.querySelector(".item-size").textContent = item.size_name;
+        checkoutItem.querySelector(".item-qty").textContent = item.qty;
+
+        checkoutItem.querySelector(".item-total").textContent =
+            item.product_price * item.qty;
+
+        checkoutItems.appendChild(checkoutFragment);
+    });
+
+    // حساب إجمالي سعر السلة.
+    const summary = getCartSummary();
+
+    // تحديث الإجمالي في السلة المصغرة وملخص الطلب.
+    document.querySelectorAll(".cart-total-price").forEach(element => {
+        element.innerHTML =
+            `${summary.totalPrice}<span class="currency">د.ل</span>`;
+    });
+
+    // إظهار السلة عند وجود عناصر فيها.
+    cartSection.hidden = cartProducts.length === 0;
+}
+
+// إظهار نموذج تأكيد الطلب وإخفاء صفحة المنتج.
+function showCartForm() {
+    // منع الانتقال إذا كانت السلة فارغة.
+    if (cartProducts.length === 0) return;
+
+    const productPage = document.getElementById("product_page");
+    const cartSection = document.getElementById("cart");
+    const cartForm = document.getElementById("cart_form");
+
+    if (!productPage || !cartSection || !cartForm) return;
+
+    // تحديث ملخص الطلب قبل إظهار النموذج.
+    renderCart();
+
+    // إخفاء صفحة المنتج والسلة المصغرة.
+    productPage.hidden = true;
+    cartSection.hidden = true;
+
+    // إظهار نموذج الشراء.
+    cartForm.hidden = false;
+
+    // العودة إلى أعلى الصفحة.
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+}
+
+//  العودة إلى صفحة المنتج والسلة المصغرة.
+function hideCartForm() {
+    // الحصول على عناصر الصفحة.
+    const productPage = document.getElementById("product_page");
+    const cartSection = document.getElementById("cart");
+    const cartForm = document.getElementById("cart_form");
+
+    if (!productPage || !cartSection || !cartForm) return;
+
+    // إخفاء النموذج وإظهار صفحة المنتج.
+    cartForm.hidden = true;
+    productPage.hidden = false;
+
+    // إظهار السلة المصغرة إذا كانت تحتوي على عناصر.
+    cartSection.hidden = cartProducts.length === 0;
+
+    // تحديث السلة بعد العودة.
+    renderCart();
+}
+
+// ربط أزرار التنقل بعد تحميل الصفحة.
+document.addEventListener("DOMContentLoaded", () => {
+    // زر إتمام الطلب.
+    const checkoutButton = document.getElementById("checkout-button");
+
+    if (checkoutButton) {
+        checkoutButton.addEventListener("click", showCartForm);
+    }
+
+    // زر العودة إلى المنتج.
+    const backButton = document.querySelector("#cart_form .hide-form");
+
+    if (backButton) {
+        backButton.type = "button";
+
+        backButton.addEventListener("click", event => {
+            event.preventDefault();
+            hideCartForm();
+        });
+    }
+});
+
+// إرسال الطلب عند تقديم النموذج.
+document.getElementById("cart_form")?.addEventListener("submit", event => {
+    event.preventDefault();
+    submitOrder(event.currentTarget);
+});
+// =========================================================================

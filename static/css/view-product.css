@@ -862,26 +862,26 @@ footer .copyrights {
 /* ═══════════════════════════════════════════════════════════════════════════════════════════════════
 ====================================== Cart Form Style ===============================================
 ════════════════════════════════════════════════════════════════════════════════════════════════════ */
-.cart-form {
+.cart_form {
     padding: 10px;
 }
 /*---------------
     Form Title
 ----------------*/
-.cart-form .form-title {
+.cart_form .form-title {
     display: flex;
     align-items: center;
     justify-content: space-between ;
     padding: 5px 10px;
     margin-bottom: 20px;
 }
-.cart-form .form-title h3 {
+.cart_form .form-title h3 {
     font-size: 16px;
 }
-.cart-form .form-title .hide-form {
+.cart_form .form-title .hide-form {
     font-size: 14px;
 }
-.cart-form .form-title .hide-form {
+.cart_form .form-title .hide-form {
     background-color: transparent;
     color: var(--primary-color);
 }

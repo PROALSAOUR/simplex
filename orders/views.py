@@ -133,7 +133,8 @@ def add_order_manually(request):
 # هذه الدالة لاتتطلب تسجيل دخول لأنها مخصصة للزبائن
 @require_POST
 def add_order(request):
-    """ الدالة المسؤولة عن انشاء طلب عن طريق كل من الزبون او البائع  """
+    """الدالة المسؤولة عن إنشاء طلب عن طريق الزبون أو البائع."""
+
     try:
         data = json.loads(request.body.decode("utf-8"))
     except (json.JSONDecodeError, UnicodeDecodeError):
@@ -148,73 +149,104 @@ def add_order(request):
         "customer_location": data.get("customer_location", ""),
         "note": data.get("note", ""),
     }
+
     items_data = data.get("items", [])
     order_form = OrderCustomerForm(customer_data)
     item_forms = []
     item_errors = {}
 
+    # التحقق من وجود عناصر في السلة.
     if not isinstance(items_data, list) or not items_data:
         item_errors["__all__"] = ["السلة فارغة."]
         items_data = []
 
+    # التحقق من بيانات كل عنصر في السلة.
     for index, item in enumerate(items_data):
+        if not isinstance(item, dict):
+            item_errors[str(index)] = {
+                "__all__": ["بيانات المنتج غير صحيحة."]
+            }
+            continue
+
         form_data = {
             "product": item.get("product_id", ""),
             "product_color": item.get("color_id", ""),
-            "product_size": item.get("size_id", ""),
+            "product_size": item.get("size_id") or "",
             "qty": item.get("qty", ""),
         }
+
         item_form = OrderItemRegisterForm(form_data)
         item_forms.append(item_form)
+
         if not item_form.is_valid():
             item_errors[str(index)] = {
                 field: [str(error) for error in errors]
                 for field, errors in item_form.errors.items()
             }
 
+    # التحقق من بيانات الزبون وعناصر السلة.
     form_is_valid = order_form.is_valid()
     items_are_valid = not item_errors
 
     if form_is_valid and items_are_valid:
-        products = [item_form.cleaned_data["product"] for item_form in item_forms]
+        products = [
+            item_form.cleaned_data["product"]
+            for item_form in item_forms
+        ]
+
         store = products[0].store
 
+        # التأكد من أن جميع المنتجات تتبع المتجر نفسه.
         if any(product.store_id != store.id for product in products):
             return JsonResponse({
                 "success": False,
                 "message": "لا يمكن إنشاء طلب يحتوي على منتجات من أكثر من متجر.",
                 "errors": {},
-                "item_errors": {"__all__": ["منتجات السلة يجب أن تكون من نفس المتجر."]},
-            })
+                "item_errors": {
+                    "__all__": [
+                        "منتجات السلة يجب أن تكون من نفس المتجر."
+                    ]
+                },
+            }, status=400)
 
         with transaction.atomic():
             order = order_form.save(commit=False)
             order.store = store
             order.serial_number = order.create_serial_number()
-            #change-later تعديل منطق معرفة هل التوصيل مجاني تحديدا بصفحة انشاء طلب يدوي
+
+            # تحديد حالة التوصيل بناءً على المنتج الأول.
             order.free_delivery = products[0].free_delivery
-            # التحقق أن المستخدم بائع في هذا المتجر تحديداً
+
+            # التحقق مما إذا كان منشئ الطلب بائعًا.
             is_store_vendor = (
-                request.user.is_authenticated and
-                hasattr(request.user, 'userprofile') and
-                request.user.userprofile.user_type == 'vendor'
+                request.user.is_authenticated
+                and hasattr(request.user, "userprofile")
+                and request.user.userprofile.user_type == "vendor"
             )
-            if is_store_vendor: # اذا كان منشئ الطلب بائع بالمتجر الطلب حقيقي تلقائيا
+
+            if is_store_vendor:
+                # طلب البائع يُعتمد تلقائيًا.
                 order.verification_status = "approved"
-            else: # إذا كان زبون → تحقق من إعداد المتجر
-                order.verification_status = "checking" if store.check_orders else "approved"
+            else:
+                # تحديد حالة طلب الزبون وفق إعدادات المتجر.
+                order.verification_status = (
+                    "checking" if store.check_orders else "approved"
+                )
+
             order.save()
 
+            # حفظ عناصر الطلب.
             for item_form in item_forms:
                 item_form.save(order=order)
 
         return JsonResponse({
             "success": True,
-            "message": "شكرا لك، تم إرسال طلبك بنجاح.",
+            "message": "شكراً لك، تم إرسال طلبك بنجاح.",
             "order_id": order.id,
             "serial_number": order.serial_number,
         })
 
+    # إرجاع أخطاء التحقق.
     return JsonResponse({
         "success": False,
         "message": "يرجى تصحيح البيانات وإعادة إرسال الطلب.",
@@ -223,7 +255,9 @@ def add_order(request):
             for field, errors in order_form.errors.items()
         },
         "item_errors": item_errors,
-    })
+    }, status=400)
+    
+    
     
 @login_required(login_url='accounts:log_in')
 def view_order(request, oid):
