@@ -35,8 +35,8 @@ document.addEventListener("DOMContentLoaded", () => {
         resultsContainer.innerHTML = html;
 
         // دالة تعرض مقاسات اللون المحدد فقط وتخفي الباقي
-        resultsContainer.querySelectorAll(".product-card").forEach(card => {
-            setupProductSizes(card);
+        resultsContainer.querySelectorAll(".product-card").forEach(product => {
+            setupProductSizes(product);
         });
         
 
@@ -45,55 +45,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 }
 });
-// ==================================================================================
-//  عرض المقاسات المرتبطة باللون المحدد فقط وتحديد أول مقاس تلقائيًا
-function setupProductSizes(card) {
-    const colorInputs = card.querySelectorAll(
-        "input[name^='color_']"
-    );
-
-    const sizeGroups = card.querySelectorAll(
-        ".size-group"
-    );
-
-    function updateSizes(colorId) {
-        // تحديث المقاسات وتحديد أول مقاس من اللون المحدد
-        sizeGroups.forEach(group => {
-            const isSelected =
-                group.dataset.colorId === colorId;
-
-            group.hidden = !isSelected;
-
-            const sizeInputs = group.querySelectorAll(
-                "input[type='radio']"
-            );
-
-            if (isSelected) {
-                const firstSize = sizeInputs[0];
-
-                if (firstSize) {
-                    firstSize.checked = true;
-                }
-            } else {
-                sizeInputs.forEach(input => {
-                    input.checked = false;
-                });
-            }
-        });
-    }
-
-    colorInputs.forEach(input => {
-        input.addEventListener("change", function () {
-            updateSizes(this.value);
-        });
-    });
-
-    const selectedColor = card.querySelector(
-        "input[name^='color_']:checked"
-    );
-
-    if (selectedColor) {
-        updateSizes(selectedColor.value);
-    }
-}
 // ==================================================================================

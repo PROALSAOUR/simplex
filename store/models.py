@@ -49,6 +49,12 @@ class Product(models.Model):
         else:
             return self.price
         
+    @property
+    def discount_percentage(self):
+        if self.price > 0 and self.offer:
+            return round((self.price - self.offer_price) / self.price * 100)
+        return 0
+        
 class ProductImages(models.Model):
     product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE , verbose_name='المنتج')
     priority = models.PositiveIntegerField(default=1 , verbose_name='الأولوية', help_text='حدد الأولوية للصورة في عرض المنتج') # . يمكنك استخدام هذا الحقل لترتيب الصور حسب الأهمية. على سبيل المثال، يمكنك تعيين الأولوية 1 للصورة الرئيسية، والأولوية 2 للصورة الثانية، وهكذا.

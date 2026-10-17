@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block page_head %}
+{% comment %} #change-later ملف تنسيق الجدوال يتم استدعائه هنا كاملا لاجل تنسيق مربع البحث فقط {% endcomment %}
     <link rel="stylesheet" href="{% static "css/tables.css" %} ">         
     <link rel="stylesheet" href="{% static "css/fields.css" %} ">      
     <link rel="stylesheet" href="{% static "css/orders.css" %} ">         
@@ -233,11 +234,11 @@
 
 {% endblock content %}
 
-{% block out_container %}{% endblock out_container %}
 
 {% block page_scripts %}
 
     <script src="{% static "js/fields.js" %}"></script>
+    <script src="{% static "js/products/product_variants.js" %}" ></script>
     <script src="{% static "js/orders/search_products.js" %}"></script>
     <script src="{% static "js/orders/cart.js" %}"></script>
     <script src="{% static "js/orders/add_order_manually.js" %}"></script>

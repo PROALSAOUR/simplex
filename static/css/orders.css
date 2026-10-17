@@ -200,6 +200,7 @@
     gap: 10px;
     font-size: 14px;
     margin-bottom: 10px;
+    -webkit-user-select: none;
     user-select: none;
 }
 .cart-section .cs-header i {

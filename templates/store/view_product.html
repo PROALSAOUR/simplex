@@ -1,0 +1,599 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"  class="dark-mode" >
+<!-- <html lang="ar" dir="rtl" > -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.name }}</title>
+
+    <!-- ملفات css -->
+    <link rel="stylesheet" href="{% static "css/normalize.css" %}">                               
+    <link rel="stylesheet" href="{% static "css/style.css" %}">        
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css"
+    />
+    <link rel="stylesheet" href="{% static "css/view-product.css" %}">         
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"> 
+
+    <!--   ايقونة الموقع  -->
+    <link rel="shortcut icon" href="{% static "images/sq-logo.png" %}" type="image/x-icon">
+    <!-- الخطوط المستخدمة بالتصميم -->
+    <!-- import font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
+    
+</head>
+<body>
+    
+    <main class="container">
+
+        {% if can_view %}
+        
+            <div id="product_page">
+
+                {% if is_product_owner %}
+                    <section class="alerts">
+                        {% if  product.status == "rejected" %}
+                            <div class="alert">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                {% comment %} #change-later غير النص {% endcomment %}
+                                <span>تم رفض هذا المنتج بعد المراجعة، يرجى مراجعة السبب من صفحة تعديل المنتج وإجراء التعديلات المطلوبة لإعادة رفع المنتج :</span>
+                            </div>
+                        {% endif %}
+                        {% if not product.is_visible  %}
+                            <div class="alert">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                {% comment %} #change-later غير النص {% endcomment %}
+                                <span> هذا المنتج مخفي</span> 
+                            </div>
+                        {% endif %}
+                    </section>
+                {% endif %}
+
+                <section class="product-gallery">
+
+                    <div class="top-bar">
+                        <button type="button" class="btn" onclick="shareProduct()">
+                            <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                        </button>
+
+                        <button type="button" class="btn" onclick="goBack()">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                    </div>
+
+                    <!-- الصور الرئيسية -->
+                    <div class="swiper product-main-swiper">
+
+                        <div class="swiper-wrapper">
+
+                            <div class="swiper-slide">
+                                <img src="{{ product.thumbnail_img.url }}" alt="{{ product.name }}" width="50" height="50">
+                            </div>
+                            {% for product_image in product_images %}
+                                <div class="swiper-slide">
+                                    <img src="{{ product_image.image.url }}" alt="{{ product.name }}" width="50" height="50">
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+                        <!-- النقاط -->
+                        <div class="swiper-pagination"></div>
+
+                    </div>
+
+                    <!-- =====  معرض التكبير لوضع ملء الشاشة ===== -->
+                    <div class="product-lightbox">
+
+                        <button type="button" class="lightbox-close" aria-label="إغلاق">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+
+                        <div class="swiper product-lightbox-swiper">
+                            <div class="swiper-wrapper">
+                                <!-- تُبنى الشرائح ديناميكيًا بالـ JS من نفس صور المعرض الرئيسي -->
+                            </div>
+                            <div class="swiper-pagination"></div>
+                        </div>
+
+                    </div>
+
+                    <!-- الصور الثانوية -->
+                    <div class="swiper product-thumbs-swiper">
+
+                        <div class="swiper-wrapper">
+
+                            <div class="swiper-slide">
+                                <img src="{{ product.thumbnail_img.url }}" alt="{{ product.name }}" width="50" height="50">
+                            </div>
+                            {% for product_image in product_images %}
+                                <div class="swiper-slide">
+                                    <img src="{{ product_image.image.url }}" alt="{{ product.name }}" width="50" height="50">
+                                </div>
+                            {% endfor %}
+        
+                        </div>
+
+                    </div>
+
+                </section>
+
+                <section class="product-summary">
+                    <h3 class="p-name">{{ product.name }}</h3>
+                    {% comment %} #change-later تحكم بالتقيمات وعدد المبيعات الفعلي {% endcomment %}
+                    <div class="p-rating">
+                        ({{product.total_sales}})
+                        ⭐⭐⭐⭐⭐
+                        4.8
+                    </div>
+                    <div class="p-pricing">
+                        <div class="price-row">
+                            {% comment %} #change-later تحكم بالفواصل العشرية ونسبة التخفيض {% endcomment %}
+                            <h3 class="price-current">{{ product.get_price|floatformat:1 }}<span class="currency">د.ل</span></h3>
+                            {% if product.offer %}
+                                <h5 class="price-old">{{ product.price|floatformat:0 }}<span class="currency">د.ل</span></h5>
+                                <span class="price-discount"> تخفيض {{ product.discount_percentage }}%</span>
+                            {% endif %}
+                        </div>
+                        {% if product.free_delivery %}
+                            <p class="price-delivery"> التوصيل مجاني 🚚</p>
+                        {% endif %}
+                    </div>
+                </section>
+
+                <section class="product-variants" >
+
+                    <h3 class="title">
+                        الوان المنتج
+                    </h3>
+
+                    <div id="product-options" class="product-options">
+                    
+                        <!-- الألوان -->
+                        <div class="product-option">
+
+                            <div class="option-title">اختر اللون</div>
+
+                            <div class="option-values color-values">
+
+                                {% for color in available_colors %}
+
+                                    <label class="option-value ">
+
+                                        <input
+                                            type="radio"
+                                            name="color_{{ product.id }}"
+                                            value="{{ color.id }}"
+                                            data-color-name="{{ color.color }}"
+                                            data-color-image="{% if color.image %}{{ color.image.url }}{% else %}{{ product.thumbnail_img.url }}{% endif %}"
+                                            {% if forloop.first %}checked{% endif %}
+                                        >
+
+                                        <span>
+                                            <img src="{% if color.image %}{{ color.image.url }}{% else %}{{ product.thumbnail_img.url }}{% endif %}" alt="{{ color.color }}" width="50" height="50">
+                                        </span>
+
+                                    </label>
+
+                                {% endfor %}
+                                
+                            </div>
+
+                        </div>
+                        
+                        <!-- المقاسات -->
+                        <div class="product-option">
+
+                            <div class="option-title">اختر المقاس</div>
+
+                            <div class="option-values size-values">
+
+                                {% for color in available_colors %}
+
+                                    {% with sizes=color.sizes.all %}
+
+                                        {% if sizes %}
+
+                                            <div class="size-group" data-color-id="{{ color.id }}" >
+
+                                                {% for size in sizes %}
+
+                                                    <label class="option-value">
+
+                                                        <input
+                                                            type="radio"
+                                                            name="size_{{ color.id }}_{{ product.id }}"
+                                                            value="{{ size.id }}"
+                                                            data-size-name="{{ size.size }}"
+                                                            {% if forloop.first %}checked{% endif %}
+                                                        >
+
+                                                        <span>
+                                                            {{ size.size }}
+                                                            <i class="fa-solid fa-circle-check"></i>
+                                                        </span>
+
+                                                    </label>
+
+                                                {% endfor %}
+
+                                            </div>
+
+                                        {% else %}
+
+                                            <div class="size-group" data-color-id="{{ color.id }}">
+
+                                                <label class="option-value">
+
+                                                    <input
+                                                        type="radio"
+                                                        value=""
+                                                        data-unified-size="true"
+                                                        checked
+                                                        aria-hidden="true"
+                                                    >
+
+                                                    <span>
+                                                        مقاس موحد
+                                                        <i class="fa-solid fa-circle-check"></i>
+                                                    </span>
+
+                                                </label>
+
+
+                                            </div>
+
+                                        {% endif %}
+
+                                    {% endwith %}
+
+                                {% endfor %}
+
+                            </div>
+
+                        </div>
+
+                        <!-- الكمية -->
+                        <div class="product-option">
+
+                            <label for="qty_{{ product.id }}" class="option-title">الكمية</label>
+
+                            <div class="qty-control">
+
+                                <button
+                                    type="button"
+                                    class="qty-minus"
+                                    aria-label="إنقاص"
+                                    onclick="changeQuantity(this, -1)"
+                                >−</button>
+
+                                <input
+                                    type="text"
+                                    id="qty_{{ product.id }}"
+                                    inputmode="decimal"
+                                    class="qty-input"
+                                    value="1"
+                                    min="1"
+                                    max="{{ product.max_quantity_per_order }}"
+                                >
+
+                                <button
+                                    type="button"
+                                    class="qty-plus"
+                                    aria-label="زيادة"
+                                    onclick="changeQuantity(this, 1)"
+                                >+</button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="btn-wrapper">
+                        <button
+                            type="button"
+                            class="add-btn"
+                            onclick="addToCart(this)" 
+                        >
+                            إضافة إلى السلة
+                            <i class="fa-solid fa-cart-shopping"></i>
+                        </button>
+                        <p class="btn-note" >يمكن اضافة اكثر من لون الى الطلب</p>
+                    </div>
+                    
+                </section>
+
+                <section class="product-variants cart-section" hidden>
+
+                    <h3 class="title">
+                        السلة
+                    </h3>
+
+                    <div class="cart-items">
+                        <div class="cart-item">
+                            <img src="/images/deafult.jpg" alt="" width="30" height="30">
+                            <span> احمر- xxlarge</span>
+                            <span>3x100</span>
+                            <span>300</span>
+                            <button><i class="fa-solid fa-trash"></i></button>
+                        </div>       
+                    </div>
+                    <div class="cart-total">
+                        <p>الإجمالي:</p>
+                        <span id="cart-total-price">0 <span class="currency" >د.ل</span> </span>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="add-btn"
+                        onclick="addToCart(this)" 
+                        > 
+                        
+                        إتمام الطلب
+                        <i class="fa-solid fa-truck-fast"></i>
+                    </button>
+                    <p class="btn-note" >عملية الطلب تستغرق اقل من دقيقة واحدة⚡</p>
+
+                </section>
+
+                <section class="benefits">
+
+                    <div class="benefit-item">
+                        <div class="icon">
+                            <i class="fa-solid fa-truck-fast purple"></i>
+                        </div>
+                        <div class="content">
+                            <h3>توصيل سريع</h3>
+                        </div>
+
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="icon">
+                            <i class="fa-solid fa-shield-halved blue"></i>
+                        </div>
+                        <div class="content">
+                            <h3>منتج أصلي</h3>
+                        </div>
+
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="icon">
+                            <i class="fa-solid fa-money-bill-wave green"></i>
+                        </div>
+                        <div class="content">
+                            <h3>دفع عند الاستلام</h3>
+                        </div>
+
+                    </div>
+
+                </section>
+
+                <section class="product-store">
+                    <div class="store-logo">
+                        <img src="{{ product.store.logo.url }}" alt="{{  product.store }}" width="80" height="80" draggable="false">
+                    </div>
+                    <div class="store-details">
+                        <h4> متجر {{  product.store }}</h4>
+                        <p>{{  product.store.location }}</p>
+                    </div>
+                </section>
+
+                <section class="product-content">
+                    {% comment %} عدل الباك اند واضف المميزات #change-later {% endcomment %}
+                    <h4 class="title">
+                        مميزات المنتج
+                    </h4>
+                    <ul class="content">
+                        <li>
+                            <i class="fa-regular fa-circle-check"></i>
+                            <p>  رقم  ميزة رقم ميزة ميزة رقم ميزة</p>
+                        </li>
+                        <li>
+                            <i class="fa-regular fa-circle-check"></i>
+                            <p>  رقم  ميزة رقم ميزة ميزة رقم ميزة</p>
+                        </li>
+                        <li>
+                            <i class="fa-regular fa-circle-check"></i>
+                            <p>  رقم  ميزة رقم ميزة ميزة رقم ميزة</p>
+                        </li>
+                    </ul>
+                </section>
+
+                <section class="product-content">
+                    <h4 class="title">
+                        وصف المنتج
+                    </h4>
+                    <div class="content">
+                        <p id="productDescription" class="collapsed">
+                            {{ product.description }}     
+                        </p>
+                    </div>
+                    <button type="button" class="show-more" onclick="toggleDescription()" hidden>
+                        عرض المزيد...
+                    </button>
+                </section>
+
+                <section class="store-social">
+                    <h4 class="title">هل لديك اي استفسارات اضافية ؟</h4>
+                    <p>تواصل معنا على ...</p>
+                    <div class="social-links">
+                        {% if product.store.facebook %}
+                            <a class="facebook" href="{{ product.store.facebook }}" draggable="false"><i class="fa-brands fa-facebook-f"></i></a>
+                        {% endif %}
+                        {% if product.store.instagram %}
+                            <a class="instagram" href="{{ product.store.instagram }}" draggable="false"><i class="fa-brands fa-instagram"></i></a>
+                        {% endif %}
+                        {% if product.store.tiktok %}
+                            <a class="tiktok" href="{{ product.store.tiktok }}" draggable="false"><i class="fa-brands fa-tiktok"></i></a>
+                        {% endif %}
+                        {% if product.store.whatsapp %}
+                            <a class="whatsapp" href="{{ product.store.whatsapp }}" draggable="false"><i class="fa-brands fa-whatsapp"></i></a>
+                        {% endif %}
+                        {% if product.store.phone_number1 %}
+                            <a class="phone-call" href="{{ product.store.phone_number1 }}" draggable="false"><i class="fa-solid fa-phone"></i></a>
+                        {% endif %}
+                    </div> 
+                </section>
+
+            </div>
+
+            <form class="cart-form" id="cart_form" style="display: none;">
+
+                <div class="form-title">
+                    <h3>مراجعة وتأكيد الطلب</h3>
+                    <button class="hide-form" onclick="hideCartForm(this)">
+                        العودة الى المنتج <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                </div>
+
+                <div class="cart-section">
+                    <div class="cs-header">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <h4>ملخص الطلب</h4>
+                    </div>
+
+                    <div class="cart-items">
+
+                        <div id="cart-item-template">
+                            <div class="cart-item">
+                                <img src="/images/deafult.jpg" alt="" width="30" height="30">
+                                <span> احمر- xxlarge</span>
+                                <span>2x</span>
+                                <span>300</span>
+                            </div>    
+                            <div class="cart-item">
+                                <img src="/images/deafult.jpg" alt="" width="30" height="30">
+                                <span> احمر- xxlarge</span>
+                                <span>3x</span>
+                                <span>300</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="cart-total">
+                        <p>الإجمالي:</p>
+                        <span id="cart-total-price">0 <span class="currency" >د.ل</span> </span>
+                    </div>
+        
+                    <div class="deleivery-note free"> <!-- free -->
+                        <p>ملاحظة:</p>
+                        <span id="cart-total-price">سعر التوصيل  مشمول بإجمالي الفاتورة </span>
+                    </div>
+
+                </div>
+                
+                <div class="cart-section">
+                    <div class="cs-header">
+                        <i class="fa-solid fa-user"></i>
+                        <h4>بياناتك</h4>
+                    </div>
+                    
+                    <div class="field">
+                        <label for="id_customer_name">
+                            اسم الزبون
+                            <span class="required">*</span>
+                        </label>
+                        <div class="input">
+                            <input type="text" name="customer_name" maxlength="20" required="" aria-describedby="id_customer_name_helptext" id="id_customer_name">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        
+                        <span class="help-text">أدخل الاسم الكامل للزبون، مثل: محمد أحمد.</span>
+                    
+                    </div>
+
+                    <div class="field ">
+                        <label for="id_customer_phone">
+                            رقم هاتف الزبون
+                            <span class="required">*</span>
+                        </label>
+                        <div class="input">
+                            <input type="text" name="customer_phone" maxlength="15" required="" aria-describedby="id_customer_phone_helptext" id="id_customer_phone">
+                            <i class="fa-solid fa-phone-volume"></i>
+                        </div>
+                        
+                        <span class="help-text">أدخل رقم هاتف الزبون، مثل: 0912345678.</span>
+                        
+                    </div>
+
+                    <div class="field ">
+                        <label for="id_customer_location">
+                            عنوان الزبون
+                            <span class="required">*</span>
+                        </label>
+                        <div class="input">
+                            <input type="text" name="customer_location" maxlength="100" required="" aria-describedby="id_customer_location_helptext" id="id_customer_location">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </div>
+                        
+                        <span class="help-text">أدخل عنوان التوصيل ، مثل: بنغازي - السلماني .</span>
+                        
+                    </div>
+
+                    <div class="field" id="show-note-field">
+                        <label for="show_note">
+                            هل لديك ملاحظات خاصة بالطلب ؟
+                        </label>
+                        <input type="checkbox" name="show_note" id="show_note">
+                    </div>
+
+                    <div class="field hidden" id="note-field" > 
+                        <label for="note">ملاحظة</label>
+                        <div class="input">
+                            <textarea name="note" id="note" rows="5" cols="40" maxlength="500" required=""></textarea>
+                        </div>
+                        
+                        <span class="help-text">يمكنك إضافة ملاحظات خاصة بالطلب، مثل تعليمات التوصيل أو طلبات خاصة من الزبون.</span>
+                        
+                    </div>
+                        
+                </div>
+
+                <div class="form-submit">
+                    <button class="add-btn">تأكيد الطلب <i class="fa-solid fa-cart-plus"></i></button>
+                    <span>الدفع عند الاستلام  <i class="fa-solid fa-hand-holding-dollar"></i>  </span>
+                </div>
+
+            </form>
+
+        {% else %}
+            {% comment %} #change-later غير النص {% endcomment %}
+            عذرا لا يمكن عرض هذا المنتج حاليا
+        {% endif %}
+    
+    </main>
+
+    <footer>
+        <a href="{% url "landing_page" %}">
+            <div class="logo">
+                <img src="{% static "images/sq-logo.png" %}" alt="simplex logo" width="30" height="30">
+                <strong>Simplex</strong>
+            </div>
+            <p>منصة لإدارة المتاجر الإلكترونية</p>
+        </a>
+
+        <div class="copyrights">
+            جميع الحقوق محفوظة لمنصة سيمبليكس
+            <br>
+            © 2026 SIMPLEX.
+        </div>
+
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js"></script>
+    <script src="{% static "js/orders/cart.js" %}" ></script>
+    <script src="{% static "js/products/product_variants.js" %}" ></script>
+    <script src="{% static "js/products/view-product.js" %}" ></script>
+
+</body>
+</html>

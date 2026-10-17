@@ -149,13 +149,7 @@ def add_order(request):
         "note": data.get("note", ""),
     }
     items_data = data.get("items", [])
-    # التحقق أن المستخدم بائع 
-    is_vendor = (
-        request.user.is_authenticated and
-        hasattr(request.user, 'userprofile') and
-        request.user.userprofile.user_type == 'vendor'
-    )
-    order_form = OrderCustomerForm(customer_data, is_vendor=is_vendor)
+    order_form = OrderCustomerForm(customer_data)
     item_forms = []
     item_errors = {}
 
@@ -197,6 +191,7 @@ def add_order(request):
             order = order_form.save(commit=False)
             order.store = store
             order.serial_number = order.create_serial_number()
+            #change-later تعديل منطق معرفة هل التوصيل مجاني تحديدا بصفحة انشاء طلب يدوي
             order.free_delivery = products[0].free_delivery
             # التحقق أن المستخدم بائع في هذا المتجر تحديداً
             is_store_vendor = (

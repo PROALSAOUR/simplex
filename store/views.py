@@ -741,22 +741,22 @@ def view_product(request, pid):
     """الدالة المسؤولة عن عرض صفحة المنتج للزبون ليتمكن من اجراء عملية الشراء منها"""
     product = get_object_or_404(Product, id=pid)
     product_images = product.images.all()
-    colors = product.colors.filter(available=True).prefetch_related('sizes')
+    available_colors = product.colors.filter(available=True).prefetch_related('sizes')
     is_product_owner = False
     if request.user.is_authenticated:
         try:
             is_product_owner = request.user.userprofile.store == product.store
         except Store.DoesNotExist:
             pass
-    # [يعرض المنتج دائما للبائع لكن مع الاخطاء الخاصة به] [لعرض المنتج: [للزبون يجب ان يكون موافق عليه من الادارة ومعروض من البائع 
-    can_view = is_product_owner or (product.is_visible and product.status == "approved")
+    # [يعرض المنتج دائما للبائع لكن مع الاخطاء الخاصة به] [لعرض المنتج: [للزبون يجب ان يكون معروض من البائع 
+    can_view = is_product_owner or product.is_visible 
 
     context = {
         'product': product,
         'is_product_owner': is_product_owner,
         "can_view": can_view,
         'product_images': product_images,
-        'colors': colors,
+        'available_colors': available_colors,
         'product_price': str(product.get_price()),
     }
     return render(request, 'store/view_product.html', context)
