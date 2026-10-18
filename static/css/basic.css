@@ -1013,8 +1013,13 @@ Start Sections Header Style
     font-size: 1em;
 }
 .notice .notice-content .notice-text {
-    font-size: calc(1em - 6px);
+    font-size: calc(1em - 4px);
     line-height: 1.5;
+}
+@media (min-width:500px) {
+    .notice .notice-content .notice-text {
+        font-size: calc(1em - 2px);
+    }
 }
 .notice.rejected {
     background-color: var(--red-background);

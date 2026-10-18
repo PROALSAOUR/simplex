@@ -34,6 +34,7 @@ class Product(models.Model):
     GENDER_CHOICES = [('male', 'رجالي'), ('female', 'نسائي'), ('unisex', 'كلا الجنسين')]
     gender = models.CharField( verbose_name="الجنس المستهدف", max_length=20, choices=GENDER_CHOICES, default='unisex', help_text="حدد إن كان المنتج موجّه للرجال أو النساء أو مناسب لكلا الجنسين")
 
+    views_count = models.PositiveBigIntegerField( default=0, verbose_name='عدد المشاهدات', )
 
     class Meta:
         verbose_name = 'منتج'
@@ -90,3 +91,4 @@ class ProductSize(models.Model):
     class Meta:
         verbose_name = 'مقاس المنتج'
         verbose_name_plural = 'مقاسات المنتج'
+

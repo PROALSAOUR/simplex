@@ -55,6 +55,8 @@
                         </div>
                     </div>
 
+                    {% comment %} #change-later اعرض عدد المشاهدات هنا {% endcomment %}
+
                 </div>
             </div>
 
@@ -675,6 +677,20 @@
 
                     <input type="hidden" name="colors_data" id="colors_data">
 
+                    {% if not has_available_colors %}
+                        <div class="notice">
+                            <div class="notice-icon">
+                                <i class="fa-regular fa-face-frown"></i>
+                            </div>
+                            <div class="notice-content">
+                                <strong class="notice-title">المنتج غير قابل للطلب !</strong>
+                                <p class="notice-text">
+                                    لا توجد ألوان متوفرة لهذا المنتج حالياً، لذلك لن يتمكن الزبائن من طلبه. يرجى جعل لون واحد على الأقل  متوفراً ليصبح المنتج قابلاً للطلب.  
+                                </p>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
                     <div class="fields-container colors-varibles" id="color_form_container">
 
                         <!-- قائمة الألوان المضافة -->

@@ -7,6 +7,9 @@ from django.contrib import messages
 from django.db import transaction , models as db_models
 from django.core.paginator import Paginator
 import hashlib, json
+from datetime import timedelta
+from django.utils import timezone
+
 
 from Project.utils import compress_image
 from accounts.decorators import vendor_only
@@ -639,7 +642,6 @@ def edit_product(request, pid):
             form = ProductRegisterForm(
                 instance=product
             )
-
     # ================================================================
     # تجهيز بيانات الألوان
     colors_data = []
@@ -674,6 +676,11 @@ def edit_product(request, pid):
         colors_data,
         ensure_ascii=False
     )
+    
+    # التحقق من وجود لون واحد متاح على الأقل.
+    has_available_colors = product.colors.filter(
+        available=True
+    ).exists()
 
     # ================================================================
     # تجهيز بيانات الصور
@@ -693,7 +700,6 @@ def edit_product(request, pid):
         images_data,
         ensure_ascii=False
     )
-
     # ================================================================
     # بيانات القالب
     context = {
@@ -702,6 +708,7 @@ def edit_product(request, pid):
         'product_images': product_images,
         'colors_data_json': colors_data_json,
         'images_data_json': images_data_json,
+        'has_available_colors': has_available_colors,
     }
 
     return render(
@@ -738,25 +745,78 @@ def delete_product(request):
         })
 
 def view_product(request, pid):
-    """الدالة المسؤولة عن عرض صفحة المنتج للزبون ليتمكن من اجراء عملية الشراء منها"""
-    product = get_object_or_404(Product.objects.select_related('store'), id=pid)
+    """عرض صفحة المنتج وتسجيل المشاهدات وفق فترة زمنية محددة."""
+
+    product = get_object_or_404(
+        Product.objects.select_related('store'),
+        id=pid,
+    )
+
     product_images = product.images.all()
-    available_colors = product.colors.filter(available=True).prefetch_related('sizes')
+
+    available_colors = product.colors.filter(
+        available=True
+    ).prefetch_related('sizes')
+
     is_product_owner = False
+    user_type = None
+
     if request.user.is_authenticated:
+        user_type = get_user_type(request.user)
+
         try:
-            is_product_owner = request.user.userprofile.store_id == product.store_id
+            is_product_owner = ( request.user.userprofile.store_id == product.store_id )
         except (AttributeError, Store.DoesNotExist):
             pass
-    # [يعرض المنتج دائما للبائع لكن مع الاخطاء الخاصة به] [لعرض المنتج: [للزبون يجب ان يكون معروض من البائع 
-    can_view = is_product_owner or product.is_visible 
+
+    # تسجيل المشاهدة للزوار فقط، باستثناء البائع والمدير.
+    if ( not is_product_owner and user_type != 'admin' and product.is_visible ):
+        session_key = f'product_view_{product.id}'
+        now = timezone.now()
+
+        last_view = request.session.get(session_key)
+        should_count = True
+
+        if last_view:
+            try:
+                last_view_time = timezone.datetime.fromisoformat(
+                    last_view
+                )
+
+                if timezone.is_naive(last_view_time):
+                    last_view_time = timezone.make_aware(
+                        last_view_time,
+                        timezone.get_current_timezone(),
+                    )
+
+                if now - last_view_time < timedelta(minutes=10):
+                    should_count = False
+
+            except (ValueError, TypeError):
+                pass
+
+        if should_count:
+            Product.objects.filter(
+                pk=product.pk
+            ).update(
+                views_count=db_models.F('views_count') + 1
+            )
+
+            request.session[session_key] = now.isoformat()
+
+            # تحديث القيمة في الكائن الحالي لتظهر مباشرة في القالب.
+            product.refresh_from_db(fields=['views_count'])
+
+    # إظهار المنتج للبائع حتى يتمكن من مراجعته.
+    can_view = is_product_owner or product.is_visible
 
     context = {
         'product': product,
         'is_product_owner': is_product_owner,
-        "can_view": can_view,
+        'can_view': can_view,
         'product_images': product_images,
         'available_colors': available_colors,
         'product_price': str(product.get_price()),
     }
-    return render(request, 'store/view_product.html', context)
+
+    return render( request, 'store/view_product.html', context, )
