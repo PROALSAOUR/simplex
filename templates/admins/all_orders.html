@@ -207,7 +207,7 @@
                         <tbody>
                             {% for order in page_obj %}
                                 <tr data-view-url="{% url 'orders:view_order' order.id %}">                                    
-                                    <td>{{ order.serial_number }}</td>
+                                    <td>{{ order.id }}</td>
                                     <td>{{ order.store }}</td>
 
                                     <td>{{ order.customer_name }}</td>

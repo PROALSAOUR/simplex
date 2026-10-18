@@ -307,3 +307,25 @@ function setupRejectedCause() {
 
 document.addEventListener("DOMContentLoaded", setupRejectedCause);
 // ================================================================================
+// دالة نسخ رابط الصفحة الحالية إلى الحافظة وعرض رسالة نجاح أو فشل
+async function copyPageUrl(button) {
+    try {
+        await navigator.clipboard.writeText(window.location.href);
+
+        // إظهار رسالة نجاح.
+        showToast(
+            "success-toast",
+            "تم نسخ رابط المنتج بنجاح"
+        );
+
+    } catch (error) {
+        console.error("Copy URL error:", error);
+
+        // إظهار رسالة فشل.
+        showToast(
+            "failed-toast",
+            "تعذر نسخ الرابط، يرجى المحاولة مرة أخرى"
+        );
+    }
+}
+// ================================================================================

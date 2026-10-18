@@ -739,14 +739,14 @@ def delete_product(request):
 
 def view_product(request, pid):
     """الدالة المسؤولة عن عرض صفحة المنتج للزبون ليتمكن من اجراء عملية الشراء منها"""
-    product = get_object_or_404(Product, id=pid)
+    product = get_object_or_404(Product.objects.select_related('store'), id=pid)
     product_images = product.images.all()
     available_colors = product.colors.filter(available=True).prefetch_related('sizes')
     is_product_owner = False
     if request.user.is_authenticated:
         try:
-            is_product_owner = request.user.userprofile.store == product.store
-        except Store.DoesNotExist:
+            is_product_owner = request.user.userprofile.store_id == product.store_id
+        except (AttributeError, Store.DoesNotExist):
             pass
     # [يعرض المنتج دائما للبائع لكن مع الاخطاء الخاصة به] [لعرض المنتج: [للزبون يجب ان يكون معروض من البائع 
     can_view = is_product_owner or product.is_visible 

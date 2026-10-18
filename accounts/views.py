@@ -170,7 +170,7 @@ def check_username(request):
     except ValidationError as e:
         return JsonResponse({
             "status": "error",
-            "message": str(e)
+            "message": " ".join(e.messages)
         })
 
     return JsonResponse({
@@ -192,7 +192,7 @@ def check_phone_number(request):
     except Exception as e:
         return JsonResponse({
             "status": "error",
-            "message": str(e)
+            "message": " ".join(e.messages)
         })
 
     return JsonResponse({

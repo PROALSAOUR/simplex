@@ -49,7 +49,7 @@
                     <i class="fa-solid fa-clipboard-list primary-cl"></i>
                 </div>
                 <div class="section-details">
-                    <h1> الطلب <span class="sn">#{{ order.serial_number }}</span></h1>
+                    <h1> الطلب <span class="sn">#{{ order.id }}</span></h1>
                     <p class="{% if order.verification_status == 'approved' %}complete{% elif order.verification_status == 'rejected' %}cancel{% else %}pending{% endif %}">
                         ● {{order.get_verification_status_display}}
                     </p>
@@ -101,7 +101,7 @@
                     </div>
 
                     <div class="details-value">
-                        #{{ order.serial_number }}
+                        #{{ order.id }}
                     </div>
                 </li>
 

@@ -135,7 +135,7 @@ def all_orders(request):
         filters = Q(customer_name__icontains=search)
 
         if search.isdigit():
-            filters |= Q(serial_number=int(search)) 
+            filters |= Q(id=int(search)) 
 
         orders = orders.filter(filters)
     # ── ترتيب ──────────────────────────────────────────

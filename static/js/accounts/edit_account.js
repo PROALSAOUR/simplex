@@ -38,17 +38,17 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(data => {
             if (data.status === "success") {
                 // ✅ نجاح: أظهر رسالة نجاح
-                errorsDiv.classList.add('hidden');
+                errorsDiv.hidden = true;
                 showToast("success-toast", data.message);
             } else {
                 // ❌ خطأ: أعرض الأخطاء
                 errorsDiv.innerText = data.message;
-                errorsDiv.classList.remove('hidden');
+                errorsDiv.hidden = false;
             }
         })
         .catch(error => {
-            errorsDiv.classList.remove('hidden');
             errorsDiv.innerText = "حدث خطأ غير متوقع.";
+            errorsDiv.hidden = false;
         });            
     });
 });

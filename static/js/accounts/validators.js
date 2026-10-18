@@ -19,7 +19,9 @@ async function validateUsername(inputElement, feedback, url, currentUserId = nul
             fetch(requestUrl)
                 .then(response => response.json())
                 .then(data => {
-                    feedback.innerText = data.message;
+                    feedback.innerText = Array.isArray(data.message)
+                    ? data.message.join(" ")
+                    : data.message;
 
                     if (data.status === 'success') {
                         feedback.style.color = 'green';

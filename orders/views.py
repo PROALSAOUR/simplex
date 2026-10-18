@@ -71,7 +71,7 @@ def store_orders(request, sid):
         filters = Q(customer_name__icontains=search)
 
         if search.isdigit():
-            filters |= Q(serial_number=int(search)) 
+            filters |= Q(id=int(search)) 
 
         orders = orders.filter(filters)
     # ── ترتيب ──────────────────────────────────────────
@@ -215,8 +215,7 @@ def create_order(request):
         with transaction.atomic():
             order = order_form.save(commit=False)
             order.store = store
-            order.serial_number = order.create_serial_number()
-
+            
             # تحديد حالة التوصيل بناءً على المنتج الأول. عندما يكون المشتري زبون
             order.free_delivery = products[0].free_delivery
             
@@ -248,7 +247,6 @@ def create_order(request):
             "success": True,
             "message": "شكراً لك، تم إرسال طلبك بنجاح.",
             "order_id": order.id,
-            "serial_number": order.serial_number,
         })
 
     # إرجاع أخطاء التحقق.

@@ -81,8 +81,7 @@
 
         <div class="card-actions">
             <a class="card-btn view-btn" href="{% url "store:view_product" product.id %}" > معاينة <i class="fa-solid fa-eye"></i></a>
-            {% comment %} #change-later فعل زر نسخ الرابط {% endcomment %}
-            <button class="card-btn copy-url">نسخ الرابط <i class="fa-solid fa-copy"></i></button>
+            <button class="card-btn copy-url" onclick="copyPageUrl(this)" >نسخ الرابط <i class="fa-solid fa-copy"></i></button>
             {% if USER_TYPE == "vendor" %}
                 <button class="card-btn remove-btn" id="delete-btn" onclick="openDeleteProductDialog(this)" data-id="{{ product.id }}" data-name="{{ product.name }}" data-redirect="{% url "store:store_products" product.store.id %}" >حذف<i class="fa-solid fa-trash"></i></button>
             {% endif %}    

@@ -28,7 +28,6 @@ class Order(models.Model):
     )
 
     # حقول بيانات الطلب
-    serial_number = models.PositiveIntegerField(default=1, verbose_name='الرقم التسلسلي')
     
     VERIFICATION_STATUS_CHOICES = [
         ('checking', 'جاري التحقق'),
@@ -79,14 +78,7 @@ class Order(models.Model):
         verbose_name_plural = 'الطلبات'
 
     def __str__(self):
-        return self.store.name + " - " + str(self.serial_number)
-
-    def create_serial_number(self):
-        """إنشاء رقم تسلسلي فريد لكل طلب داخل المتجر."""
-        last_order = Order.objects.filter(store=self.store).order_by('serial_number').last()
-        if last_order:
-            return last_order.serial_number + 1
-        return 1
+        return self.store.name + " - " + str(self.id)
 
     def calculate_totals(self):
         """

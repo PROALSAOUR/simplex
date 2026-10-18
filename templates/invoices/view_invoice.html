@@ -388,7 +388,7 @@
                     <tbody>
                         {% for order in orders  %}
                             <tr id="item-row-{{ item.id }}" data-view-url="{% url "orders:view_order" order.id %}" >
-                                <td >#{{ order.serial_number }}</td>
+                                <td >#{{ order.id }}</td>
                                 <td >{{ order.customer_name }}</td>
                                 <td >{{ order.total_selling_price }}<span class="currency">د.ل</span></td>
                                 <td >{{ order.delivery_date|date:"l d M" }}</td>

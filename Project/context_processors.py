@@ -3,37 +3,31 @@ def global_data(request):
     تتحقق من تسجيل المستخدم للدخول ثم تتحق من نوعه هل اداري ام بائع 
     """
     
-    return {
-        "STORE_ID": (
-            request.user.userprofile.store.id
-            if request.user.is_authenticated
-            and hasattr(request.user, 'userprofile')
-            and request.user.userprofile.user_type == 'vendor'
-            and request.user.userprofile.store
-            else None
-        ),
-        
-        "STORE_NAME": (
-            request.user.userprofile.store.name
-            if request.user.is_authenticated
-            and hasattr(request.user, 'userprofile')
-            and request.user.userprofile.user_type == 'vendor'
-            and request.user.userprofile.store
-            else None
-        ),
-        "STORE_LOGO": (
-            request.user.userprofile.store.logo.url
-            if request.user.is_authenticated
-            and hasattr(request.user, 'userprofile')
-            and request.user.userprofile.user_type == 'vendor'
-            and request.user.userprofile.store
-            else None
-        ),
-
-        "USER_TYPE": (
-            request.user.userprofile.user_type
-            if request.user.is_authenticated
-            and hasattr(request.user, 'userprofile')
-            else None
-        ),
+    # القيم الافتراضية. 
+    store_id = None 
+    store_name = None 
+    store_logo = None 
+    user_type = None
+    
+    # التحقق من تسجيل الدخول. 
+    if request.user.is_authenticated: 
+        # جلب الملف الشخصي مرة واحدة. 
+        profile = getattr(request.user, 'userprofile', None) 
+        if profile: 
+            user_type = profile.user_type 
+            # جلب بيانات المتجر للبائع فقط. 
+            if user_type == 'vendor': 
+                store = profile.store 
+                if store: 
+                    store_id = store.id 
+                    store_name = store.name 
+                    store_logo = store.logo.url if store.logo else None 
+                    
+    return { 
+        'STORE_ID': store_id, 
+        'STORE_NAME': store_name, 
+        'STORE_LOGO': store_logo, 
+        'USER_TYPE': user_type, 
     }
+    
+    
