@@ -85,7 +85,7 @@
             <a class="card-btn view-btn" href="{% url "store:view_product" product.id %}" > معاينة <i class="fa-solid fa-eye"></i></a>
             <button class="card-btn copy-url" onclick="copyPageUrl(this)" >نسخ الرابط <i class="fa-solid fa-copy"></i></button>
             {% if USER_TYPE == "vendor" %}
-                <button class="card-btn remove-btn" id="delete-btn" onclick="openDeleteProductDialog(this)" data-id="{{ product.id }}" data-name="{{ product.name }}" data-redirect="{% url "store:store_products" product.store.id %}" >حذف<i class="fa-solid fa-trash"></i></button>
+                <button class="card-btn remove-btn" id="delete-btn" onclick="openDeleteItemDialog(this)" data-id="{{ product.id }}" data-name="{{ product.name }}" data-redirect="{% url "store:store_products" product.store.id %}" >حذف<i class="fa-solid fa-trash"></i></button>
             {% endif %}    
         
         </div>
@@ -169,9 +169,9 @@
                     <div class="fields-container">
 
                         <div class="field {% if form.name.errors %}has-error{% endif %}">
-                            <label for="name">{{  form.name.label }}<span class="required">*</span></label>
+                            <label for="{{ form.name.id_for_label }}">{{  form.name.label }}<span class="required">*</span></label>
                             <div class="input">
-                                <input id="name" name="name" type="text" placeholder="ادخل اسم المنتج ..." value="{{ form.name.value|default:'' }}" autocomplete="off" required>
+                                {{ form.name }}
                                 <i class="fa-solid fa-circle-exclamation error-icon"></i>
                             </div>
                             {% if form.name.errors %}

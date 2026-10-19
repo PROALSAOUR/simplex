@@ -293,7 +293,7 @@ function changeQuantity(button, amount) {
         value = 1;
     }
 
-    const min = 1;
+    const min = 0;
     const max = parseInt(input.max, 10);
 
     value += amount;

@@ -209,8 +209,6 @@ class StoreUpdateForm(forms.ModelForm):
     
             return bool(value)
             
-    
-
 class StoreAdminUpdateForm(StoreUpdateForm):
     class Meta(StoreUpdateForm.Meta):
         # نموذج الإدارة يحتوي أيضًا على حالة المتجر ورقم الهاتف والتليجرام

@@ -1,10 +1,15 @@
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+
 from django.db.models import Q,F, ExpressionWrapper, DecimalField
 from django.core.paginator import Paginator
 from django.db import models as db_models
 from accounts.models import Store
 from accounts.decorators import admin_only 
+from admins.models import City
+from admins.forms import CityUpdateForm
 from invoices.models import Invoice
 from store.models import Product
 from orders.models import Order
@@ -382,6 +387,130 @@ def all_products(request):
 
 @login_required(login_url='accounts:log_in')
 @admin_only
+def all_cities(request):
+    """عرض جميع المدن التي يمكن للمتاجر اختيارها"""
+        
+    cities = City.objects.all()
+    has_cities = cities.exists()
+
+    # ── فلترة ──────────────────────────────────────────
+    is_active = request.GET.get('is_active', '')
+    if is_active == 'True':
+        cities = cities.filter(active=True)
+    elif is_active == 'False':
+        cities = cities.filter(active=False)
+        
+    search = request.GET.get('search', '').strip()
+    if search:
+        filters = Q(name__icontains=search)
+        cities = cities.filter(filters)
+    # ── ترتيب ──────────────────────────────────────────
+    VALID_SORTS = {
+        '-name': '-name',  
+        'name':  'name',  
+        '-priority': '-priority',  
+        'priority': 'priority',    
+    }
+    selected_sort = request.GET.get('sort', '-priority')
+    order_by = VALID_SORTS.get(selected_sort, '-priority')
+    cities = cities.order_by(order_by)
+    # ── Pagination ──────────────────────────────────────
+    paginator = Paginator(cities, 12)
+    page_number = request.GET.get('page')
+    try:
+        page_obj = paginator.page(page_number if page_number else 1)
+    except Exception:
+        page_obj = paginator.page(1)
+
+    # ── نبني query string بدون page لاستخدامه في روابط الباجنيتور ──
+    query_params = request.GET.copy()
+    query_params.pop('page', None)
+    query_string = query_params.urlencode()  
+
+    context = {
+        'has_cities': has_cities,
+        'page_obj': page_obj,
+        'query_string': query_string,
+        # قيم الفلاتر للحفاظ عليها في الـ form
+        'selected_is_active': is_active ,
+        'search': search,
+        'selected_sort':   selected_sort,
+    }
+    return render(request, 'admins/all_cities.html', context)
+
+@login_required(login_url='accounts:log_in')
+@admin_only
+def edit_city(request, cid):
+    """عرض صفحة تعديل بيانات المدينة"""
+    city = get_object_or_404(City, id=cid)
+    
+    if request.method == "POST":
+    
+        form = CityUpdateForm(
+            request.POST,
+            request.FILES,
+            instance=city
+        )
+    
+        if form.is_valid():
+            form.save()
+            return JsonResponse({
+                "status": "success",
+                "message": "تم حفظ التعديلات  بنجاح"
+            })
+            
+        # تجهيز أخطاء الحقول لإرسالها إلى JavaScript
+        errors = {
+            field: [str(error) for error in error_list]
+            for field, error_list in form.errors.items()
+        }
+
+        return JsonResponse({
+            "status": "error",
+            "errors": errors
+        })
+    
+    else:   # GET  
+        form = CityUpdateForm(instance=city)
+
+    context = {
+        "city": city,
+        "form": form,
+    }
+    
+    return render(request, 'admins/edit_city.html', context)
+
+@login_required(login_url='accounts:log_in')
+@admin_only
+def add_city(request):
+    """عرض صفحة اضافة مدينة جديدة"""
+    if request.method == "POST":
+        form = CityUpdateForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({
+                "status": "success",
+                "message": "تم إضافة المدينة بنجاح"
+            })
+        else:
+            errors = {
+                field: [str(error) for error in error_list]
+                for field, error_list in form.errors.items()
+            }
+            return JsonResponse({
+                "status": "error",
+                "errors": errors
+            })
+    else:  # GET
+        form = CityUpdateForm()
+
+    context = {
+        "form": form,
+    }
+    return render(request, 'admins/add_city.html', context)
+
+@login_required(login_url='accounts:log_in')
+@admin_only
 def store_list(request, sid):
     """عرض صفحة القائمة التي تحتوي على روابط الى تفاصيل المتجر و طلباته ومنتجاته و احصائياته"""
     store = get_object_or_404(Store, id=sid)
@@ -389,4 +518,32 @@ def store_list(request, sid):
         'store': store,
     }
     return render(request, 'admins/store_list.html', context)
+
+@login_required(login_url='accounts:log_in')
+@admin_only
+@require_POST
+def delete_city(request):
+    
+    "الدالة المسؤولة عن حذف مدينة "
+    if request.method == "POST":
+        city_id = request.POST.get('item_id')
+
+        try:
+            city_id = int(city_id)
+            city =get_object_or_404(
+                City,
+                id=city_id,
+            )
+                
+            city.delete()
+            return JsonResponse({
+            "status": "success",
+            "message": 'تم حذف المدينة بنجاح'
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+            "status": "error",
+            "message": str(e)
+        })
 

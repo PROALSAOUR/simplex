@@ -1,0 +1,135 @@
+{% extends "partials/base.html" %}
+{% load static %}      
+{% load l10n %}
+
+{% comment %} Page Head {% endcomment %}
+{% block page_head %}
+    <link rel="stylesheet" href="{% static "css/fields.css" %} ">
+    <link rel="stylesheet" href="{% static "css/details.css" %} ">
+    <link rel="stylesheet" href="{% static "css/accounts.css" %} ">
+
+{% endblock page_head %}
+
+{% comment %} Page Content {% endcomment %}
+{% block content %}
+
+    <section>
+
+        <!-- رأس القسم -->
+        <div class="section-header">
+            <div class="section-content">
+                <div class="section-icon product">
+                    <i class="fa-solid fa-city"></i>
+                </div>
+                <div class="section-details">
+                    <h1> مدينة {{ city.name }} </h1>
+                    <p> قم بتحديث بيانات المدينة  بسهولة.</p>
+                </div>
+            </div>
+            <button class="back-btn" id="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i> </button>
+        </div>
+        
+        <form id="city_form" method="POST" action="{% url 'admins:edit_city' city.id %}" autocomplete="off" >
+            {% csrf_token %}
+            <nav>
+                <div class="nav-btns">
+                    <button type="submit"  class="save-btn">حفظ</button>
+                    <button type="reset" class="reset" >الغاء</button>
+                </div>
+            </nav>
+            
+            <div  class="settings-panel">
+                <div class="panel-header">
+                    <div class="panel-heading">
+                        <i class="panel-icon fa-solid fa-city"></i>
+                        <div class="panel-title">
+                            <h2>تفاصيل المدينة</h2>
+                            <p>الاسم، الأولوية , الحالة. </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-content ">
+                    <div class="fields-container">
+
+                        <div id="field-errors" class="field-errors" hidden></div>
+
+                        <div class="field  {% if form.name.errors %}has-error{% endif %}">
+                            {{ form.name.label }}
+                            <div class="input">
+                                {{ form.name }}
+                                <i class="fa-solid fa-a"></i>
+                            </div>
+                            {% if form.name.errors %}
+                                <span class="help-text"> {{ form.name.errors.0 }} </span>
+                            {% else %}
+                                <span class="help-text">{{ form.name.help_text }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="field checkbox-field  {% if form.active.errors %}has-error{% endif %}">
+                            <div class="checkbox-control">
+                                <label for="active">{{  form.active.label }}</label>
+                                <input type="checkbox" name="active" id="active" {% if form.active.value %}checked{% endif %}>
+                            </div>
+                            {% if form.active.errors %}
+                                <span class="help-text"> {{ form.active.errors.0 }} </span>
+                            {% else %}
+                                <span class="help-text">{{ form.active.help_text }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="field {% if form.priority.errors %}has-error{% endif %}">
+                            <label for="priority" class="option-title">{{ form.priority.label }}</label>
+                                <div class="qty-control ">
+                                    <button
+                                        type="button"
+                                        class="qty-minus"
+                                        aria-label="إنقاص"
+                                        onclick="changeQuantity(this, -1)"
+                                    >−</button>
+                                    <input
+                                        type="text"
+                                        id="priority"
+                                        name="priority"
+                                        inputmode="decimal"
+                                        class="qty-input"
+                                        value="{{ form.priority.value|default:'0' }}"
+                                        min="0"
+                                        
+                                    >
+                                    <button
+                                        type="button"
+                                        class="qty-plus"
+                                        aria-label="زيادة"
+                                        onclick="changeQuantity(this, 1)"
+                                    >+</button>
+                                </div>
+                            {% if form.priority.errors %}
+                                <span class="help-text"> {{ form.priority.errors.0 }} </span>
+                            {% else %}
+                                <span class="help-text">{{ form.priority.help_text }}</span>
+                            {% endif %}
+                        </div>
+
+                        
+
+                        
+
+                    </div>
+            
+                </div>
+            </div>
+
+        </form>
+
+    </section>
+
+{% endblock content %}
+
+
+{% comment %} Page Scripts {% endcomment %}
+{% block page_scripts %}
+    <script src="{% static "js/fields.js" %}"></script>
+    <script src="{% static "js/admins/edit_city.js" %}"></script>
+{% endblock %}

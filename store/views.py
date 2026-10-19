@@ -723,7 +723,7 @@ def edit_product(request, pid):
 def delete_product(request):
     "الدالة المسؤولة عن حذف منتج من المتجر, لايمكن الا لمالك المتجر او التحكم الكامل"
     if request.method == "POST":
-        product_id  = request.POST.get('product_id')
+        product_id  = request.POST.get('item_id')
         
         try:
             product_id = int(product_id)

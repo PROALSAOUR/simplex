@@ -1,0 +1,324 @@
+{% extends "partials/base.html" %}
+{% load static %}
+
+{% comment %} Page Head {% endcomment %}
+{% block page_head %}
+    <link rel="stylesheet" href="{% static "css/tables.css" %} ">                            
+{% endblock page_head %}
+
+
+{% comment %} Page Content {% endcomment %}
+{% block content %}
+
+<section class="">
+
+    
+    <!-- رأس القسم -->
+    <div class="section-header">
+        <div class="section-content">
+            <div class="section-icon product">
+                <i class="fa-solid fa-city"></i>
+            </div>
+            <div class="section-details">
+                <h1>جميع المدن</h1>
+                <p> عرض وإدارة جميع المدن المدعومة في المنصة.</p>
+            </div>
+        </div>
+
+        <a href="{% url "admins:add_city" %}" class="add-button link-btn section-procedure primary-btn">إضافة مدينة <i class="fa-solid fa-plus"></i> </a>
+
+
+    </div>
+        
+    {% if has_cities %}
+        <div class="data-content">
+
+            <form method="GET" autocomplete="off" id="search-form">
+
+                <!-- ══ TOP BAR ══════════════════════════════════════════ -->
+                <div class="toolbar">
+
+                    <!-- Search -->
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" name="search" class="search-input" value="{{ search }}" 
+                            placeholder="ابحث عن طريق  اسم المدينة" 
+                        >
+                        <button type="submit">بحث</button>
+                    </div>
+
+                    <div class="search-btns">
+                        
+                        <!-- Filter toggle -->
+                        <button type="button" onclick="toggleMenu(this, '.filter-panel')" class="filter-btn toolbar-btn ">
+                            <i class="fa-solid fa-sliders"></i>
+                        </button>
+                        
+                        <!-- Sort dropdown -->
+                        <div class="sort-wrap">
+                            <button type="button" onclick="toggleMenu(this, '.sort-menu', true)" class="sort-btn toolbar-btn" >
+                                <i class="fa-solid fa-arrow-down-wide-short"></i>
+                                <span>ترتيب</span>
+                            </button>
+                            
+                            <div class="sort-menu small-menu" id="sort-menu"> <!-- open -->
+                                {% with sorts=sort_options %}
+                                    {% comment %} حسب  الابجدية {% endcomment %}
+                                    <button type="button" class="menu-link {% if selected_sort == 'name' %}selected{% endif %}" onclick="applySort('name')">
+                                        <i class="fa-solid fa-arrow-up-a-z"></i>
+                                        أبجدياً (أ → ي)
+                                    </button>
+
+                                    <button type="button" class="menu-link {% if selected_sort == '-name' %}selected{% endif %}" onclick="applySort('-name')">
+                                        <i class="fa-solid fa-arrow-down-a-z"></i>
+                                        أبجدياً (ي → أ)
+                                    </button>
+
+                                    {% comment %} حسب  الاولوية {% endcomment %}
+                                    <button type="button" class="menu-link {% if selected_sort == '-priority' %}selected{% endif %}" onclick="applySort('-priority')">
+                                        <i class="fa-solid fa-arrow-up-a-z"></i>
+                                        الأهم اولاً
+                                    </button>
+
+                                    <button type="button" class="menu-link {% if selected_sort == 'priority' %}selected{% endif %}" onclick="applySort('priority')">
+                                        <i class="fa-solid fa-arrow-down-a-z"></i>
+                                        الأهم اخراً 
+                                    </button>
+
+                                {% endwith %}
+                                <!-- hidden sort input -->
+                                <input type="hidden" name="sort" id="sort-input" value="{{ selected_sort }}">
+
+                            </div>
+                            
+                        </div>
+
+                    </div>
+                        
+                    </div>
+
+                <!-- ══ FILTER PANEL ═════════════════════════════════════ -->
+                <div class="panel filter-panel {% if selected_is_active %}open{% endif %}">
+                    <div class="filter-grid">
+
+                        <div class="field">
+                            <label>متاحة للاختيار</label>
+                            <select name="is_active" >
+                                <option value=""  {% if selected_is_active == '' %}selected{% endif %}>الكل</option>
+                                <option value="False" {% if selected_is_active == 'False' %}selected{% endif %}>غير متاحة</option>
+                                <option value="True" {% if selected_is_active == 'True' %}selected{% endif %}>متاحة</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <div class="panel-actions filter-actions">
+                        <a href="{% url 'admins:all_cities' %}" class="filter-btn action-btn link-btn" >مسح الكل</a>
+                        <button type="submit" class="action-btn link-btn">
+                            تطبيق
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+
+            <!-- ══ Data Summary ═════════════════════════════════════════ -->
+            <div class="data-summary">
+                <span class="count">
+                    إجمالي المدن: <strong >{{ page_obj.paginator.count }}</strong> مدينة
+                    &nbsp;·&nbsp; الصفحة <strong>{{ page_obj.number }}</strong> من <strong>{{ page_obj.paginator.num_pages }}</strong>
+                </span>
+
+                <!-- Active filter chips -->
+                {% if selected_is_active %}
+                    <button class="chip" onclick="clearParam('is_active')">
+                        <i class="fa-solid fa-xmark"></i>
+                        متاحة للاختيار: {{ selected_is_active_display  }}
+                    </button>
+                {% endif %}
+                {% if search %}
+                    <button class="chip" onclick="clearParam('search')">
+                        <i class="fa-solid fa-xmark"></i>
+                        بحث: "{{ search }}"
+                    </button>
+                {% endif %}
+
+            </div>
+
+            <!-- ══ TABLE ═════════════════════════════════════════════ -->
+            
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>اسم المدينة</th>
+                            <th>متاحة للاختيار</th>
+                            <th>الأولوية</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    {% if page_obj %}
+                        <tbody>
+                            {% for city in page_obj %}
+                                <tr data-view-url="{% url 'admins:edit_city' city.id %}" >       
+
+                                    <td>{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
+                                    <td>{{ city.name }}</td>
+                                    <td class="{% if city.active  %}complete{% else %}cancel{% endif %}" >{{ city.get_active_display }}</td>
+                                    <td>{{ city.priority }}</td>
+
+                                    <td>
+                                        <button
+                                            type="button"
+                                            class="td-actions"
+                                            aria-label="الإجراءات"
+                                            data-id="{{ city.id }}"
+                                            data-name="{{ city.name }}"
+                                            data-edit-url="{% url 'admins:edit_city' city.id %}"
+                                        >
+                                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+            
+                        </tbody>                
+                    {% endif %}
+                </table>
+
+                {% if not page_obj %}
+                    <div class="message">
+                        <div class="message-image">
+                            <img src="{% static "images/no-search-result.png" %}" alt="" width="100" height="80" >
+                        </div>
+                        <h2 class="message-title" >لم يتم العثور على اي مدن</h2>
+                        <p class="message-content">
+                            لم نجد اي مدينة تطابق بحثك，
+                            جرب تغيير كلمات البحث او تعديل الفلاتر 
+                            ثم حاول مرة اخرى
+                        </p>
+                        <a href="{% url 'admins:all_cities'  %}" class="message-btn link-btn" >مسح البحث <i class="fa-solid fa-arrows-rotate"></i></a>
+                    </div>
+                {% endif %}
+
+            </div>
+
+            <!-- ══ PAGINATION ════════════════════════════════════════ -->
+                    
+            <div class="pagination">
+
+                <!-- معلومات النتائج -->
+                {% if page_obj %}
+                    <div class="pagination-info">
+                        عرض <strong>{{ page_obj.start_index }}</strong>
+                        إلى <strong>{{ page_obj.end_index }}</strong>
+                        من <strong>{{ page_obj.paginator.count }}</strong>
+                    </div>
+                {% endif %}
+
+                {% if page_obj.paginator.num_pages > 1 %}
+                    <!-- أزرار الصفحات -->
+                    <div class="pagination-controls">
+
+                        <!-- الصفحة السابقة -->
+                        {% if page_obj.has_previous %}
+                            <button
+                                type="button"
+                                class="page-btn"
+                                aria-label="الصفحة السابقة"
+                                onclick="window.location.href='?{{ query_string }}&page={{ page_obj.previous_page_number }}'"
+                            >
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        {% else %}
+                            <button
+                                type="button"
+                                class="page-btn disabled"
+                                aria-label="الصفحة السابقة"
+                                disabled
+                            >
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        {% endif %}
+
+                        <!-- رقم الصفحة -->
+                        <div class="page-indicator">
+                            <strong>{{ page_obj.number }}</strong>
+                            <span>/</span>
+                            <span>{{ page_obj.paginator.num_pages }}</span>
+                        </div>
+
+                        <!-- الصفحة التالية -->
+                        {% if page_obj.has_next %}
+                            <button
+                                type="button"
+                                class="page-btn"
+                                aria-label="الصفحة التالية"
+                                onclick="window.location.href='?{{ query_string }}&page={{ page_obj.next_page_number }}'"
+                            >
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                        {% else %}
+                            <button
+                                type="button"
+                                class="page-btn disabled"
+                                aria-label="الصفحة التالية"
+                                disabled
+                            >
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                        {% endif %}
+
+                    </div>
+                {% endif %}
+
+            </div>
+
+        </div>
+    {% else %}
+        <div class="data-content">
+            <div class="message-container">
+                <div class="message">
+                    <div class="message-image">
+                        <img src=" {% static "images/empty.png" %} " alt="لاتوجد نتائج" width="100" height="80" >
+                    </div>
+                    <h2 class="message-title" >لا توجد أي مدن مدعومة بعد !</h2>
+                    <p class="message-content">
+                        يبدوا ان المنصة لم تقم بإضافة أي مدن بعد ، 
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    {% endif %}
+    
+        
+</section>
+{% endblock content %}
+
+{% block out_container %}
+    {% include "admins/components/delete_city.html" %}
+
+    <!-- Start Action Menu -->
+    <div class="action-menu small-menu" id="action-menu">
+        
+        <a id="edit-btn" class="menu-link">
+            <i class="fa-regular fa-pen-to-square"></i>
+            <span>تعديل</span>
+        </a>
+        
+        <button id="delete-btn" type="button" class="menu-link cancel" onclick="openDeleteItemDialog(this)" data-id="" data-name="" data-redirect="{% url "admins:all_cities" %}">
+            <i class="fa-regular fa-trash-can"></i>
+            <span>حذف</span>
+        </button>
+    </div>
+    <!-- End Action Menu -->
+
+{% endblock out_container %}
+
+{% comment %} Page Scripts {% endcomment %}
+{% block page_scripts %}
+    <script src="{% static "js/tables.js" %}"></script>
+{% endblock %}
