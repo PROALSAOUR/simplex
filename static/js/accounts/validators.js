@@ -42,34 +42,56 @@ async function validateUsername(inputElement, feedback, url, currentUserId = nul
 //  =========================================================================
 //  دالة التحقق من صلاحية رقم الهاتف أثناء الكتابة 
 let phonenumberTimeout = null;
-async function validatePhoneNumber(inputElement, feedback, url,) {
+let phoneValidationRequestId = 0;
+async function validatePhoneNumber(inputElement, feedback, url) {
     clearTimeout(phonenumberTimeout);
-    const phone_number = inputElement.value;
+
+    const phoneNumber = inputElement.value.trim();
+    const requestId = ++phoneValidationRequestId;
+
+    if (!phoneNumber) {
+        feedback.innerText = "أدخل رقم الهاتف .";
+        feedback.style.color = "gray";
+        return false;
+    }
 
     feedback.innerText = "جاري التحقق...";
     feedback.style.color = "gray";
 
     return new Promise((resolve) => {
-        phonenumberTimeout = setTimeout(() => {
-            let requestUrl = `${url}?phone_number=${encodeURIComponent(phone_number)}`;
-            fetch(requestUrl)
-                .then(response => response.json())
-                .then(data => {
-                    feedback.innerText = data.message;
+        phonenumberTimeout = setTimeout(async () => {
+            try {
+                const requestUrl =
+                    `${url}?phone_number=${encodeURIComponent(phoneNumber)}`;
 
-                    if (data.status === 'success') {
-                        feedback.style.color = 'green';
-                        resolve(true);
-                    } else {
-                        feedback.style.color = 'red';
-                        resolve(false);
-                    }
-                })
-                .catch(() => {
-                    feedback.innerText = "حدث خطأ";
-                    feedback.style.color = "red";
+                const response = await fetch(requestUrl);
+                const data = await response.json();
+
+                // تجاهل نتائج الطلبات القديمة.
+                if (requestId !== phoneValidationRequestId) {
                     resolve(false);
-                });
+                    return;
+                }
+
+                feedback.innerText = data.message;
+
+                const isValid =
+                    response.ok && data.status === "success";
+
+                feedback.style.color = isValid ? "green" : "red";
+
+                resolve(isValid);
+
+            } catch (error) {
+                if (requestId === phoneValidationRequestId) {
+                    feedback.innerText =
+                        "تعذر التحقق من رقم الهاتف.";
+
+                    feedback.style.color = "red";
+                }
+
+                resolve(false);
+            }
         }, 500);
     });
 }

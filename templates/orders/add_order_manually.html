@@ -50,7 +50,7 @@
 
     </div>
 
-    <form id="cart_form" autocomplete="off" data-submit-url="{% url "orders:create_order" %}" data-redirect-url="{% url "orders:store_orders" STORE_ID %}"  hidden >
+    <form id="cart_form" autocomplete="off" data-submit-url="{% url "orders:create_order" %}" data-redirect-url="{% url "orders:store_orders" STORE_ID %}" data-check-url="{% url 'accounts:check_phone_number' %}"  hidden >
         {% csrf_token %}
 
         <div class="cart-section ">
@@ -156,11 +156,13 @@
                             {{ form.customer_phone }}
                             <i class="fa-solid fa-phone-volume"></i>
                         </div>
-                        {% if form.customer_phone.errors %}
-                            <span class="help-text"> {{ form.customer_phone.errors.0 }} </span>
-                        {% else %}
-                            <span class="help-text">{{ form.customer_phone.help_text }}</span>
-                        {% endif %}
+                        <span id="phone-feedback" class="help-text">
+                            {% if form.customer_phone.errors %}
+                                {{ form.customer_phone.errors.0 }} 
+                            {% else %}
+                                {{ form.customer_phone.help_text }}
+                            {% endif %}
+                        </span>
                         
                     </div>
                     
@@ -248,9 +250,11 @@
 
 {% block page_scripts %}
 
+    <script src="{% static "js/accounts/validators.js" %}"></script>
     <script src="{% static "js/fields.js" %}"></script>
     <script src="{% static "js/products/product_variants.js" %}" ></script>
     <script src="{% static "js/orders/search_products.js" %}"></script>
     <script src="{% static "js/orders/add_order_manually.js" %}"></script>
     <script src="{% static "js/orders/cart.js" %}"></script>
+
 {% endblock %}

@@ -471,7 +471,7 @@
 
             </div>
 
-            <form class="cart_form" id="cart_form" autocomplete="off" data-submit-url="{% url "orders:create_order" %}" data-redirect-url="{% url "store:view_product" product.id %}"  hidden>
+            <form class="cart_form" id="cart_form" autocomplete="off" data-submit-url="{% url "orders:create_order" %}" data-redirect-url="{% url "store:view_product" product.id %}" data-check-url="{% url 'accounts:check_phone_number' %}"  hidden>
                 {% csrf_token %}
 
                 <div class="form-title">
@@ -548,7 +548,7 @@
                             <i class="fa-solid fa-phone-volume"></i>
                         </div>
                         
-                        <span class="help-text">أدخل رقم هاتف الزبون، مثل: 0912345678.</span>
+                        <span id="phone-feedback" class="help-text">أدخل رقم الهاتف  مثل: 0912345678.</span>
                         
                     </div>
 
@@ -619,6 +619,7 @@
     {% include "common/thanks_modal.html" %}
     <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js"></script>
     <script src="{% static "js/fields.js" %}" ></script>
+    <script src="{% static "js/accounts/validators.js" %}"></script>
     <script src="{% static "js/orders/cart.js" %}" ></script>
     <script src="{% static "js/products/product_variants.js" %}" ></script>
     <script src="{% static "js/products/view-product.js" %}" ></script>

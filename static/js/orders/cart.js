@@ -174,9 +174,44 @@ function showThankYouModal() {
         window.setTimeout(() => {
             thanksModal.classList.remove("show");
         }, 2500);
-    }
+}
+// ===========================================================================
+// كود التحقق من صحة رقم الهاتف بشكل مباشر اثناء الكتابة
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("cart_form");
+    const phoneInput = document.getElementById("id_customer_phone");
+    const feedback = document.getElementById("phone-feedback");
 
-// ================================
+    if (!form || !phoneInput || !feedback) return;
+
+    const checkPhoneUrl = form.dataset.checkUrl;
+
+    let isValidPhonenumber = false;
+
+    // التحقق عند تغيير قيمة رقم الهاتف.
+    phoneInput.addEventListener("input", async function () {
+        isValidPhonenumber = false;
+
+        isValidPhonenumber = await validatePhoneNumber(
+            this,
+            feedback,
+            checkPhoneUrl
+        );
+    });
+
+    // منع إرسال الطلب إذا كان رقم الهاتف غير صالح.
+    form.addEventListener("submit", function (event) {
+        if (!isValidPhonenumber) {
+            event.preventDefault();
+
+            feedback.innerText = "يرجى إدخال رقم هاتف صالح.";
+            feedback.style.color = "red";
+
+            phoneInput.focus();
+        }
+    });
+});
+// ============================================================================
 //  إرسال بيانات الطلب إلى الخادم وعرض نتيجة العملية.
 async function submitOrder(form) {
     const url = form.dataset.submitUrl;
