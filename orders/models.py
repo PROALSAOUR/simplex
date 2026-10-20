@@ -3,6 +3,7 @@ from django_ckeditor_5.fields import CKEditor5Field
 from store.models import Product
 from accounts.models import Store
 from invoices.models import Invoice
+from admins.models import City
 
 """
 يمكن تعديل الطلبات التي حالتها جاري التجهيز فقط ولايمكن تعديل الطلبات المستلمة او الملغية
@@ -64,7 +65,8 @@ class Order(models.Model):
     # حقول بيانات الزبون
     customer_name = models.CharField(max_length=20, verbose_name='اسم الزبون', help_text='أدخل الاسم الكامل للزبون، مثل: محمد أحمد.')
     customer_phone = models.CharField(max_length=15, verbose_name='رقم هاتف الزبون', help_text='أدخل رقم هاتف الزبون، مثل: 0912345678.')
-    customer_location = models.CharField(max_length=100, verbose_name='عنوان الزبون', help_text='أدخل عنوان التوصيل ، مثل: بنغازي - السلماني .')
+    customer_location = models.ForeignKey(City, on_delete=models.PROTECT, null=True, blank=True, verbose_name='عنوان الزبون', help_text="قم بإدخال عنوان التوصيل الخاص بك ")
+
     note = CKEditor5Field('ملاحظة', config_name='default', null=True, blank=True, help_text='يمكنك إضافة ملاحظات خاصة بالطلب، مثل تعليمات التوصيل أو طلبات خاصة من الزبون.')
 
     # حقول قيم الطلب

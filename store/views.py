@@ -9,7 +9,7 @@ from django.core.paginator import Paginator
 import hashlib, json
 from datetime import timedelta
 from django.utils import timezone
-
+from orders.forms import OrderCustomerForm
 
 from Project.utils import compress_image
 from accounts.decorators import vendor_only
@@ -751,6 +751,7 @@ def view_product(request, pid):
         Product.objects.select_related('store'),
         id=pid,
     )
+    customer_form = OrderCustomerForm()
 
     product_images = product.images.all()
 
@@ -812,6 +813,7 @@ def view_product(request, pid):
 
     context = {
         'product': product,
+        'form': customer_form,
         'is_product_owner': is_product_owner,
         'can_view': can_view,
         'product_images': product_images,

@@ -33,17 +33,6 @@ class OrderCustomerForm(forms.ModelForm):
             raise ValidationError("اسم المستلم يجب أن يكون 4 أحرف أو أكثر.")
 
         return customer_name
-
-    def clean_customer_location(self):
-        customer_location = self.cleaned_data["customer_location"].strip()
-
-        if customer_location.isdigit():
-            raise ValidationError("العنوان لا يجب أن يكون رقما فقط.")
-
-        if len(customer_location) < 3:
-            raise ValidationError("العنوان يجب أن يكون 3 أحرف أو أكثر.")
-
-        return customer_location
         
     def clean_free_delivery(self):
         # تحويل قيمة checkbox إلى True أو False بشكل صحيح

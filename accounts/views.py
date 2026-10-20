@@ -90,7 +90,7 @@ def store_details(request, sid):
                 "message": "تم حفظ تعديلات المتجر بنجاح",
 
                 "name": store.name,
-                "location": store.location,
+                "location":store.location.name if store.location else "",
                 "store_status": store.get_status_display(),
                 "check_orders": store.get_check_orders_display(),
 

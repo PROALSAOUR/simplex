@@ -176,17 +176,6 @@ class StoreUpdateForm(forms.ModelForm):
 
         return store_name
 
-    def clean_location(self):
-        # التحقق من صحة موقع المتجر
-        location = self.cleaned_data["location"].strip()
-
-        if location.isdigit():
-            raise ValidationError("موقع المتجر لا يجب أن يكون رقماً فقط.")
-
-        if len(location) < 3:
-            raise ValidationError("موقع المتجر يجب أن يكون 3 أحرف أو أكثر.")
-
-        return location
 
     def clean_logo(self):
         # ضغط والتحقق من صورة شعار المتجر

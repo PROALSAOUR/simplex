@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from admins.models import City
 """
 ======== بالنسبة للبائع ========
 تسجيل الدخول يتم من خلال اليوزرنيم والباسورد الخاصين بالبائع حيث يتم جلب المتجر المرتبط بهم والدخول اليه
@@ -68,10 +68,11 @@ class Store(models.Model):
         ('active', 'مُفعل'), 
         ('inactive', 'غير مُفعل')
     ]
+
     
     status = models.CharField(verbose_name='حالة المتجر', max_length=20, choices=STATUS_CHOICES, default='pending')
     logo = models.ImageField(upload_to='vendors/Stores/logos' , verbose_name="صورة لوجو المتجر", default='default/default_store_logo.png') 
-    location = models.CharField(max_length=50 , verbose_name="الموقع", blank=True, help_text="قم بإدخال موقع المتجر الخاص بك \n يمكنك كتابة اسم المدينة فقط أو العنوان الكامل حسب رغبتك")
+    location = models.ForeignKey(City, on_delete=models.PROTECT, null=True, blank=True, verbose_name="الموقع", help_text="قم بإدخال موقع المتجر الخاص بك ")
     check_orders = models.BooleanField(default=True, choices=[(False, 'غير مُفعل'), (True, 'مُفعل'),], verbose_name="تحقق من الطلبات " , help_text="في حال التفعيل سيقوم احد الموظفين لدينا من الاتصال بالزبون والتأكد من الطلب قبل ارسال اشعار اليك مما يقلل من الطلبات الوهمية")
     # جميع حقول السوشيال ميديا يتم اضافتها بعد انشاء الحساب وتفعيله الا رقم الهاتف يجب ادخاله اثناء انشاء الحساب لانه يستخدم في التواصل مع الادارة لتفعيل الحساب
     phone_number1 = models.CharField(verbose_name='رقم الهاتف',  max_length=15, help_text='قم بإدخال رقم الهاتف الخاص بمتجرك (ملاحظة : يجب ان يكون الرقم مربوطاً بواتساب لأننا سوف نقوم بالتواصل معك على واتساب لتفعيل حسابك) ')# يجب ان يقوم بإدخاله لان الادارة سوف تتواصل معه على هذا الرقم لتفعيل حسابه

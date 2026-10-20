@@ -256,6 +256,112 @@ document.addEventListener('DOMContentLoaded', initTextareaCounters);
 })();
 
 // ==========================================================
+// إضافة البحث وعرض أول 10 خيارات في القوائم المنسدلة.
+function enableCustomSelectSearch() {
+    document.querySelectorAll('.js-custom-select .custom-select').forEach(function (wrapper) {
+        // منع إضافة البحث أكثر من مرة.
+        if (wrapper.dataset.searchEnabled === 'true') return;
+
+        const panel = wrapper.querySelector('.select-panel');
+        const trigger = wrapper.querySelector('.select-trigger');
+
+        if (!panel || !trigger) return;
+
+        const options = Array.from(
+            panel.querySelectorAll('.select-option')
+        );
+
+        // الحصول على خيار "أخرى" الموجود أصلًا في القائمة.
+        const otherOption = options.find(function (option) {
+            return option.textContent.trim() === 'أخرى';
+        });
+
+        // إنشاء حقل البحث.
+        const searchInput = document.createElement('input');
+        searchInput.type = 'search';
+        searchInput.className = 'custom-select-search';
+        searchInput.placeholder = 'بحث...';
+        searchInput.autocomplete = 'off';
+        searchInput.setAttribute('aria-label', 'البحث في الخيارات');
+
+        // إضافة حقل البحث في بداية القائمة.
+        panel.insertBefore(searchInput, panel.firstChild);
+
+        // البحث وعرض أول 10 نتائج مطابقة.
+        function filterOptions() {
+            const query = searchInput.value.trim().toLocaleLowerCase();
+            let visibleCount = 0;
+            let matchingCount = 0;
+
+            options.forEach(function (option) {
+                // معالجة خيار "أخرى" بشكل مستقل.
+                if (option === otherOption) {
+                    option.style.display = 'none';
+                    return;
+                }
+
+                const matches = option.textContent
+                    .trim()
+                    .toLocaleLowerCase()
+                    .includes(query);
+
+                if (matches) {
+                    matchingCount++;
+
+                    // عرض أول 10 نتائج مطابقة فقط.
+                    if (visibleCount < 10) {
+                        option.style.display = '';
+                        visibleCount++;
+                    } else {
+                        option.style.display = 'none';
+                    }
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+
+            // إظهار خيار "أخرى" عند البحث وعدم وجود نتائج مطابقة.
+            if (otherOption) {
+                otherOption.style.display =
+                    query !== '' && matchingCount === 0 ? '' : 'none';
+            }
+        }
+
+        // تحديث النتائج أثناء الكتابة.
+        searchInput.addEventListener('input', filterOptions);
+
+        // إعادة ضبط البحث عند فتح القائمة.
+        trigger.addEventListener('click', function () {
+            searchInput.value = '';
+            filterOptions();
+
+            setTimeout(function () {
+                if (wrapper.classList.contains('open')) {
+                    searchInput.focus();
+                }
+            }, 0);
+        });
+
+        // السماح بالكتابة دون إغلاق القائمة.
+        searchInput.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                wrapper.classList.remove('open');
+                trigger.setAttribute('aria-expanded', 'false');
+                trigger.focus();
+            }
+
+            event.stopPropagation();
+        });
+
+        wrapper.dataset.searchEnabled = 'true';
+
+        // عرض أول 10 خيارات عند التهيئة.
+        filterOptions();
+    });
+}
+// تفعيل البحث بعد إنشاء القوائم المخصصة.
+enableCustomSelectSearch();
+// ==========================================================
 // إزالة حالة الخطأ من الحقول عند تغيير القيمة الخاطئة، بحيث لا تبقى حالة الخطأ بعد أن يقوم المستخدم بتصحيح القيمة.
 document.querySelectorAll('.field.has-error .input').forEach(input => {
     input.addEventListener('input', function () {
@@ -307,4 +413,3 @@ function changeQuantity(button, amount) {
     input.value = value;
 }
 // ==========================================================
-

@@ -1,3 +1,4 @@
+// دالة حذف منتج + مدينة
 function openDeleteItemDialog(button) {
     // جيب قيمة الاسم والاي دي من الداتا سيت
     const itemId = button.dataset.id;
@@ -9,7 +10,7 @@ function openDeleteItemDialog(button) {
     delete_item_dialog.showModal();
 }
 document.addEventListener("DOMContentLoaded", () => {
-    // التعامل مع نتيجة الدالة الخاصة بحذف موظف
+    // التعامل مع نتيجة الدالة الخاصة بحذف منتج او مدينة
     const deleteForm = document.getElementById("delete_item_form");
     const deleteDialog = document.getElementById("delete_item_dialog");
 

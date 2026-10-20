@@ -457,20 +457,25 @@
                             
                             </div>
 
-                            <div class="field  {% if customer_form.customer_location.errors %}has-error{% endif %}">
-                                <label for="customer-location">عنوان الزبون</label>
-                                <div class="input">
-                                    <input id="customer-location" name="customer_location" type="text" placeholder="ادخل موقع الزبون الخاص بك ..."   value="{{ customer_form.customer_location.value|default:order.customer_location }}">
-                                    {% if customer_form.customer_location.errors %}
-                                        <i class="fa-solid fa-circle-exclamation error-icon"></i>
-                                    {% endif %}
-                                    <i class="fa-solid fa-location-dot"></i>
+                            <div class="field {% if customer_form.customer_location.errors %}has-error{% endif %}">
+                                <div class="select-control">
+                                    <label for="{{customer_form.customer_location.id_for_label }}">
+                                        {{ customer_form.customer_location.label }}
+                                    </label>
+
+                                    <div class="js-custom-select">
+                                        {{ customer_form.customer_location }}
+                                    </div>
                                 </div>
-                                {% if customer_form.customer_location.errors %}
-                                    <span class="help-text"> {{ customer_form.customer_location.errors.0 }} </span>
-                                {% else %}
-                                    <span class="help-text ">{{ customer_form.customer_location.help_text }}</span>
-                                {% endif %}
+
+                                <span class="help-text">
+                                    {% if customer_form.customer_location.errors %}
+                                        {{ customer_form.customer_location.errors.0 }}
+                                    {% else %}
+                                        {{ customer_form.customer_location.help_text }}
+                                    {% endif %}
+                                </span>
+                                                        
                             </div>
 
                             <div class="field {% if customer_form.note.errors %}has-error{% endif %}">

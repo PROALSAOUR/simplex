@@ -34,6 +34,9 @@
             <nav>
                 <div class="nav-btns">
                     <button type="submit"  class="save-btn">حفظ</button>
+                    <button id="delete-btn" type="button" class="remove-btn" onclick="openDeleteItemDialog(this)" data-id="{{ city.id }}" data-name="{{ city.name }}" data-redirect="{% url "admins:all_cities" %}">
+                        حذف
+                    </button>
                     <button type="reset" class="reset" >الغاء</button>
                 </div>
             </nav>
@@ -126,6 +129,10 @@
     </section>
 
 {% endblock content %}
+
+{% block out_container %}
+    {% include "admins/components/delete_city.html" %}
+{% endblock out_container %}
 
 
 {% comment %} Page Scripts {% endcomment %}

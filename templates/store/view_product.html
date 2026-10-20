@@ -10,6 +10,7 @@
     <!-- ملفات css -->
     <link rel="stylesheet" href="{% static "css/normalize.css" %}">                               
     <link rel="stylesheet" href="{% static "css/style.css" %}">        
+    <link rel="stylesheet" href="{% static "css/fields.css" %}">        
 
     <link
         rel="stylesheet"
@@ -524,48 +525,64 @@
 
                     <div id="customer-errors" class="field-errors" hidden></div>
                     
-                    <div class="field">
-                        <label for="id_customer_name">
-                            اسم الزبون
+                    <div class="field {% if form.customer_name.errors %}has-error{% endif %}">
+                        <label for="{{ form.customer_name.id_for_label }}">
+                            {{ form.customer_name.label }}
                             <span class="required">*</span>
                         </label>
                         <div class="input">
-                            <input type="text" name="customer_name" maxlength="20" required aria-describedby="id_customer_name_helptext" id="id_customer_name">
+                            {{ form.customer_name }}
                             <i class="fa-solid fa-user"></i>
                         </div>
+                        {% if form.customer_name.errors %}
+                            <span class="help-text"> {{ form.customer_name.errors.0 }} </span>
+                        {% else %}
+                            <span class="help-text">{{ form.customer_name.help_text }}</span>
+                        {% endif %}
                         
-                        <span class="help-text">أدخل الاسم الكامل للزبون، مثل: محمد أحمد.</span>
-                    
                     </div>
 
-                    <div class="field ">
-                        <label for="id_customer_phone">
-                            رقم هاتف الزبون
+                    <div class="field {% if form.customer_phone.errors %}has-error{% endif %}">
+                        <label for="{{ form.customer_phone.id_for_label }}">
+                            {{ form.customer_phone.label }}
                             <span class="required">*</span>
                         </label>
                         <div class="input">
-                            <input type="text" name="customer_phone" maxlength="15" required aria-describedby="id_customer_phone_helptext" id="id_customer_phone">
+                            {{ form.customer_phone }}
                             <i class="fa-solid fa-phone-volume"></i>
                         </div>
-                        
-                        <span id="phone-feedback" class="help-text">أدخل رقم الهاتف  مثل: 0912345678.</span>
+                        <span id="phone-feedback" class="help-text">
+                            {% if form.customer_phone.errors %}
+                                {{ form.customer_phone.errors.0 }} 
+                            {% else %}
+                                {{ form.customer_phone.help_text }}
+                            {% endif %}
+                        </span>
                         
                     </div>
 
-                    <div class="field ">
-                        <label for="id_customer_location">
-                            عنوان الزبون
-                            <span class="required">*</span>
-                        </label>
-                        <div class="input">
-                            <input type="text" name="customer_location" maxlength="100" required aria-describedby="id_customer_location_helptext" id="id_customer_location">
-                            <i class="fa-solid fa-location-dot"></i>
+                    
+                    <div class="field {% if form.customer_location.errors %}has-error{% endif %}">
+                        <div class="select-control">
+                            <label for="{{form.customer_location.id_for_label }}">
+                                {{ form.customer_location.label }}
+                            </label>
+
+                            <div class="js-custom-select">
+                                {{ form.customer_location }}
+                            </div>
                         </div>
-                        
-                        <span class="help-text">أدخل عنوان التوصيل ، مثل: بنغازي - السلماني .</span>
-                        
-                    </div>
 
+                        <span class="help-text">
+                            {% if form.customer_location.errors %}
+                                {{ form.customer_location.errors.0 }}
+                            {% else %}
+                                {{ form.customer_location.help_text }}
+                            {% endif %}
+                        </span>
+                                                
+                    </div>
+    
                     <div class="field" id="show-note-field">
                         <label for="show_note">
                             هل لديك ملاحظات خاصة بالطلب ؟
@@ -573,14 +590,16 @@
                         <input type="checkbox" name="show_note" id="show_note">
                     </div>
 
-                    <div class="field hidden" id="note-field" > 
-                        <label for="note">ملاحظة</label>
+                    <div id="note-field" class="field hidden {% if form.note.errors %}has-error{% endif %}">
+                        <label for="note">{{ form.note.label }}</label>
                         <div class="input">
                             <textarea name="note" id="note" rows="5" cols="40" maxlength="500" ></textarea>
                         </div>
-                        
-                        <span class="help-text">يمكنك إضافة ملاحظات خاصة بالطلب، مثل تعليمات التوصيل أو طلبات خاصة من الزبون.</span>
-                        
+                        {% if form.note.errors %}
+                            <span class="help-text"> {{ form.note.errors.0 }} </span>
+                        {% else %}
+                            <span class="help-text">{{ form.note.help_text }}</span>
+                        {% endif %}
                     </div>
                         
                 </div>

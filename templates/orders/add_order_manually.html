@@ -167,20 +167,24 @@
                     </div>
                     
                     <div class="field {% if form.customer_location.errors %}has-error{% endif %}">
-                        <label for="{{ form.customer_location.id_for_label }}">
-                            {{ form.customer_location.label }}
-                            <span class="required">*</span>
-                        </label>
-                        <div class="input">
-                            {{ form.customer_location }}
-                            <i class="fa-solid fa-location-dot"></i>
+                        <div class="select-control">
+                            <label for="{{form.customer_location.id_for_label }}">
+                                {{ form.customer_location.label }}
+                            </label>
+
+                            <div class="js-custom-select">
+                                {{ form.customer_location }}
+                            </div>
                         </div>
-                        {% if form.customer_location.errors %}
-                            <span class="help-text"> {{ form.customer_location.errors.0 }} </span>
-                        {% else %}
-                            <span class="help-text">{{ form.customer_location.help_text }}</span>
-                        {% endif %}
-                        
+
+                        <span class="help-text">
+                            {% if form.customer_location.errors %}
+                                {{ form.customer_location.errors.0 }}
+                            {% else %}
+                                {{ form.customer_location.help_text }}
+                            {% endif %}
+                        </span>
+                                                
                     </div>
                             
                 </div>

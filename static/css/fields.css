@@ -215,6 +215,7 @@
 ═══════════════════════════════════════════ */
 .custom-select{
     position:relative;
+    min-width: 120px;
     width:100%;
     background-color: var(--gray-background);
     color:var(--gray-color);
@@ -286,7 +287,7 @@
     -o-transform:translateY(-6px);
 }
 .custom-select.open .select-panel{
-    max-height:260px;
+    max-height: 280px;
     opacity:1;
     pointer-events:auto;
     overflow-y:auto;
@@ -296,7 +297,7 @@
     -ms-transform:translateY(0);
     -o-transform:translateY(0);
 }
-.select-option{
+.select-option , .custom-select-search{
     padding:10px 15px;
     color:var(--main-text-color);
     cursor:pointer;
@@ -309,6 +310,10 @@
     -ms-transition:background-color .12s ease;
     -o-transition:background-color .12s ease;
 }
+.custom-select-search {
+    border-bottom: 1px solid var(--seprator-color);
+    max-width: 100%;
+} 
 .select-option:hover,
 .select-option.active{
     background-color:var(--primary-background);

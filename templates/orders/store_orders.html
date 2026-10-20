@@ -25,7 +25,7 @@
                 </div>
             </div>
 
-            {% if USER_TYPE == vendor %}
+            {% if USER_TYPE == "vendor" %}
                 <a href="{% url "orders:add_order_manually" %}" class="add-button link-btn section-procedure primary-btn">إنشاء  طلب <i class="fa-solid fa-plus"></i> </a>
             {% endif %}
         </div>

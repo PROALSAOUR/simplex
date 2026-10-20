@@ -66,17 +66,26 @@
                         {% endif %}
                     </div>
 
+
                     <div class="field {% if form.location.errors %}has-error{% endif %}">
-                        <label for="{{ form.location.id_for_label }}"> {{ form.location.label }} </label>
-                        <div class="input">
-                            {{ form.location }}
-                            <i class="fa-solid fa-location-dot"></i>
+                        <div class="select-control">
+                            <label for="{{ form.location.id_for_label }}">
+                                {{ form.location.label }}
+                            </label>
+
+                            <div class="js-custom-select">
+                                {{ form.location }}
+                            </div>
                         </div>
-                        {% if form.location.errors %}
-                            <span class="help-text"> {{ form.location.errors.0 }} </span>
-                        {% else %}
-                            <span class="help-text">{{ form.location.help_text }}</span>
-                        {% endif %}
+
+                        <span class="help-text">
+                            {% if form.location.errors %}
+                                {{ form.location.errors.0 }}
+                            {% else %}
+                                {{ form.location.help_text }}
+                            {% endif %}
+                        </span>
+                                                
                     </div>
 
                 </div>
