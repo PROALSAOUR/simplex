@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', initTextareaCounters);
 // ==========================================================
 // إضافة البحث وعرض أول 10 خيارات في القوائم المنسدلة.
 function enableCustomSelectSearch() {
-    document.querySelectorAll('.js-custom-select .custom-select').forEach(function (wrapper) {
+    document.querySelectorAll('.js-custom-select.search-select .custom-select').forEach(function (wrapper) {
         // منع إضافة البحث أكثر من مرة.
         if (wrapper.dataset.searchEnabled === 'true') return;
 

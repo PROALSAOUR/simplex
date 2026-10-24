@@ -142,8 +142,13 @@
                             <label>حالة المنتج</label>
                             <select name="status" >
                                 <option value="">الكل</option>
-                                <option value="checking" {% if selected_status == 'checking' %}selected{% endif %}>جاري المراجعة</option>
-                                <option value="approved" {% if selected_status == 'approved' %}selected{% endif %}>مقبول</option>
+                                {% comment %} الادمن فقط من يستطيع فلترة المنتجات حسب الحالات الثلاثة اما البائع يستطيع الفلترة من حيث الرفض او عدم الرفض  فقط {% endcomment %}
+                                {% if USER_TYPE == "admin" %}
+                                    <option value="checking" {% if selected_status == 'checking' %}selected{% endif %}>جاري المراجعة</option>
+                                    <option value="approved" {% if selected_status == 'approved' %}selected{% endif %}>مقبول</option>
+                                {% else %}
+                                    <option value="not-rejected" {% if selected_status == 'not-rejected' %}selected{% endif %}>غير مرفوض</option>
+                                {% endif %}
                                 <option value="rejected" {% if selected_status == 'rejected' %}selected{% endif %}>مرفوض</option>
                             </select>
                         </div>
@@ -253,7 +258,9 @@
                             <th>الاسم</th>
                             <th>السعر</th>
                             <th>الظهور</th>
-                            <th>الحالة</th>
+                            {% if show_status_column %}
+                                <th>الحالة</th>
+                            {% endif %}
                             <th>الإجراءات</th>
                         </tr>
                     </thead>
@@ -282,14 +289,23 @@
                                     </td>     
 
                                     <td class="{% if product.is_visible %}complete{% else %}cancel{% endif %}" >{{ product.get_is_visible_display }}</td>
-                                    <td>
-                                        {% if product.status == "rejected" %}
-                                            <div class="icon-td alert-td cancel">
-                                                <i class="fa-solid fa-triangle-exclamation"></i>
-                                                <span>مرفوض</span>
-                                            </div>
-                                        {% endif %}
-                                    </td>               
+                                    
+                                    {% if show_status_column %}
+                                        <td>
+                                            {% if product.status == "rejected" %}
+                                                <div class="icon-td alert-td cancel">
+                                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                                    <span>مرفوض</span>
+                                                </div>
+                                            {% elif USER_TYPE == "admin" %}
+                                                <span class="{% if product.status == 'approved' %}complete{% else %}pending{% endif %}">
+                                                    {{ product.get_status_display }}
+                                                </span>
+                                            {% endif %}
+                                        </td>
+
+                                    {% endif %}
+
                                     <td>
                                         <button
                                             type="button"

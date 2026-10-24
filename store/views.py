@@ -44,14 +44,18 @@ def store_products(request, sid):
     
     # ── تحويل الـ choices لقواميس (value -> label) لتسهيل الاستخدام ──
     status_dict = dict(Product.STATUS_CHOICES)
+    # اضافة خيار جديد للفلترة (مقبول + جاري المراجعة) يظهر للبائع فقط
+    status_dict['not-rejected'] = 'غير مرفوض'
+    
     type_dict = dict(Product.TYPE_CHOICES)
     gender_dict = dict(Product.GENDER_CHOICES)
 
     # ── فلترة ──────────────────────────────────────────
     status = request.GET.get('status')
-    #change-later استبعد حالة قيد المراجعة من الخيارات كي لا يراها المستخدم
-    valid_statuses = [choice[0] for choice in Product.STATUS_CHOICES]
-    if status in valid_statuses:
+    if status == 'not-rejected':
+        # المقبول + قيد المراجعة معاً (أي كل ما ليس مرفوضاً)
+        products = products.exclude(status='rejected')
+    elif status in dict(Product.STATUS_CHOICES):
         products = products.filter(status=status)
 
     product_type = request.GET.get('type')
@@ -114,6 +118,11 @@ def store_products(request, sid):
     selected_sort = request.GET.get('sort', '-upload_at')
     order_by = VALID_SORTS.get(selected_sort, '-upload_at')
     products = products.order_by(order_by)
+    
+    # ── هل يوجد منتجات مرفوضة تابعة للمتجر ──────────────────────────────────────
+    # الإداري: يرى العمود دائماً | البائع: فقط إذا كان لديه منتج مرفوض
+    show_status_column = user_type == "admin" or products.filter(status='rejected').exists()
+    
     # ── Pagination ──────────────────────────────────────
     paginator = Paginator(products, 12)
     page_number = request.GET.get('page')
@@ -131,6 +140,7 @@ def store_products(request, sid):
         'sid': sid,
         "has_products": has_products,
         'page_obj': page_obj,
+        "show_status_column": show_status_column,
         'query_string': query_string,
         # قيم الفلاتر للحفاظ عليها في الـ form
         'selected_status': status or '',
