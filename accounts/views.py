@@ -4,10 +4,12 @@ from django.http import Http404, JsonResponse
 from django.core.exceptions import ValidationError
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.contrib.auth import update_session_auth_hash
+from django.db import transaction
+
 
 from accounts.forms import *
 from accounts.validators import validate_username, get_redirect_url_for_user,  get_user_type 
-from accounts.decorators import vendor_only 
 
 @login_required(login_url='accounts:log_in') 
 def account_details(request):
@@ -15,45 +17,75 @@ def account_details(request):
     الدالة المسؤولة عن عرض الصفحة التي  تحتوي على بيانات الحساب الخاص بالبائع 
     يمكن فقط للبائعين الدخول اليها 
     """
-    userprofile = request.user.userprofile
+    account_form = AccountUpdateForm(user=request.user)
+    password_form = PasswordChangeForm(user=request.user)
     
     context = {
-        'userprofile': userprofile,
+        'account_form': account_form,
+        'password_form': password_form,
     }
     return render(request, 'accounts/account_details.html', context)
 
-@login_required(login_url='accounts:log_in') 
+@login_required(login_url='accounts:log_in')
 @require_POST
 def edit_account_details(request):
-    """
-    الدالة المسؤولة عن تعديل بيانات الحساب الخاص بالبائع 
-    يمكن فقط للبائعين الدخول اليها 
-    """
-    
-    username = request.POST.get('username')
-    name = request.POST.get('name')
-    
+    # التحقق من بيانات الحساب قبل حفظها.
     user = request.user
-    current_user_id = request.user.pk if request.user.is_authenticated else None
-    try:
-        validate_username(username, current_user_id)
-    except ValidationError as e:
+    form = AccountUpdateForm(request.POST, user=user)
+
+    if not form.is_valid():
         return JsonResponse({
-            "status": "error",
-            "message": str(e)
+            'status': 'error',
+            'message': 'يرجى تصحيح الأخطاء المدخلة.',
+            'errors': form.errors.get_json_data(),
         })
 
-    user.username = username
-    userprofile = request.user.userprofile
-    userprofile.name = name
-    
-    user.save()
-    userprofile.save()
+    with transaction.atomic():
+        # تحديث بيانات الحساب.
+        user.username = form.cleaned_data['username']
+        user.userprofile.name = form.cleaned_data['name']
+
+        user.save()
+        user.userprofile.save()
+
     return JsonResponse({
-        "status": "success",
-        "message": "تم التعديل بنجاح",
-        "name": userprofile.name,
-        "username": user.username
+        'status': 'success',
+        'message': 'تم تعديل بيانات الحساب بنجاح.',
+        'name': user.userprofile.name,
+        'username': user.username,
+    })
+
+@login_required(login_url='accounts:log_in')
+@require_POST
+def change_password(request):
+    # التحقق من البيانات وتغيير كلمة المرور عند صحتها.
+    user = request.user
+    form = PasswordChangeForm(request.POST, user=user)
+
+    if not form.is_valid():
+        return JsonResponse({
+            'status': 'error',
+            'message': 'يرجى تصحيح الأخطاء المدخلة.',
+            'errors': form.errors.get_json_data(),
+        })
+
+    # عدم تنفيذ أي تغيير إذا كانت حقول كلمة المرور فارغة.
+    if not form.changes_password:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'يرجى إدخال بيانات كلمة المرور الجديدة.',
+        }, status=400)
+
+    # تغيير كلمة المرور وحفظها.
+    user.set_password(form.cleaned_data['new_password'])
+    user.save(update_fields=['password'])
+
+    # الحفاظ على جلسة تسجيل الدخول الحالية.
+    update_session_auth_hash(request, user)
+
+    return JsonResponse({
+        'status': 'success',
+        'message': 'تم تغيير كلمة المرور بنجاح.',
     })
 
 @login_required(login_url='accounts:log_in')

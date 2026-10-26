@@ -201,6 +201,25 @@ section {
 .panel-content.social .field label i.whatsapp {
     background-color: #25D366;
 }
+/* ═══════════════════════════════════════════
+    panel-btns Section 
+═══════════════════════════════════════════ */
+.panel-content .panel-btns {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+.panel-content .panel-btns .btn  {
+    background-color: transparent;
+    padding: 7px 10px;
+    color: var(--main-text-color);
+    border: 1px solid var(--seprator-color);
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
 
 /* ═══════════════════════════════════════════
     Sign Page Section 

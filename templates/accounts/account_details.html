@@ -29,81 +29,115 @@
             <button class="back-btn" id="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i> </button>
         </div>
         
-        <form id="edit_account_form" method="POST" action="{% url 'accounts:edit_account_details' %}" data-current-user-id="{{ request.user.id }}" data-check-url="{% url 'accounts:check_username' %}" autocomplete="off" >
+            
+            
+        <form  class="settings-panel" id="edit_account_form" method="POST" action="{% url 'accounts:edit_account_details' %}" data-current-user-id="{{ request.user.id }}" data-check-url="{% url 'accounts:check_username' %}" autocomplete="off">
             {% csrf_token %}
-            <nav>
-                <div class="nav-btns">
-                    <button type="submit"  class="save-btn">حفظ</button>
-                    <button type="reset" class="reset" >الغاء</button>
-                </div>
-            </nav>
-            
-            <div  class="settings-panel">
-                <div class="panel-header">
-                    <div class="panel-heading">
-                        <i class="panel-icon fa-solid fa-user"></i>
-                        <div class="panel-title">
-                            <h2>تفاصيل الحساب</h2>
-                            <p>الاسم، المعرف. </p>
-                        </div>
+            <div class="panel-header">
+                <div class="panel-heading">
+                    <i class="panel-icon fa-solid fa-user"></i>
+                    <div class="panel-title">
+                        <h2>تفاصيل الحساب</h2>
+                        <p>الاسم، المعرف. </p>
                     </div>
-                </div>
-
-                <div class="panel-content ">
-                    <div class="fields-container">
-
-                        <div id="field-errors" class="field-errors" hidden></div>
-
-                        <div class="field">
-                            <label for="name">اسم المستخدم </label>
-                            <div class="input">
-                                <input id="name" name="name" type="text" placeholder="ادخل اسم المستخدم ..." value="{{ userprofile.name }}">
-                                <i class="fa-solid fa-user"></i>
-                            </div>
-                            <span class="help-text">نص المساعدة هنا نص المساعدة هنا</span>
-                        </div>
-
-                        <div class="field">
-                            <label for="username">المعرف</label>
-                            <div class="input">
-                                <input id="username" name="username"  type="text" placeholder="ادخل اسم المتجر ..." value="{{ userprofile.user.username }}" >
-                                <i class="fa-solid fa-at"></i>
-                            </div>
-                            <span id="username-feedback" class="help-text">نص المساعدة هنا نص المساعدة هنا</span>
-                        </div>
-
-                    </div>
-            
                 </div>
             </div>
 
-            <div  class="settings-panel">
-                <div class="panel-header">
-                    <div class="panel-heading">
-                        <i class="panel-icon fa-solid fa-lock"></i>
-                        <div class="panel-title">
-                            <h2>كلمة السر</h2>
-                            <p>بإمكانك تغيير كلمة السر. </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="panel-content ">
-                    <div class="fields-container">
+            <div class="panel-content">
+                <div class="fields-container">
 
-                        <div class="field">
-                            <label for="password">كلمة السر </label>
-                            <div class="input">
-                                <input id="password" name="password" type="password" placeholder="******" >
-                            </div>
-                            <span class="help-text">نص المساعدة هنا نص المساعدة هنا</span>
-                        </div>
+                    <div class="field-errors" hidden></div>
 
+                    <div class="field">
+                        <label for="{{ account_form.name.id_for_label }}">{{ account_form.name.label }}</label>
+                        <div class="input">
+                            {{ account_form.name }}
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <span class="help-text">{{ account_form.name.help_text }}</span>
                     </div>
-            
+
+
+                    <div class="field">
+                        <label for="{{ account_form.username.id_for_label }}">{{ account_form.username.label }}</label>
+                        <div class="input">
+                            {{ account_form.username }}
+                            <i class="fa-solid fa-at"></i>
+                        </div>
+                        <span id="username-feedback" class="help-text">{{ account_form.username.help_text }}</span>
+                    </div>
+
                 </div>
+
+                <div class="panel-btns">
+                    <button type="reset"  class="btn reset-btn">اعادة تعيين</button>
+                    <button type="submit" class="btn save-btn">حفظ</button>
+                </div>
+        
             </div>
-
         </form>
+
+        <form class="settings-panel" id="change_password_form" method="POST"  action="{% url 'accounts:change_password' %}">
+            {% csrf_token %}
+            <input
+                type="text"
+                name="username"
+                value="{{ request.user.username }}"
+                autocomplete="username"
+                hidden
+                tabindex="-1"
+                aria-hidden="true"
+            >
+            <div class="panel-header">
+                <div class="panel-heading">
+                    <i class="panel-icon fa-solid fa-lock"></i>
+                    <div class="panel-title">
+                        <h2> تغيير كلمة السر</h2>
+                        <p>بإمكانك تغيير كلمة السر. </p>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-content ">
+                <div class="fields-container">
+                    <div class="field-errors" hidden></div>
+
+                    <div class="field">
+                        <label for="{{ password_form.old_password.id_for_label }}">{{ password_form.old_password.label }}</label>
+                        <div class="input">
+                            {{ password_form.old_password }}
+                            <i class="fa-regular fa-eye trigger-password"></i>
+                        </div>
+                        <span class="help-text">{{ password_form.old_password.help_text }}</span>
+                    </div>
+
+                    <div class="field">
+                        <label for="{{ password_form.new_password.id_for_label }}">{{ password_form.new_password.label }}</label>
+                        <div class="input">
+                            {{ password_form.new_password }}
+                            <i class="fa-regular fa-eye trigger-password"></i>
+                        </div>
+                        <span class="help-text">{{ password_form.new_password.help_text }}</span>
+                    </div>
+
+                    <div class="field">
+                        <label for="{{ password_form.confirmnew_password.id_for_label }}">{{ password_form.confirmnew_password.label }}</label>
+                        <div class="input">
+                            {{ password_form.confirmnew_password }}
+                            <i class="fa-regular fa-eye trigger-password"></i>
+                        </div>
+                        <span class="help-text">{{ password_form.confirmnew_password.help_text }}</span>
+                    </div>
+
+                </div>
+
+                <div class="panel-btns">
+                    <button type="reset"  class="btn reset-btn">اعادة تعيين</button>
+                    <button type="submit" class="btn save-btn">حفظ</button>
+                </div>
+        
+            </div>
+        </form>
+
 
     </section>
 

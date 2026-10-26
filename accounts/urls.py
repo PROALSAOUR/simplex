@@ -7,6 +7,7 @@ urlpatterns = [
     path('account/under-review/', account_under_review, name='account_under_review'),
     path('account/details/', account_details, name='account_details'), 
     path('account/edit/details/', edit_account_details, name='edit_account_details'), 
+    path('account/change/password/', change_password, name='change_password'), 
     
     path('store/<int:sid>/details/', store_details, name='store_details'), 
 

@@ -145,6 +145,154 @@ class LoginForm(forms.Form):
         }
     )
 
+# نموذج تعديل حساب مستخدم ( الاسم + المعرف)
+class AccountUpdateForm(forms.ModelForm):
+    
+    username = forms.CharField(
+        label='المعرف',
+        help_text = 'المعرف هو اسم المستخدم الذي ستسجل به الدخول. يجب أن يتكون من أحرف إنجليزية وأرقام فقط، ولا يحتوي على فراغات.',
+        error_messages={
+            'required': 'المعرف  مطلوب',
+            'invalid': 'اسم المستخدم غير صالح',
+        },
+        widget=forms.TextInput(attrs={
+            'id': 'username',
+            'placeholder': '(مثل: example1)'
+        })
+    )
+    
+    class Meta:
+        model = UserProfile
+        fields = ['name']
+        error_messages = {
+            'name': {
+                'required': 'الاسم مطلوب',
+            }
+        }
+    
+    def __init__(self, *args, user=None, **kwargs):
+        # الاحتفاظ بالمستخدم للتحقق من كلمة المرور والمعرف.
+        super().__init__(*args, **kwargs)
+        self.user = user
+
+        if user:
+            self.fields['name'].initial = user.userprofile.name
+            self.fields['username'].initial = user.username
+            
+    def clean_username(self):
+        # التحقق من صلاحية المعرف وعدم استخدامه من حساب آخر.
+        username = self.cleaned_data['username'].strip()
+
+        validate_username(username, self.user.pk)
+
+        return username
+
+# نموذج تعديل كلمة مرور مستخدم 
+class PasswordChangeForm(forms.Form):
+    
+    # حقل كلمة المرور القديمة.
+    old_password = forms.CharField(
+        label='كلمة السر القديمة',
+        required=False,
+        widget=forms.PasswordInput(attrs={
+            'autocomplete': 'current-password',
+        }),
+        error_messages={
+            'required': 'كلمة المرور القديمة مطلوبة.',
+        }
+    )
+    # حقل كلمة المرور الجديدة.
+    new_password = forms.CharField(
+        label='كلمة السر الجديدة',
+        required=False,
+        help_text=(
+            'يجب أن تتكون كلمة المرور من 4 أحرف على الأقل، '
+        ),
+        widget=forms.PasswordInput(attrs={
+            'autocomplete': 'new-password',
+        }),
+        error_messages={
+            'required': 'كلمة المرور الجديدة مطلوبة.',
+        }
+    )
+    # تأكيد كلمة المرور الجديدة.
+    confirmnew_password = forms.CharField(
+        label='تأكيد كلمة السر',
+        required=False,
+        help_text=(
+            "اعد كتابة كلمة المرور الجديدة مرة اخرى للتأكيد"
+        ),
+        widget=forms.PasswordInput(attrs={
+            'autocomplete': 'new-password',
+        }),
+        error_messages={
+            'required': 'تأكيد كلمة المرور مطلوب.',
+        }
+    )
+            
+    def __init__(self, *args, user=None, **kwargs):
+        # الاحتفاظ بالمستخدم للتحقق من كلمة المرور الحالية.
+        super().__init__(*args, **kwargs)
+        self.user = user
+                
+    def clean(self):
+        # التحقق من جميع الحقول المرتبطة بتغيير كلمة المرور.
+        cleaned_data = super().clean()
+
+        old_password = cleaned_data.get('old_password', '')
+        new_password = cleaned_data.get('new_password', '')
+        confirm_password = cleaned_data.get('confirmnew_password', '')
+
+        # السماح بإرسال الفورم دون تغيير كلمة المرور.
+        if not any((old_password, new_password, confirm_password)):
+            return cleaned_data
+
+        # التأكد من وجود كلمة المرور القديمة وصحتها.
+        if not old_password:
+            self.add_error(
+                'old_password',
+                'يرجى إدخال كلمة المرور القديمة.'
+            )
+        elif not self.user or not self.user.check_password(old_password):
+            self.add_error(
+                'old_password',
+                'كلمة المرور القديمة غير صحيحة.'
+            )
+
+        # التحقق من كلمة المرور الجديدة.
+        if not new_password:
+            self.add_error(
+                'new_password',
+                'يرجى إدخال كلمة المرور الجديدة.'
+            )
+        elif len(new_password) < 4:
+            self.add_error(
+                'new_password',
+                'يجب أن تتكون كلمة المرور من 4 أحرف على الأقل.'
+            )
+
+        # التحقق من تأكيد كلمة المرور.
+        if not confirm_password:
+            self.add_error(
+                'confirmnew_password',
+                'يرجى تأكيد كلمة المرور الجديدة.'
+            )
+        elif new_password and new_password != confirm_password:
+            self.add_error(
+                'confirmnew_password',
+                'كلمتا المرور غير متطابقتين.'
+            )
+
+        return cleaned_data
+
+    @property
+    def changes_password(self):
+        # تحديد ما إذا كانت هناك كلمة مرور جديدة صالحة في بيانات الفورم.
+        return bool(
+            self.cleaned_data.get('new_password')
+            if hasattr(self, 'cleaned_data')
+            else False
+        )
 # نموذج تعديل جميع بيانات المتجر من نموذج واحد
 class StoreUpdateForm(forms.ModelForm):
     check_orders = forms.BooleanField(
