@@ -240,8 +240,7 @@
                                 <span class="counter" > 
                                     <span class="current-c">0</span>/<span class="max-c"></span>
                                 </span>
-                                {% comment %} #change-later غير اقصى حد للوصف {% endcomment %}
-                                <textarea name="description" id="description"  placeholder="ادخل وصف المنتج ..."  rows="5" cols="40"  maxlength="500" required >{{ form.description.value|default:'' }}</textarea>
+                                <textarea name="description" id="description"  placeholder="ادخل وصف المنتج ..."  rows="5" cols="40"  maxlength="1000" required >{{ form.description.value|default:'' }}</textarea>
                             </div>
                             {% if form.description.errors %}
                                 <span class="help-text"> {{ form.description.errors.0 }} </span>

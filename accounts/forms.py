@@ -21,8 +21,8 @@ class StoreRegisterForm(forms.ModelForm):
         })
     )
     password = forms.CharField(
-        label='كلمة السر',
-        help_text = "كلمة السر يجب أن تكون قوية وتتكون من 4 أحرف على الأقل، وتشمل حروفًا وأرقامًا \n (في حال نسيان كلمة المرور سوف يتوجب عليك التواصل يدويا مع خدمة العملاء لتغييرها لذا يرجى حفظها جيدا.)",
+        label='كلمة المرور',
+        help_text = "كلمة المرور يجب أن تكون قوية وتتكون من 4 أحرف على الأقل، وتشمل حروفًا وأرقامًا \n (في حال نسيان كلمة المرور سوف يتوجب عليك التواصل يدويا مع خدمة العملاء لتغييرها لذا يرجى حفظها جيدا.)",
         widget=forms.PasswordInput,
         error_messages={
         'required': 'كلمة المرور مطلوبة',
@@ -30,7 +30,7 @@ class StoreRegisterForm(forms.ModelForm):
         }
     )
     confirm_password =forms.CharField(
-    label='تأكيد كلمة السر',  
+    label='تأكيد كلمة المرور',  
     widget=forms.PasswordInput,
         error_messages={
         'required': 'تأكيد كلمة المرور مطلوب',
@@ -138,7 +138,7 @@ class LoginForm(forms.Form):
 
     password = forms.CharField(
         label="كلمة المرور",
-        help_text="أدخل كلمة السر الخاصة بك",
+        help_text="أدخل كلمة المرور الخاصة بك",
         widget=forms.PasswordInput,
         error_messages={
             'required': 'كلمة المرور مطلوبة',
@@ -192,24 +192,27 @@ class PasswordChangeForm(forms.Form):
     
     # حقل كلمة المرور القديمة.
     old_password = forms.CharField(
-        label='كلمة السر القديمة',
+        label='كلمة المرور الحالية',
         required=False,
+        help_text='أدخل كلمة المرور الحالية.',
         widget=forms.PasswordInput(attrs={
             'autocomplete': 'current-password',
+            'placeholder': 'كلمة المرور الحالية',
         }),
         error_messages={
-            'required': 'كلمة المرور القديمة مطلوبة.',
+            'required': 'كلمة المرور الحالية مطلوبة.',
         }
     )
     # حقل كلمة المرور الجديدة.
     new_password = forms.CharField(
-        label='كلمة السر الجديدة',
+        label='كلمة المرور الجديدة',
         required=False,
         help_text=(
-            'يجب أن تتكون كلمة المرور من 4 أحرف على الأقل، '
+            'يجب أن تتكون من 4 أحرف على الأقل، '
         ),
         widget=forms.PasswordInput(attrs={
             'autocomplete': 'new-password',
+            'placeholder': 'كلمة المرور الجديدة',
         }),
         error_messages={
             'required': 'كلمة المرور الجديدة مطلوبة.',
@@ -217,13 +220,12 @@ class PasswordChangeForm(forms.Form):
     )
     # تأكيد كلمة المرور الجديدة.
     confirmnew_password = forms.CharField(
-        label='تأكيد كلمة السر',
+        label='تأكيد كلمة المرور',
         required=False,
-        help_text=(
-            "اعد كتابة كلمة المرور الجديدة مرة اخرى للتأكيد"
-        ),
+        help_text='أعد إدخال كلمة المرور الجديدة.',
         widget=forms.PasswordInput(attrs={
             'autocomplete': 'new-password',
+            'placeholder': 'تأكيد كلمة المرور الجديدة',
         }),
         error_messages={
             'required': 'تأكيد كلمة المرور مطلوب.',

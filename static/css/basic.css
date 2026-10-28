@@ -1194,8 +1194,9 @@ nav .nav-btns {
 }
 nav button {
     font-size: 14px;
-    color: #ffffff;
-    background-color: var(--gray-color);
+    background-color: transparent;
+    color: var(--gray-color);
+    border: 1px solid var(--seprator-color);
     padding: 5px 12px;
     margin: 0 2px;
     border-radius: 5px;

@@ -472,12 +472,12 @@
 
             </div>
 
-            <form class="cart_form" id="cart_form" autocomplete="off" data-submit-url="{% url "orders:create_order" %}" data-redirect-url="{% url "store:view_product" product.id %}" data-check-url="{% url 'accounts:check_phone_number' %}"  hidden>
+            <form class="cart_form" id="cart_form" autocomplete="off" data-submit-url="{% url "orders:create_order" %}" data-redirect-url="{% url "store:view_product" product.id %}" data-user-type="customer" data-check-url="{% url 'accounts:check_phone_number' %}"  hidden>
                 {% csrf_token %}
 
                 <div class="form-title">
                     <h3>مراجعة وتأكيد الطلب</h3>
-                    <button class="hide-form">
+                    <button type="button" class="hide-form">
                         العودة الى المنتج <i class="fa-solid fa-chevron-left"></i>
                     </button>
                 </div>

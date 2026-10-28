@@ -287,7 +287,6 @@ def all_products(request):
 
     # ── فلترة ──────────────────────────────────────────
     status = request.GET.get('status')
-    #change-later استبعد حالة قيد المراجعة من الخيارات كي لا يراها المستخدم
     valid_statuses = [choice[0] for choice in Product.STATUS_CHOICES]
     if status in valid_statuses:
         products = products.filter(status=status)

@@ -50,7 +50,7 @@
 
     </div>
 
-    <form id="cart_form" autocomplete="off" data-submit-url="{% url "orders:create_order" %}" data-redirect-url="{% url "orders:store_orders" STORE_ID %}" data-check-url="{% url 'accounts:check_phone_number' %}"  hidden >
+    <form id="cart_form" autocomplete="off" data-submit-url="{% url "orders:create_order" %}" data-redirect-url="{% url "orders:store_orders" STORE_ID %}" data-user-type="admin" data-check-url="{% url 'accounts:check_phone_number' %}"  hidden >
         {% csrf_token %}
 
         <div class="cart-section ">

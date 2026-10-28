@@ -1,4 +1,4 @@
-{% comment %} رسالة الشكر التي تظهر بعد انشاء الطلب بنجاح {% endcomment %}
+{% comment %} رسالة الشكر التي تظهر بعد إنشاء الطلب بنجاح {% endcomment %}
 
 <style>
     .thanks-modal {
@@ -9,18 +9,18 @@
         z-index: 9999;
         align-items: center;
         justify-content: center;
+        padding: 15px;
     }
     .thanks-modal.show {
         display: flex;
     }
-    .thanks-modal-content {
-        font-size: 18px;
+    .thanks-modal .thanks-msg {
         background: var(--background-color);
-        border-radius: 10px;
-        padding: 40px 32px;
+        border-radius: 14px;
+        padding: 32px 22px 26px;
         text-align: center;
-        max-width: 360px;
-        width: 90%;
+        max-width: 380px;
+        width: 100%;
         box-shadow: var(--main-shadow);
         animation: popIn 0.3s ease;
     }
@@ -28,30 +28,103 @@
         from { opacity: 0; transform: scale(0.9); }
         to   { opacity: 1; transform: scale(1); }
     }
-    .thanks-modal i {
+    .thanks-modal .title {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+    .thanks-modal .title i {
         color: var(--green-color);
-        font-size: 3rem;
+        background-color: var(--green-background);
+        font-size: 2.2rem;
+        width: 80px;
+        height: 80px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 10px;
+        border-radius: 50%;
     }
-    .thanks-modal h3 {
-        margin: 0 0 8px;
-        font-size: 1.2rem;
-    }
-    .thanks-modal p {
+    .thanks-modal .title h3 {
+        font-size: 1.6rem;
         margin: 0;
-        color: var(--clr-text-muted);
-        font-size: 0.9rem;
+    }
+    .thanks-modal .title p {
+        color: var(--gray-color);
+        font-size: 0.95rem;
+        margin: 0;
+    }
+    .thanks-modal .content {
+        border-top: 1px solid color-mix(in srgb, var(--gray-color) 25%, transparent);
+        padding-top: 16px;
+    }
+    /* في طلبات الإدارة: إخفاء قسم المحتوى */
+    .thanks-modal.no-content .content {
+        display: none;
+    }
+    .thanks-modal.no-content .title {
+        margin-bottom: 0;
+    }
+
+    /* منع تمرير الصفحة خلف المودال */
+    body.modal-open {
+        overflow: hidden;
+    }
+    .thanks-modal .content p {
+        font-size: 0.92rem;
+        line-height: 1.8;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    .thanks-modal .content p i {
+        font-size: 1.1rem;
+        color: var(--green-color);
+    }
+    .thanks-modal .content button {
+        background-color: var(--green-color);
+        border: 1px solid var(--green-color);
+        border-radius: 8px;
+        padding: 10px 18px;
+        margin-top: 18px;
+        color: #fff;
+        font-size: 1rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: opacity 0.2s;
+    }
+    .thanks-modal .content button:hover,
+    .thanks-modal .content button:active {
+        opacity: 0.88;
     }
 </style>
 
-<div class="thanks-modal" id="thanks-modal" aria-live="polite">
-    <div class="thanks-modal-content">
-        <i class="fa-solid fa-check"></i>
-        <h3>شكرا لك</h3>
-        {% comment %} #change-later غير النص {% endcomment %}
-        <p> تم انشاء الطلب بنجاح </p>
+<div class="thanks-modal" id="thanks-modal" role="dialog" aria-modal="true" aria-live="polite">
+
+    <div class="thanks-msg">
+
+        <div class="title">
+            <i class="fa-solid fa-check"></i>
+            <h3>شكراً لك!</h3>
+            <p>تم إنشاء طلبك بنجاح</p>
+        </div>
+
+        <div class="content">
+            <p>
+                سنتواصل معك قريباً لتأكيد الطلب
+                <i class="fa-solid fa-phone-volume"></i>
+            </p>
+            <button type="button">
+                العودة إلى المنتج
+                <i class="fa-solid fa-arrow-left-long"></i>
+            </button>
+        </div>
+
     </div>
+
 </div>

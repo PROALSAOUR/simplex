@@ -42,13 +42,13 @@
             <div class="field {% if form.password.errors %}has-error{% endif %} ">
                 <label for="password">{{ form.password.label }}</label>
                 <div class="input">
-                    <input id="password" name="password" type="password" placeholder="ادخل كلمة السر الخاصة بك ..."  autocomplete="on">
+                    <input id="password" name="password" type="password" placeholder="ادخل كلمة المرور الخاصة بك ..."  autocomplete="on">
                     <i class="fa-solid fa-unlock-keyhole"></i>
                 </div>
                 {% if form.password.errors %}
                     <span class="help-text"> {{ form.password.errors.0 }} </span>
                 {% endif %}
-                <a class="help-text primary-cl">نسيت كلمة السر؟</a>
+                <a class="help-text primary-cl">نسيت كلمة المرور؟</a>
             </div>
 
             <button type="submit" class="primary-btn" >تسجيل الدخول</button>

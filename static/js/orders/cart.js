@@ -167,13 +167,53 @@ function displayFormErrors(form, errors = {}, itemErrors = {}) {
     }
 }
 
-function showThankYouModal() {
-    const thanksModal = document.getElementById("thanks-modal");
-    if (!thanksModal ) return;
-        thanksModal.classList.add("show");
-        window.setTimeout(() => {
-            thanksModal.classList.remove("show");
-        }, 2500);
+// دالة عرض  رسالة الشكر
+let thanksTimer = null;
+let thanksAbort = null;
+
+function showThankYouModal(userType, redirectUrl) {
+    /**
+     * يعرض رسالة الشكر.
+     * admin      : تُعرض بدون قسم المحتوى لعدة ثوانٍ ثم يتم التحويل تلقائياً.
+     * customer : تبقى ظاهرة حتى النقر خارجها أو على الزر أو Escape، وكلها تحوّل للرابط.
+     */
+    const modal = document.getElementById("thanks-modal");
+    const goBack = () => { window.location.href = redirectUrl; };
+
+    // احتياط: إن لم يوجد المودال في الصفحة نحوّل مباشرة
+    if (!modal) {
+        goBack();
+        return;
+    }
+
+    // تنظيف أي عرض سابق (مؤقتات ومستمعات)
+    clearTimeout(thanksTimer);
+    thanksAbort?.abort();
+    thanksAbort = new AbortController();
+    const { signal } = thanksAbort;
+
+    const isAdmin = userType === "admin";
+
+    modal.classList.toggle("no-content", isAdmin);
+    modal.classList.add("show");
+    document.body.classList.add("modal-open");
+
+    if (isAdmin) {
+        thanksTimer = setTimeout(goBack, 2500);
+        return;
+    }
+
+    // صفحة البيع: تبقى ظاهرة حتى يتفاعل المستخدم
+    modal.addEventListener("click", (e) => {
+        if (e.target === modal) goBack();
+    }, { signal });
+
+    modal.querySelector(".content button")
+        ?.addEventListener("click", goBack, { signal });
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") goBack();
+    }, { signal });
 }
 // ===========================================================================
 // كود التحقق من صحة رقم الهاتف بشكل مباشر اثناء الكتابة
@@ -213,13 +253,14 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 // ============================================================================
 //  إرسال بيانات الطلب إلى الخادم وعرض نتيجة العملية.
+// إرسال بيانات الطلب إلى الخادم وعرض نتيجة العملية.
 async function submitOrder(form) {
     const url = form.dataset.submitUrl;
+    const userType = form.dataset.userType;
+    const redirectUrl = form.dataset.redirectUrl;
+    const submitBtn = form.querySelector(".add-btn");
 
-    const csrfToken = form.querySelector(
-        '[name="csrfmiddlewaretoken"]'
-    ).value;
-
+    const csrfToken = form.querySelector('[name="csrfmiddlewaretoken"]').value;
     const formData = new FormData(form);
 
     const data = {
@@ -232,6 +273,10 @@ async function submitOrder(form) {
             qty: item.qty
         }))
     };
+
+    // منع الإرسال المزدوج
+    if (submitBtn) submitBtn.disabled = true;
+    let succeeded = false;
 
     try {
         const response = await fetch(url, {
@@ -246,27 +291,30 @@ async function submitOrder(form) {
         const result = await response.json();
 
         if (!response.ok || !result.success) {
-            displayFormErrors(
-                form,
-                result.errors || {},
-                result.item_errors || {}
-            );
+            displayFormErrors(form, result.errors || {}, result.item_errors || {});
             return;
         }
 
-        // اظهار الشكرية الناجحة.
-        
-        showThankYouModal();
+        succeeded = true;
 
         form.reset();
         cartProducts.length = 0;
         renderCart();
-        setTimeout(() => {
-            window.location.href = form.dataset.redirectUrl;
-        }, 3000);
+
+        // اظهار رسالة الشكر (التحويل يتم داخلها حسب نوع الصفحة)
+        showThankYouModal(userType, redirectUrl);
 
     } catch (error) {
         console.error("Submit order error:", error);
+
+        const box = document.getElementById("customer-errors");
+        if (box) {
+            box.textContent = "تعذّر إرسال الطلب، تحقق من اتصالك بالإنترنت وحاول مرة أخرى.";
+            box.hidden = false;
+        }
+    } finally {
+        // نعيد تفعيل الزر عند الفشل فقط، أما عند النجاح فالصفحة ستُحوَّل
+        if (!succeeded && submitBtn) submitBtn.disabled = false;
     }
 }
 
