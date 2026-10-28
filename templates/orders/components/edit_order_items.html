@@ -6,23 +6,25 @@
         {% csrf_token %}
         <input type="hidden" name="order_item_id" id="delete-order-item-id">
 
-        <div class="logo-image">
-            <img src=" {% static "images/d-long-logo.png" %} " alt="logo" width="120" height="80"  draggable="false">
-        </div>
-
         <div class="dialog-content">
             <h3 class="dialog-title"> تحذير </h3>
-            <p>هل انت متأكد من رغبتك بإزالة المنتج: <span class="cancel" id="delete-order-item-name"></span> من الطلب بشكل نهائي؟ </p>
-            <br>
-            {% comment %} #change-later التنسيق سيئ و مو عاجبني {% endcomment %}
-            <p> بمجرد الضغط على زر "إزالة"، سيتم إزالة هذا المنتج من الطلب نهائيًا، ولن تتمكن من التراجع عن هذه العملية</p>
+
+            <p class="dialog-text">
+                هل أنت متأكد من رغبتك في إزالة المنتج
+                <strong id="delete-order-item-name" class="cancel"></strong>
+                من الطلب؟
+            </p>
+
+            <div class="delete-warning">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>لن تتمكن من التراجع عن هذه العملية بعد تأكيد الإزالة.</span>
+            </div>
         </div>
 
         <div class="dialog-actions">
-            <button type="button" onclick="delete_order_item_dialog.close()">تراجع</button>
+            <button class="cancel-btn" type="button" onclick="delete_order_item_dialog.close()">تراجع</button>
             <button class="remove-btn" type="submit"> إزالة</button>
         </div>
         
     </form>
 </dialog>
-

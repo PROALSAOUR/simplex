@@ -1094,39 +1094,82 @@ dialog .logo-image img {
 }
 
 dialog .dialog-content {
-    margin: 10px 0;
+    margin: 20px 0;
+    text-align: center;
 }
 dialog .dialog-content .dialog-title {
-    font-size: calc(1em + 10px);
-    margin-bottom: 10px;
+    font-size: calc(1em + 6px);
+    margin: 0 0 15px;
 }
 dialog .dialog-content .dialog-text {
-    font-size: calc(1em + 2px);
     line-height: 1.5;
+    margin: 0;
 }
+dialog .dialog-content .dialog-text strong {
+    font-weight: 700;
+}
+/* تنسيق التحذير الإضافي. */
+dialog .delete-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 18px;
+    padding: 12px;
+    text-align: right;
+    font-size: 0.9em;
+    line-height: 1.5;
+    color: var(--main-text-color);
+    background-color: rgba(220, 53, 69, 0.08);
+    border: 1px solid rgba(220, 53, 69, 0.2);
+    border-radius: 8px;
+}
+
+dialog .delete-warning i {
+    margin-top: 4px;
+    color: #dc3545;
+}
+
 dialog .fields-container {
     text-align: right;
     font-size: calc(1em - 2px);
 }
 dialog .dialog-actions {
-    padding: 10px;
-    margin-top: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    padding: 0px;
+    margin-top: 20px;
+    gap: 12px;
 }
 dialog .dialog-actions button {
-    padding: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 110px;
+    padding: 11px 18px;
+    font: inherit;
     font-weight: 700;
+    cursor: pointer;
+    border: 1px solid var(--seprator-color);
+    border-radius: 7px;
+    transition: background-color 0.2s, color 0.2s;
+}
+/* زر التراجع. */
+dialog .dialog-actions .cancel-btn {
     color: var(--main-text-color);
     background-color: transparent;
-    border: 1px solid var(--seprator-color);
-    border-radius: 5px;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    -ms-border-radius: 5px;
-    -o-border-radius: 5px;
+}
+dialog .dialog-actions .cancel-btn:hover {
+    background-color: var(--seprator-color);
+}
+/* تحسين العرض على الشاشات الصغيرة. */
+@media (max-width: 400px) {
+    dialog .dialog-actions button {
+        flex: 1;
+        min-width: 0;
+        padding: 10px;
+    }
 }
 /* ═══════════════════════════════════════════
     تنسيق التوست 

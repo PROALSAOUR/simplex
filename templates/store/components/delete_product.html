@@ -6,12 +6,16 @@
         <input type="hidden" name="item_id" id="delete-item-id">
 
         <div class="dialog-content">
-            <h3 class="dialog-title cancel" > تحذير </h3>
+            <h3 class="dialog-title" > تحذير </h3>
             <p class="dialog-text" >هل انت متأكد من رغبتك بحذف المنتج: <span class="cancel" id="delete-item-name"></span> بشكل نهائي؟ </p>
+            <div class="delete-warning">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>لن تتمكن من التراجع عن هذه العملية بعد تأكيد الإزالة.</span>
+            </div>
         </div>
 
         <div class="dialog-actions">
-            <button type="button" onclick="delete_item_dialog.close()">تراجع</button>
+            <button class="cancel-btn" type="button" onclick="delete_item_dialog.close()">تراجع</button>
             <button class="remove-btn" type="submit"> حذف</button>
         </div>
         
