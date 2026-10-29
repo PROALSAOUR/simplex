@@ -28,10 +28,10 @@
                     <i class="fa-regular fa-calendar-days"></i>
                 </span>
                 <select id="date-range" name="date_range">
-                    <option value="today">اليوم</option>
-                    <option value="this_month">هذا الشهر</option>
-                    <option value="this_year">هذا العام</option>
-                    <option value="all">منذ الافتتاح</option>
+                    <option value="today" {% if date_range == 'today' %}selected{% endif %}>اليوم</option>
+                    <option value="this_month" {% if date_range == 'this_month' %}selected{% endif %}>هذا الشهر</option>
+                    <option value="this_year" {% if date_range == 'this_year' %}selected{% endif %}>هذا العام</option>
+                    <option value="all" {% if date_range == 'all' %}selected{% endif %}>منذ الافتتاح</option>
                 </select>
                 <span class="date-icon">
                     <i class="fa-solid fa-chevron-down"></i>
@@ -42,20 +42,24 @@
 
         <!-- بطاقات الإحصائيات -->
         <div class="stats-grid">
+            {% comment %} #change-later اضق روابط للمبيعات والمشاهدات {% endcomment %}
 
             <!-- إجمالي المبيعات -->
             <a href="" class="stat-card">
                 <div class="card-content">
                     <div class="card-details">
                         <span class="card-title"> المبيعات</span>
-                        <strong class="card-value">12,540 <span class="currency" >د.ل</span></strong>
+                        <strong class="card-value">
+                            <span id="sales-value">{{ stats.sales.value|floatformat:0 }}</span>
+                            <span class="currency">د.ل</span>
+                        </strong>
                     </div>
                     <div class="card-icon sales">
                         <i class="fa-solid fa-arrow-trend-up"></i>
                     </div>
                 </div>
-                <span class="stat-change complete">
-                    ▲ 12% عن أمس
+                <span id="sales-change" class="stat-change {{ stats.sales.change.class }}">
+                    {{ stats.sales.change.text }}
                 </span>
             </a>
 
@@ -64,14 +68,14 @@
                 <div class="card-content">
                     <div class="card-details">
                         <span class="card-title">الطلبات</span>
-                        <strong class="card-value">245</strong>
+                        <strong id="orders-value" class="card-value"> {{ stats.orders.value }}</strong>
                     </div>
                     <div class="card-icon orders">
                         <i class="fa-solid fa-cart-shopping"></i>
                     </div>
                 </div>
-                <span class="stat-change complete">
-                    ▲ 8% عن أمس
+                <span id="orders-change" class="stat-change {{ stats.orders.change.class }}">
+                    {{ stats.orders.change.text }}
                 </span>
             </a>
             
@@ -80,30 +84,30 @@
                 <div class="card-content">
                     <div class="card-details">
                         <span class="card-title">المنتجات</span>
-                        <strong class="card-value">320</strong>
+                        <strong  id="products-value" class="card-value">{{ stats.products.value }}</strong>
                     </div>
                     <div class="card-icon products">
                         <i class="fa-solid fa-box-open"></i>
                     </div>
                 </div>
-                <span class="stat-change">
-                    — لا تغيير —
+                <span id="products-change" class="stat-change {{ stats.products.change.class }}">
+                    {{ stats.products.change.text }}
                 </span>
             </a>
 
             <!-- المشاهدات -->
-            <a class="stat-card">
+            <a href="" class="stat-card">
                 <div class="card-content">
                     <div class="card-details">
                         <span class="card-title">المشاهدات</span>
-                        <strong class="card-value">1,280</strong>
+                        <strong  id="views-value" class="card-value"> {{ stats.views.value }}</strong>
                     </div>
                     <div class="card-icon views">
                         <i class="fa-regular fa-eye"></i>
                     </div>
                 </div>
-                <span class="stat-change cancel">
-                    ▼ 15% عن أمس
+                <span id="views-change" class="stat-change {{ stats.views.change.class }}">
+                    {{ stats.views.change.text }}
                 </span>
             </a>
 

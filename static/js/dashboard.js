@@ -1,3 +1,68 @@
+// ===============================================================================
+// دوال التحكم ببطاقات الاحصائيات
+
+document.addEventListener('DOMContentLoaded', function () {
+    // تحديث إحصائيات لوحة التحكم عند تغيير الفترة الزمنية.
+    const dateRange = document.getElementById('date-range');
+
+    dateRange.addEventListener('change', async function () {
+        const params = new URLSearchParams({
+            date_range: this.value
+        });
+
+        try {
+            const response = await fetch(
+                `${window.location.pathname}?${params}`,
+                {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error('فشل تحميل الإحصائيات');
+            }
+
+            const data = await response.json();
+            const stats = data.stats;
+
+            // تحديث قيم البطاقات.
+            document.getElementById('sales-value').textContent =
+                Number(stats.sales.value).toLocaleString('en-US', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 2
+                });
+
+            document.getElementById('orders-value').textContent =
+                Number(stats.orders.value).toLocaleString('en-US');
+
+            document.getElementById('products-value').textContent =
+                Number(stats.products.value).toLocaleString('en-US');
+
+            document.getElementById('views-value').textContent =
+                Number(stats.views.value).toLocaleString('en-US');
+
+            // تحديث نسبة التغيير والكلاسات.
+            ['sales', 'orders', 'products', 'views'].forEach(function (key) {
+                const element = document.getElementById(`${key}-change`);
+                const change = stats[key].change;
+
+                element.textContent = change.text;
+                element.classList.remove('complete', 'cancel');
+
+                if (change.class) {
+                    element.classList.add(change.class);
+                }
+            });
+
+        } catch (error) {
+            console.error('Dashboard statistics error:', error);
+        }
+    });
+});
+
+// ===============================================================================
 // اكواد المنحنى الخاص بالمبيعات
 const canvas = document.getElementById("salesChart");
 const ctx = canvas.getContext("2d");

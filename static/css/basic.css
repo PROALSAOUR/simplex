@@ -23,6 +23,7 @@ main.container {
 .currency {
     color: var(--gray-color);
     font-size:  calc(1em - 2px);
+    margin-right: 2px;
 }
 .required {
     color: var(--red-color);

@@ -3,7 +3,6 @@
     <form method="post" action="{% url 'accounts:log_out' %}">
         {% csrf_token %}
 
-
         <div class="dialog-icon">
             <img src="{% static "images/locked.png" %}" alt="" width="150" height="150" >
         </div>
@@ -14,7 +13,7 @@
         </div>
 
         <div class="dialog-actions">
-            <button type="button" onclick="logout.close()">تراجع</button>
+            <button class="cancel-btn" type="button" onclick="logout.close()">تراجع</button>
             <button class="remove-btn" type="submit">تسجيل الخروج</button>
         </div>
         

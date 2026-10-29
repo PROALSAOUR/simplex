@@ -7,26 +7,39 @@ from django.contrib import messages
 from django.db import transaction , models as db_models
 from django.core.paginator import Paginator
 import hashlib, json
-from orders.forms import OrderCustomerForm
 
 from Project.utils import compress_image
 from accounts.decorators import vendor_only
 from Project.validators import validate_image_file , is_bot, should_count_view
 from accounts.validators import get_user_type 
 from store.models import *
+from store.utils import *
 from store.forms import ProductAdminForm, ProductRegisterForm
+from orders.forms import OrderCustomerForm
+from django.views.decorators.vary import vary_on_headers
+
 
 @login_required(login_url='accounts:log_in')
 @vendor_only
+@vary_on_headers('X-Requested-With')  # يمنع خلط HTML بـ JSON في الـ cache
 def store_dashboard(request):
-    #change-later قم بإكمال دالة الداشبورد
-    user_name = request.user.userprofile.name
-    
-    context = {
-        "user_name" : user_name ,
-    }
-    return render(request, 'store/dashboard.html', context)
+    #change-later قسم اخر الطلبات
+    date_range = request.GET.get('date_range', DEFAULT_PERIOD)
+    if date_range not in PERIODS:
+        date_range = DEFAULT_PERIOD
 
+    profile = request.user.userprofile
+    stats = get_dashboard_stats(profile.store, date_range)
+
+    # إعادة JSON عند طلب تحديث الإحصائيات باستخدام AJAX.
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'stats': stats})
+
+    return render(request, 'store/dashboard.html', {
+        'user_name': profile.name,
+        'stats': stats,
+        'date_range': date_range,
+    })
 @login_required(login_url='accounts:log_in')
 def store_products(request, sid):
     """دالة عرض جميع المنتجات الخاصة بالمستخدم كما تحتوي على ألية البحث والفلترة """
@@ -794,3 +807,6 @@ def view_product(request, pid):
     }
 
     return render( request, 'store/view_product.html', context, )
+
+
+
