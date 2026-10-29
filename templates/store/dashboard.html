@@ -114,7 +114,7 @@
             <div class="last-items">
                 <div class="content-header">
                     <h4>أخر الطلبات</h4>
-                    <a href="/orders/all-orders.html">عرض الكل</a>
+                    <a href="{% url "orders:store_orders" STORE_ID %}">عرض الكل</a>
                 </div>
                 <div class="table-wrap">
                     <table>                    
@@ -137,18 +137,7 @@
                                 <td>منذ 4 ايام</td>
                                 <td ><span class="cl-span pending">جاري المعالجة</span></td>
                             </tr>
-                            <tr>
-                                <td>100014</td>
-                                <td >احمد خالد</td>
-                                <td>منذ 2 اسبوع</td>
-                                <td ><span class="cl-span cancel">تم الإلغاء</span></td>
-                            </tr>
-                            <tr>
-                                <td>113010</td>
-                                <td >سارة خالد</td>
-                                <td>منذ 1 اشهر</td>
-                                <td ><span class="cl-span complete">تم التسليم</span></td>
-                            </tr>
+        
                         </tbody>
                     </table>
                 </div>

@@ -7,13 +7,11 @@ from django.contrib import messages
 from django.db import transaction , models as db_models
 from django.core.paginator import Paginator
 import hashlib, json
-from datetime import timedelta
-from django.utils import timezone
 from orders.forms import OrderCustomerForm
 
 from Project.utils import compress_image
 from accounts.decorators import vendor_only
-from Project.validators import validate_image_file
+from Project.validators import validate_image_file , is_bot, should_count_view
 from accounts.validators import get_user_type 
 from store.models import *
 from store.forms import ProductAdminForm, ProductRegisterForm
@@ -774,49 +772,13 @@ def view_product(request, pid):
 
     if request.user.is_authenticated:
         user_type = get_user_type(request.user)
-
-        try:
-            is_product_owner = ( request.user.userprofile.store_id == product.store_id )
-        except (AttributeError, Store.DoesNotExist):
-            pass
+        is_product_owner = product.store.owner_id == request.user.id
 
     # تسجيل المشاهدة للزوار فقط، باستثناء البائع والمدير.
-    if ( not is_product_owner and user_type != 'admin' and product.is_visible ):
-        session_key = f'product_view_{product.id}'
-        now = timezone.now()
-
-        last_view = request.session.get(session_key)
-        should_count = True
-
-        if last_view:
-            try:
-                last_view_time = timezone.datetime.fromisoformat(
-                    last_view
-                )
-
-                if timezone.is_naive(last_view_time):
-                    last_view_time = timezone.make_aware(
-                        last_view_time,
-                        timezone.get_current_timezone(),
-                    )
-
-                if now - last_view_time < timedelta(minutes=10):
-                    should_count = False
-
-            except (ValueError, TypeError):
-                pass
-
-        if should_count:
-            Product.objects.filter(
-                pk=product.pk
-            ).update(
-                views_count=db_models.F('views_count') + 1
-            )
-
-            request.session[session_key] = now.isoformat()
-
-            # تحديث القيمة في الكائن الحالي لتظهر مباشرة في القالب.
-            product.refresh_from_db(fields=['views_count'])
+    if (not is_product_owner and user_type != 'admin' and product.is_visible and not is_bot(request) and should_count_view(request, product.id)):
+        with transaction.atomic():
+            ProductView.objects.create(product=product)
+            Product.objects.filter(pk=product.pk).update(views_count=db_models.F('views_count') + 1)
 
     # إظهار المنتج للبائع حتى يتمكن من مراجعته.
     can_view = is_product_owner or product.is_visible

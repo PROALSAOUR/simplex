@@ -1080,19 +1080,11 @@ dialog img {
     -moz-user-select: none;
     -ms-user-select: none;
 }
-dialog .logo-image ,  dialog .dialog-icon  {
+dialog .dialog-icon  {
     margin: 10px auto;
     width: 50%;
     max-width: 150px;
 }
-dialog .logo-image img {
-    content:var(--light-logo);
-    aspect-ratio: 3/1;
-}
-.dark-mode dialog .logo-image img {
-    content:var(--dark-logo);
-}
-
 dialog .dialog-content {
     margin: 20px 0;
     text-align: center;

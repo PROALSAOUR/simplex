@@ -24,17 +24,16 @@ class Product(models.Model):
     total_sales = models.PositiveIntegerField(default=0 , verbose_name="عدد المبيعات", help_text="اجمالي عدد مرات بيع المنتج")
     rejected_cause = models.TextField(verbose_name='سبب الرفض', blank=True, null=True, help_text='في حال تم رفض المنتج، يرجى توضيح سبب الرفض هنا ليتسنى للبائع معرفة التعديلات المطلوبة لإعادة رفع المنتج للمراجعة مرة أخرى')
     max_quantity_per_order = models.PositiveIntegerField(default=10 , blank=True, verbose_name="الكمية القصوى للطلب", help_text="حدد الحد الأقصى لعدد القطع التي يمكن للزبون طلبها من هذا المنتج في طلب واحد")
+    views_count = models.PositiveIntegerField(default=0, editable=False, verbose_name="عدد المشاهدات")
 
     STATUS_CHOICES = [('checking', 'جاري المراجعة'), ('approved', 'مقبول'), ('rejected', 'مرفوض')]
-    status = models.CharField(verbose_name='حالة المنتج', max_length=20, choices=STATUS_CHOICES, default='checking', help_text="جاري المراجعة: تم رفع المنتج وسيتم مراجعته من قبل الإدارة خلال 24 ساعة | مقبول: تم قبول المنتج وهو ظاهر للزبائن | مرفوض: تم رفض المنتج لعدم مطابقته لمعايير الجودة أو لأي سبب آخر،")
+    status = models.CharField(max_length=20, verbose_name='حالة المنتج', choices=STATUS_CHOICES, default='checking', help_text="جاري المراجعة: تم رفع المنتج وسيتم مراجعته من قبل الإدارة خلال 24 ساعة | مقبول: تم قبول المنتج وهو ظاهر للزبائن | مرفوض: تم رفض المنتج لعدم مطابقته لمعايير الجودة أو لأي سبب آخر،")
 
     TYPE_CHOICES = [('clothes','ملابس'),('watches','ساعات'), ('accessories','اكسسوارات') , ('other','اخرى')]
-    type = models.CharField(verbose_name='نوع المنتج', choices=TYPE_CHOICES, default='clothes', help_text="قم بإختيار نوع المنتج الخاص بك")
+    type = models.CharField(max_length=20, verbose_name='نوع المنتج', choices=TYPE_CHOICES, default='clothes', help_text="قم بإختيار نوع المنتج الخاص بك")
     
     GENDER_CHOICES = [('male', 'رجالي'), ('female', 'نسائي'), ('unisex', 'كلا الجنسين')]
-    gender = models.CharField( verbose_name="الجنس المستهدف", max_length=20, choices=GENDER_CHOICES, default='unisex', help_text="حدد إن كان المنتج موجّه للرجال أو النساء أو مناسب لكلا الجنسين")
-
-    views_count = models.PositiveBigIntegerField( default=0, verbose_name='عدد المشاهدات', )
+    gender = models.CharField(max_length=20, verbose_name="الجنس المستهدف", choices=GENDER_CHOICES, default='unisex', help_text="حدد إن كان المنتج موجّه للرجال أو النساء أو مناسب لكلا الجنسين")
 
     class Meta:
         verbose_name = 'منتج'
@@ -92,3 +91,16 @@ class ProductSize(models.Model):
         verbose_name = 'مقاس المنتج'
         verbose_name_plural = 'مقاسات المنتج'
 
+class ProductView(models.Model):
+    """
+    يتم حساب عدد مشاهدات المنتج من خلال هذا الكلاس بالإضافة لحقل views_count  داخل المنتج
+    حيث يتم استخدام هذا الكلاس لعرض احصائيات دقيقة للمشاهدات واوقاتها 
+    اما الحقل الذي بداخل المنتج يتم استعماله لعرض عدد المشاهدات داخل تفاصيل المنتج بشكل سريع
+    """
+
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_views')
+    viewed_at = models.DateTimeField(auto_now_add=True)
+    # ربما بالمستقبل اضيف حقل لموقع الزبون او التطبيق الذي جاء منه الى صفحة البيع
+
+    class Meta:
+        indexes = [models.Index(fields=['product', 'viewed_at'])]
